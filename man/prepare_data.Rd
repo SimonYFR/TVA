@@ -25,9 +25,11 @@ If FALSE, then they must also have the exact same activated arms (the zeros of t
 }
 \value{
 returns a list containing :\cr
-X, the marginals matrix ready for support estimation\cr
-marginals_colnames, a vector containing all the marginals names (also called the alphas)\cr
-variables, the list of variables that should be used in the regression (fixed effects, marginals and the intercept)
+\itemize{
+\item X: a dataframe containing the marginals matrix, the fixed effects, the outcome and the intercept. X is ready for support estimation\cr
+\item marginals_colnames: a vector containing all the marginals names (also called the alphas)\cr
+\item variables: the list of variables that should be used in the regression (fixed effects, marginals and the intercept)
+}
 }
 \description{
 Prepare the data for the support estimation
@@ -38,7 +40,7 @@ fes = c('fes_1')
 y = 'outcome'
 w = 'weights'
 A1 = c(0,0,0,0,0,1,1,1,1,1)
-A2 = c(1,1,0,0,1,1,0,0,1,1,0)
+A2 = c(1,1,0,0,1,1,0,0,1,1)
 A3 = c(0,1,2,3,0,3,2,1,0,1)
 F1 = c(0,1,0,0,0,1,0,1,0,0)
 Y  = c(5,4,3,5,4,5,4,2,3,2)

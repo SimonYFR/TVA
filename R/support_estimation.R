@@ -13,6 +13,7 @@
 pval_MSE <- function(X,y,variables,pval_cutoff){
   #need to check if some columns are always 0, especially the FE
   
+  #change "sp"
   current_variables = variables
   deselect_list <- c()
   deselect_pval <- c()
@@ -33,7 +34,7 @@ pval_MSE <- function(X,y,variables,pval_cutoff){
     current_variables <- current_variables[current_variables != deselect_name]
     if (length(current_variables)==0){
       print("pval_cutoff is too strict, no variable survived")
-      return(c())
+      break
     }
     current_sp_formula <- as.formula(paste0(y,"~",paste0(c(current_variables,0),collapse = "+")))
     current_model_ols <- estimatr::lm_robust(formula = current_sp_formula, data = X,se_type = "classical")

@@ -22,7 +22,7 @@ Compute some useful information to understand what's inside each pool
 \examples{
 arms = c('financial_incentive','reminder','information')
 A1 = c(0,0,0,0,0,1,1,1,1,1)
-A2 = c(1,1,0,0,1,1,0,0,1,1,0)
+A2 = c(1,1,0,0,1,1,0,0,1,1)
 A3 = c(0,1,2,3,0,3,2,1,0,1)
 pool_id = c(0,1,0,0,0,2,0,0,0,2)
 data = data.frame(financial_incentive = A1, reminder = A2, information = A3, pool_id = pool_id)

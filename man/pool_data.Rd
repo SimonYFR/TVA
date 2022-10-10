@@ -26,7 +26,7 @@ Take the estimated support and pool each observation in its right pool
 \examples{
 arms = c('financial_incentive','reminder','information')
 A1 = c(0,0,0,0,0,1,1,1,1,1)
-A2 = c(1,1,0,0,1,1,0,0,1,1,0)
+A2 = c(1,1,0,0,1,1,0,0,1,1)
 A3 = c(0,1,2,3,0,3,2,1,0,1)
 data = data.frame(financial_incentive = A1, reminder = A2, information = A3)
 marginal_support_strings = c('c_0_1_1', 'c_1_1_2', 'c_1_0_1', 'c_1_0_2')
