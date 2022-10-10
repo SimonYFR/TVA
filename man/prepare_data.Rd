@@ -19,12 +19,12 @@ prepare_data(data, arms, fes, y, w, scale, compare_to_zero)
 
 \item{scale}{is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens}
 
-\item{compare_to_zero}{is a boolean,
-if TRUE, a policy dominates a marginal if all dosages are greater
-if FALSE, they must also have the exact same activated arms}
+\item{compare_to_zero}{is a boolean.
+If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)}
 }
 \value{
-a list containing :
+returns a list containing :
 X, the marginals matrix ready for support estimation
 marginals_colnames, a vector containing all the marginals names (also called the alphas)
 variables, the list of variables that should be used in the regression (fixed effects, marginals and the intercept)

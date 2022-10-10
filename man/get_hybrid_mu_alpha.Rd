@@ -18,7 +18,7 @@ get_hybrid_mu_alpha(first_Y, second_Y, c_beta, first_Y_var, alpha)
 \item{second}{Y is the sclaed second best effect}
 }
 \value{
-the solution mu_alpha
+returns the solution mu_alpha
 }
 \description{
 Solves the equation F_TN^H (Y(theta^hat),mu_alpha,theta^hat,Z_theta^hat) = 1-alpha

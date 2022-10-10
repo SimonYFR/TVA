@@ -13,12 +13,12 @@ pool_data(data, arms, marginal_support_strings, compare_to_zero)
 
 \item{marginal_support_strings}{is a vector containing strings that represent all the marginals in the support}
 
-\item{compare_to_zero}{is a boolean,
-if TRUE, a policy dominates a marginal if all dosages are greater
-if FALSE, they must also have the exact same activated arms}
+\item{compare_to_zero}{is a boolean.
+If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)}
 }
 \value{
-the dataframe "data" with a pool_id column that gives the id of the observation's pool, and one dummy column per pool
+returns the dataframe "data" with a pool_id column that gives the id of the observation's pool, and one dummy column per pool
 }
 \description{
 Take the estimated support and pool each observation in its right pool

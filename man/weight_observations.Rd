@@ -12,7 +12,7 @@ weight_observations(X, W)
 \item{W}{a vector containing the weights}
 }
 \value{
-the weighted observations, where observation i is weighted by sqrt(w_i)
+returns the weighted observations, where observation i is weighted by sqrt(w_i)
 }
 \description{
 Weight the observations directly in the matrix

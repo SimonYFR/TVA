@@ -31,12 +31,12 @@ if NULL, the cutoffs used is c(5e-1,4e-1,3e-1,2e-1, 1e-1, 5e-2, 1e-2, 5e-3, 1e-3
 
 \item{scale}{is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens}
 
-\item{compare_to_zero}{is a boolean,
-if TRUE, a policy dominates a marginal if all dosages are greater
-if FALSE, they must also have the exact same activated arms}
+\item{compare_to_zero}{is a boolean.
+If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)}
 }
 \value{
-a dataframe containing all the p-values in cutoffs and the according support size one would get for each of those p-values
+returns a dataframe containing all the p-values in cutoffs and the according support size one would get for each of those p-values
 }
 \description{
 Simulate many pval one-step elimination for different pval cutoffs values.

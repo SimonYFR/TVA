@@ -12,7 +12,7 @@ pval_to_lambda(X, y, variables, pval)
 \item{y}{is the outcome of interest}
 }
 \value{
-the lambda equivalent to pval
+returns the lambda equivalent to pval
 }
 \description{
 Compute the equivalent lambda between Puffer_N LASSO lambda and pval one-step elimination

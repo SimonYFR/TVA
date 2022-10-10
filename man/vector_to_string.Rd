@@ -7,10 +7,10 @@
 vector_to_string(vector)
 }
 \arguments{
-\item{vector}{a vector of any size and containing object representable in strings}
+\item{vector}{is a vector of any size and containing integers}
 }
 \value{
-a string representing the vector in format 'c_A_B_C_D_...' where A,B,C,D,.. are the integers in the vector
+returns a string representing the vector in format 'c_A_B_C_D_...' where A,B,C,D,.. are the integers in the vector
 }
 \description{
 Create a string representing the vector

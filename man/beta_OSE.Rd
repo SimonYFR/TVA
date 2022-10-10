@@ -16,7 +16,7 @@ beta_OSE(X, y, variables, lambda_cutoff)
 \item{lambda_cutoff}{is the cutoff on beta values}
 }
 \value{
-the estimated support
+returns the estimated support
 }
 \description{
 Estimate support with beta one-step elimination

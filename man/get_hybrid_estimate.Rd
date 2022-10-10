@@ -20,7 +20,7 @@ get_hybrid_estimate(first_Y, second_Y, first_Y_var, ntreat, alpha, beta)
 \item{second}{Y is the sclaed second best effect}
 }
 \value{
-a list with the median unbiased estimate of the best effect and the alpha confidence interval lower and upper bounds
+returns a list with the median unbiased estimate of the best effect and the alpha confidence interval lower and upper bounds
 }
 \description{
 Apply the winners curse algorithm to the final pooled OLS

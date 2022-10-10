@@ -18,7 +18,7 @@ ptmvnorm_extended(q, mu, sigma, lb, ub)
 \item{ub}{the upper truncation point}
 }
 \value{
-the extended truncated normal function
+returns the extended truncated normal function
 }
 \description{
 Extends the truncated normal functions in case the point is outside bounds

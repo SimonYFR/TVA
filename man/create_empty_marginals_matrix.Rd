@@ -7,16 +7,16 @@
 create_empty_marginals_matrix(max_dosage_per_arm, n_obs)
 }
 \arguments{
-\item{max_dosage_per_arm}{a vector containing the maximum dosage possible for each arm}
+\item{max_dosage_per_arm}{is a vector containing the maximum dosage possible for each arm}
 
-\item{n_obs}{the number of observations}
+\item{n_obs}{is the number of observations}
 }
 \value{
-the empty marginals matrix, in the dataframe format, with all indicators equal to zero
+returns the empty marginals matrix, in the dataframe format, with all indicators equal to zero
 }
 \description{
 Create the marginals matrix with zeros everywhere
 }
 \examples{
-create_empty_marginals_matrix(c(1,1,3),100)
+create_empty_marginals_matrix(c(1,1,3),15)
 }

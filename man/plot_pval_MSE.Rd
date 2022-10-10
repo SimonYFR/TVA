@@ -27,12 +27,12 @@ plot_pval_MSE(
 
 \item{scale}{is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens}
 
-\item{compare_to_zero}{is a boolean,
-if TRUE, a policy dominates a marginal if all dosages are greater
-if FALSE, they must also have the exact same activated arms}
+\item{compare_to_zero}{is a boolean.
+If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)}
 }
 \value{
-the plot of the ordered p-values, allowing to see the corresponding size of support for each p-values cutoff in the pval multi-step elimination
+returns the plot of the ordered p-values, allowing to see the corresponding size of support for each p-values cutoff in the pval multi-step elimination
 }
 \description{
 Plot the ordered p-values in the multi-step elimination.

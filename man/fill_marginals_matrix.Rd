@@ -7,23 +7,23 @@
 fill_marginals_matrix(marginals_matrix, data, arms, n_obs, compare_to_zero)
 }
 \arguments{
-\item{marginals_matrix}{the marginals matrix in the dataframe format created previously}
+\item{marginals_matrix}{is the marginals matrix in the dataframe format created previously}
 
-\item{data}{the data with the dosage of each arm}
+\item{data}{is the data with the dosage on each arm}
 
-\item{arms}{a vector containing the names of each arm which are the arms columns names in "data"}
+\item{arms}{is a vector containing the column names that represent the dosages of each arm in data}
 
-\item{n_obs}{the number of observations, basically the number of rows in "data"}
+\item{n_obs}{is the number of observations, equal to the number of rows in "data"}
 
-\item{compare_to_zero}{is a boolean,
-if TRUE, a policy dominates a marginal if all dosages are greater
-if FALSE, they must also have the exact same activated arms}
+\item{compare_to_zero}{is a boolean.
+If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)}
 }
 \value{
-the marginals matrix with the right indicators inside
+returns the marginals matrix with the right indicators inside
 }
 \description{
-Fill the empty marginals matrix already crated
+Fill the empty marginals matrix already created
 }
 \examples{
 arms = c('financial_incentive','reminder','information')

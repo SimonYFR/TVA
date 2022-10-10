@@ -41,10 +41,12 @@ do_TVA(
 
 \item{scale}{is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens}
 
-\item{compare_to_zero}{is a boolean,}
+\item{compare_to_zero}{is a boolean.
+If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)}
 }
 \value{
-a list containing:
+returns a list containing:
 data: the data with new columns giving pooling information
 marginal_support: a dataframe with all the marginals in the support and their according id
 pools_summary: a dataframe with information on each pool

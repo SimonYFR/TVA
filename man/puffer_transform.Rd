@@ -12,7 +12,7 @@ puffer_transform(X, Y)
 \item{Y}{a vector with the outcome of interest}
 }
 \value{
-FX and FY, where puffer transformation has been applied to X and Y
+returns FX and FY, where puffer transformation has been applied to X and Y
 }
 \description{
 Perform the puffer transformation on X and Y

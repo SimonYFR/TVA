@@ -10,7 +10,7 @@ N_transform(X)
 \item{X}{a matrix with the observations}
 }
 \value{
-XN, where N transformation has been applied to X
+returns XN, where N transformation has been applied to X
 }
 \description{
 Perform the N transformation on X and Y

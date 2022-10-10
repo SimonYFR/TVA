@@ -18,7 +18,7 @@ get_pooled_ols(data, fes, y, w, pool_ids)
 \item{pool_ids}{is a vector containing the column names of each pool_id dummy column}
 }
 \value{
-the ols result
+returns the ols result
 }
 \description{
 Perform the final OLS on pooled data, regressing on fes and pool_id dummy columns

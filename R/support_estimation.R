@@ -6,7 +6,7 @@
 #' @param y is the outcome of interest
 #' @param variables is a vector containing all the variables we want to regress on
 #' @param pval_cutoff is the cutoff on p-values
-#' @return the estimated support
+#' @return returns the estimated support
 #' @export
 
 
@@ -50,7 +50,7 @@ pval_MSE <- function(X,y,variables,pval_cutoff){
 #' Compute the equivalent p-value between Puffer_N LASSO lambda and pval one-step elimination
 #' @param X is the regression matrix with the marginals, the fixed effects, the outcome of interest
 #' @param y is the outcome of interest
-#' @return the pval equivalent to lambda 
+#' @return returns the pval equivalent to lambda 
 #' @export
 
 
@@ -67,7 +67,7 @@ lambda_to_pval <- function(X,y,variables,lambda){
 #' Compute the equivalent lambda between Puffer_N LASSO lambda and pval one-step elimination
 #' @param X is the regression matrix with the marginals, the fixed effects, the outcome of interest
 #' @param y is the outcome of interest
-#' @return the lambda equivalent to pval 
+#' @return returns the lambda equivalent to pval 
 #' @export
 
 pval_to_lambda <- function(X,y,variables,pval){
@@ -84,7 +84,7 @@ pval_to_lambda <- function(X,y,variables,pval){
 #' @param y is the outcome of interest
 #' @param variables is a vector containing all the variables we want to regress on
 #' @param pval_cutoff is the cutoff on p-values
-#' @return the estimated support
+#' @return returns the estimated support
 #' @export
 
 pval_OSE<- function(X,y,variables,pval_cutoff){
@@ -106,7 +106,7 @@ pval_OSE<- function(X,y,variables,pval_cutoff){
 #' Perform the puffer transformation on X and Y
 #' @param X a matrix with the observations
 #' @param Y a vector with the outcome of interest
-#' @return FX and FY, where puffer transformation has been applied to X and Y
+#' @return returns FX and FY, where puffer transformation has been applied to X and Y
 #' @export
 
 
@@ -122,7 +122,7 @@ puffer_transform <- function(X,Y) {
 #'
 #' Perform the N transformation on X and Y
 #' @param X a matrix with the observations
-#' @return XN, where N transformation has been applied to X
+#' @return returns XN, where N transformation has been applied to X
 #' @export
 
 N_transform <- function(X){
@@ -139,7 +139,7 @@ N_transform <- function(X){
 #' @param y is the outcome of interest
 #' @param variables is a vector containing all the variables we want to regress on
 #' @param lambda_cutoff is the cutoff on beta values
-#' @return the estimated support
+#' @return returns the estimated support
 #' @export
 
 
@@ -173,7 +173,7 @@ puffer_N_LASSO <- function(X,y,variables,lambda_cutoff){
 #' @param y is the outcome of interest
 #' @param variables is a vector containing all the variables we want to regress on
 #' @param lambda_cutoff is the cutoff on beta values
-#' @return the estimated support
+#' @return returns the estimated support
 #' @export
 
 beta_OSE <- function(X,y,variables,lambda_cutoff){
@@ -192,7 +192,7 @@ beta_OSE <- function(X,y,variables,lambda_cutoff){
 #' @param y is the outcome of interest
 #' @param variables is a vector containing all the variables we want to regress on
 #' @param lambda_cutoff is the cutoff on beta values
-#' @return the estimated support
+#' @return returns the estimated support
 #' @export
 
 

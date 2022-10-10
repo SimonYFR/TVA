@@ -7,7 +7,7 @@
 #' @param alpha is the alpha used in the winners curse algorithm, default to 0.05
 #' @param beta is the beta used in the winners curse algorithm, default to NULL
 #' if NULL, beta will be computed with beta = alpha / 10
-#' @return a list with the median unbiased estimate of the best effect and the alpha confidence interval lower and upper bounds
+#' @return returns a list with the median unbiased estimate of the best effect and the alpha confidence interval lower and upper bounds
 #' @export
 
 
@@ -44,7 +44,7 @@ winners_curse <- function(pooled_ols,pool_ids,alpha=0.05,beta=NULL){
 #' @param ntreat is the number of estimated effects
 #' @param alpha is the alpha used in the winners curse algorithm, default to 0.05
 #' @param beta is the beta used in the winners curse algorithm
-#' @return a list with the median unbiased estimate of the best effect and the alpha confidence interval lower and upper bounds
+#' @return returns a list with the median unbiased estimate of the best effect and the alpha confidence interval lower and upper bounds
 #' @export
 
 
@@ -70,7 +70,7 @@ get_hybrid_estimate <- function(first_Y, second_Y, first_Y_var, ntreat, alpha, b
 #' @param c_beta is the coefficient computed for the joint confidence interval of level beta
 #' @param first_Y_var is the sclaed best effect variation
 #' @param alpha is the alpha used in the winners curse algorithm, default to 0.05
-#' @return the solution mu_alpha
+#' @return returns the solution mu_alpha
 #' @export
 
 get_hybrid_mu_alpha <- function(first_Y, second_Y, c_beta, first_Y_var, alpha) {
@@ -88,7 +88,7 @@ get_hybrid_mu_alpha <- function(first_Y, second_Y, c_beta, first_Y_var, alpha) {
 #' @param sigma the standard deviation of the normal
 #' @param lb the lower truncation point
 #' @param ub the upper truncation point
-#' @return the extended truncated normal function
+#' @return returns the extended truncated normal function
 #' @export
 
 

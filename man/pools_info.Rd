@@ -12,7 +12,7 @@ pools_info(data, arms)
 \item{arms}{is a vector containing the column names of all the arms}
 }
 \value{
-a list containing :
+returns a list containing :
 pools_summary: a dataframe containing information on each pool (number of unique policies, number of observations, pool minimum etc...)
 unique_policy: a dataframe containing all the possible unique policies with their according pool id
 }

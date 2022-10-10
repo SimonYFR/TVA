@@ -16,7 +16,7 @@ pval_MSE(X, y, variables, pval_cutoff)
 \item{pval_cutoff}{is the cutoff on p-values}
 }
 \value{
-the estimated support
+returns the estimated support
 }
 \description{
 Estimate support with p-value multi-step elimination
