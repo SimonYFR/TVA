@@ -112,7 +112,7 @@ fill_marginals_matrix <- function(marginals_matrix,data,arms,n_obs,compare_to_ze
   
   marginals_matrix = marginals_matrix[, colSums(marginals_matrix != 0) > 0]
   control_marginal_index = which(names(marginals_matrix) %in% c(vector_to_string(rep(0,M)) ))
-  if (control_marginal_index > 0){
+  if (length(control_marginal_index) > 0){
     marginals_matrix = marginals_matrix[ , -control_marginal_index]
   }
   return(marginals_matrix)
