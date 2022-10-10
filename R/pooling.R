@@ -440,7 +440,7 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,scale=FALSE,co
 #' suggest_pval_OSE_cutoff(data=data,arms=arms,fes=fes,y=y,w=w,scale=FALSE,compare_to_zero=FALSE)
 
 suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero=FALSE){
-  grid = grid_pval_OSE(cutoffs,data,arms,fes,y,w,scale,compare_to_zero)
+  grid = grid_pval_OSE(cutoffs=NULL,data=data,arms=arms,fes=fes,y=y,w=w,scale=scale,compare_to_zero=compare_to_zero)
   n_unique_policies = dplyr::n_distinct(data[,arms])
   unique_policies_to_support_size_ratio = 20
   suggested_support_size = round(n_unique_policies / unique_policies_to_support_size_ratio)
