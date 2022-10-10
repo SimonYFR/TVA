@@ -7,7 +7,7 @@
 get_policy_fullname(policy, arms)
 }
 \arguments{
-\item{policy}{is a policy in the format 'c_A_B_C_D_..' where A,B,C,D,... are integers representing the dosage for arm 1,2,3,4,...
+\item{policy}{is a policy in the format 'c_A_B_C_D_..' where A,B,C,D,... are integers representing the dosage for arm 1,2,3,4,...\cr
 For example, 'c_1_0_2' means arm 1 has dosage 1, arm 2 is not activated and arm 3 has dosage 2}
 
 \item{arms}{is a vector containing the arms' names and of the same length as the vector representation of the policy}

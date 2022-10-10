@@ -5,7 +5,7 @@
 #' @param pooled_ols the result of the final pooled OLS
 #' @param pool_ids the names of the pool id dummy columns which coefficients are in pooled_ols
 #' @param alpha is the alpha used in the winners curse algorithm, default to 0.05
-#' @param beta is the beta used in the winners curse algorithm, default to NULL
+#' @param beta is the beta used in the winners curse algorithm, default to NULL\cr
 #' if NULL, beta will be computed with beta = alpha / 10
 #' @return returns a list with the median unbiased estimate of the best effect and the alpha confidence interval lower and upper bounds
 #' @export

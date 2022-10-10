@@ -16,7 +16,7 @@ grid_pval_OSE(
 )
 }
 \arguments{
-\item{cutoffs}{is a vector containing all the cutoffs we want to test in the grid, default to NULL
+\item{cutoffs}{is a vector containing all the cutoffs we want to test in the grid, default to NULL\cr
 if NULL, the cutoffs used is c(5e-1,4e-1,3e-1,2e-1, 1e-1, 5e-2, 1e-2, 5e-3, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10, 1e-12, 1e-15, 1e-20, 1e-30)}
 
 \item{data}{is the dataframe containing all our data}
@@ -31,15 +31,15 @@ if NULL, the cutoffs used is c(5e-1,4e-1,3e-1,2e-1, 1e-1, 5e-2, 1e-2, 5e-3, 1e-3
 
 \item{scale}{is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens}
 
-\item{compare_to_zero}{is a boolean.
-If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+\item{compare_to_zero}{is a boolean.\cr
+If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)}
 }
 \value{
 returns a dataframe containing all the p-values in cutoffs and the according support size one would get for each of those p-values
 }
 \description{
-Simulate many pval one-step elimination for different pval cutoffs values.
+Simulate many pval one-step elimination for different pval cutoffs values.\cr
 This allows to see the size of support one would get for each pval cutoff.
 }
 \examples{

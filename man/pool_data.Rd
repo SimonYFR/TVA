@@ -13,8 +13,8 @@ pool_data(data, arms, marginal_support_strings, compare_to_zero)
 
 \item{marginal_support_strings}{is a vector containing strings that represent all the marginals in the support}
 
-\item{compare_to_zero}{is a boolean.
-If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+\item{compare_to_zero}{is a boolean.\cr
+If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)}
 }
 \value{

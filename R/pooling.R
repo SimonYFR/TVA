@@ -38,7 +38,7 @@ string_to_vector <- function(string){
 #' Going from policy concise string to a full name
 #'
 #' Create the policy full name from its string representation
-#' @param policy is a policy in the format 'c_A_B_C_D_..' where A,B,C,D,... are integers representing the dosage for arm 1,2,3,4,...
+#' @param policy is a policy in the format 'c_A_B_C_D_..' where A,B,C,D,... are integers representing the dosage for arm 1,2,3,4,...\cr
 #' For example, 'c_1_0_2' means arm 1 has dosage 1, arm 2 is not activated and arm 3 has dosage 2
 #' @param arms is a vector containing the arms' names and of the same length as the vector representation of the policy
 #' @return returns the full name of the policy with the dosage of each arm
@@ -85,14 +85,14 @@ create_empty_marginals_matrix <- function(max_dosage_per_arm,n_obs){
 #' @param data is the data with the dosage on each arm
 #' @param arms is a vector containing the column names that represent the dosages of each arm in data
 #' @param n_obs is the number of observations, equal to the number of rows in "data"
-#' @param compare_to_zero is a boolean.
-#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+#' @param compare_to_zero is a boolean.\cr
+#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
 #' @return returns the marginals matrix with the right indicators inside
 #' @examples
 #' arms = c('financial_incentive','reminder','information')
 #' A1 = c(0,0,0,0,0,1,1,1,1,1)
-#' A2 = c(1,1,0,0,1,1,0,0,1,1,0)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
 #' A3 = c(0,1,2,3,0,3,2,1,0,1)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3)
 #' n_obs = nrow(data)
@@ -120,9 +120,10 @@ fill_marginals_matrix <- function(marginals_matrix,data,arms,n_obs,compare_to_ze
 
 #' Weight observations
 #'
-#' Weight the observations directly in the matrix
-#' @param X contains all the observations (without the weights)
-#' @param W a vector containing the weights
+#' Weight the observations directly in the matrix. \cr
+#' Performing OLS on the output matrix is equivalent to performing an OLS on the original matrix and specifying a weight column.
+#' @param X is contains all the observations (without the weights)
+#' @param W is a vector containing the weights
 #' @return returns the weighted observations, where observation i is weighted by sqrt(w_i)
 #' @export
 #' @examples
@@ -145,12 +146,12 @@ weight_observations <- function(X,W){
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
 #' @param scale is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens
-#' @param compare_to_zero is a boolean.
-#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+#' @param compare_to_zero is a boolean.\cr
+#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
-#' @return returns a list containing :
-#' X, the marginals matrix ready for support estimation
-#' marginals_colnames, a vector containing all the marginals names (also called the alphas)
+#' @return returns a list containing :\cr
+#' X, the marginals matrix ready for support estimation\cr
+#' marginals_colnames, a vector containing all the marginals names (also called the alphas)\cr
 #' variables, the list of variables that should be used in the regression (fixed effects, marginals and the intercept)
 #' @export
 #' @examples
@@ -202,8 +203,8 @@ prepare_data <- function(data,arms,fes,y,w,scale,compare_to_zero){
 
 #' Plot p-values in the pval one-step elimination
 #'
-#' Plot the ordered p-values in the one-step elimination. 
-#' This allows to choose a p-value cutoff according to a targeted support size. 
+#' Plot the ordered p-values in the one-step elimination. \cr
+#' This allows to choose a p-value cutoff according to a targeted support size. \cr
 #' This is done by simulating a one-step p-value elimination.
 #' @param data is the dataframe containing all our data
 #' @param arms is a vector containing the column names of all the arms
@@ -211,8 +212,8 @@ prepare_data <- function(data,arms,fes,y,w,scale,compare_to_zero){
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
 #' @param scale is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens
-#' @param compare_to_zero is a boolean.
-#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+#' @param compare_to_zero is a boolean.\cr
+#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
 #' @return returns the plot of the ordered p-values, allowing to see the corresponding size of support for each p-values cutoff in the pval one-step elimination
 #' @export
@@ -254,8 +255,8 @@ plot_pval_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 
 #' Plot p-values in the pval multi-step elimination
 #'
-#' Plot the ordered p-values in the multi-step elimination. 
-#' This allows to choose a p-value cutoff according to a targeted support size. 
+#' Plot the ordered p-values in the multi-step elimination. \cr
+#' This allows to choose a p-value cutoff according to a targeted support size. \cr
 #' This is done by simulating a multi-step p-value elimination.
 #' @param data is the dataframe containing all our data
 #' @param arms is a vector containing the column names of all the arms
@@ -263,8 +264,8 @@ plot_pval_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
 #' @param scale is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens
-#' @param compare_to_zero is a boolean.
-#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+#' @param compare_to_zero is a boolean.\cr
+#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
 #' @return returns the plot of the ordered p-values, allowing to see the corresponding size of support for each p-values cutoff in the pval multi-step elimination
 #' @export
@@ -308,8 +309,8 @@ plot_pval_MSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 
 #' Plot betas in the beta one-step elimination
 #'
-#' Plot the ordered absolute values of betas in the beta one-step elimination. 
-#' This allows to choose a beta cutoff according to a targeted support size. 
+#' Plot the ordered absolute values of betas in the beta one-step elimination. \cr
+#' This allows to choose a beta cutoff according to a targeted support size. \cr
 #' This is done by simulating a one-step beta elimination.
 #' @param data is the dataframe containing all our data
 #' @param arms is a vector containing the column names of all the arms
@@ -317,8 +318,8 @@ plot_pval_MSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
 #' @param scale is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens
-#' @param compare_to_zero is a boolean.
-#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+#' @param compare_to_zero is a boolean.\cr
+#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
 #' @return returns the plot of the ordered betas, allowing to see the corresponding size of support for each beta cutoff in the beta one-step elimination
 #' @export
@@ -359,9 +360,9 @@ plot_beta_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 
 #' P-values / size of support grid for multiple pval cutoffs in the pval one-step elimination
 #'
-#' Simulate many pval one-step elimination for different pval cutoffs values.
+#' Simulate many pval one-step elimination for different pval cutoffs values.\cr
 #' This allows to see the size of support one would get for each pval cutoff.
-#' @param cutoffs is a vector containing all the cutoffs we want to test in the grid, default to NULL
+#' @param cutoffs is a vector containing all the cutoffs we want to test in the grid, default to NULL\cr
 #' if NULL, the cutoffs used is c(5e-1,4e-1,3e-1,2e-1, 1e-1, 5e-2, 1e-2, 5e-3, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10, 1e-12, 1e-15, 1e-20, 1e-30)
 #' @param data is the dataframe containing all our data
 #' @param arms is a vector containing the column names of all the arms
@@ -369,8 +370,8 @@ plot_beta_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
 #' @param scale is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens
-#' @param compare_to_zero is a boolean.
-#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+#' @param compare_to_zero is a boolean.\cr
+#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
 #' @return returns a dataframe containing all the p-values in cutoffs and the according support size one would get for each of those p-values
 #' @export
@@ -416,7 +417,7 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,scale=FALSE,co
 
 #' Suggest one p-value cutoff that could be used the in pval one-step elimination
 #'
-#' Suggest one p-value cutoff that could be used the in pval one-step elimination.
+#' Suggest one p-value cutoff that could be used the in pval one-step elimination.\cr
 #' This is done by computing the grid_pval_OSE and taking the pval cutoff that create a support size equal to the number of unique policies divided by 20.
 #' @param data is the dataframe containing all our data
 #' @param arms is a vector containing the column names of all the arms
@@ -424,8 +425,8 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,scale=FALSE,co
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
 #' @param scale is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens
-#' @param compare_to_zero is a boolean.
-#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+#' @param compare_to_zero is a boolean.\cr
+#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
 #' @return returns a pval cutoff suggestion with the according support size it will produce
 #' @export
@@ -462,8 +463,8 @@ suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compa
 #' @param data is the dataframe containing all our data
 #' @param arms is a vector containing the column names of all the arms
 #' @param marginal_support_strings is a vector containing strings that represent all the marginals in the support
-#' @param compare_to_zero is a boolean.
-#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+#' @param compare_to_zero is a boolean.\cr
+#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
 #' @return returns the dataframe "data" with a pool_id column that gives the id of the observation's pool, and one dummy column per pool
 #' @export
@@ -505,8 +506,8 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
 #' Compute some useful information to understand what's inside each pool
 #' @param data is the dataframe containing all our data and a "pool_id" column giving the pool id of each observation
 #' @param arms is a vector containing the column names of all the arms
-#' @return returns a list containing :
-#' pools_summary: a dataframe containing information on each pool (number of unique policies, number of observations, pool minimum etc...)
+#' @return returns a list containing :\cr
+#' pools_summary: a dataframe containing information on each pool (number of unique policies, number of observations, pool minimum etc...)\cr
 #' unique_policy: a dataframe containing all the possible unique policies with their according pool id
 #' @export
 #' @examples
@@ -592,24 +593,24 @@ get_pooled_ols <- function(data,fes,y,w,pool_ids){
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
 #' @param cutoff is the cutoff used in the support estimation
-#' @param estimation_function_name is the estimation function we should used. Possible functions are :
-#' 1. pval_MSE: a multiple step elimination on p-values
-#' 2. pval_OSE: a one step elimination on p-values
-#' 3. puffer_N_LASSO: a LASSO OLS with a Puffer_N transformation
-#' 4. beta_OSE: a one step elimination on beta values
-#' 5. puffer_LASSO: a LASSO OLS with a Puffer transformation
+#' @param estimation_function_name is the estimation function we should used. Possible functions are :\cr
+#' 1. pval_MSE: a multiple step elimination on p-values\cr
+#' 2. pval_OSE: a one step elimination on p-values\cr
+#' 3. puffer_N_LASSO: a LASSO OLS with a Puffer_N transformation\cr
+#' 4. beta_OSE: a one step elimination on beta values\cr
+#' 5. puffer_LASSO: a LASSO OLS with a Puffer transformation\cr
 #' (2) and (3) should be equivalent, as well as (4) and (5)
 #' @param scale is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens
-#' @param compare_to_zero is a boolean.
-#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+#' @param compare_to_zero is a boolean.\cr
+#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
-#' @return returns a list containing:
-#' data: the data with new columns giving pooling information
-#' marginal_support: a dataframe with all the marginals in the support and their according id
-#' pools_summary: a dataframe with information on each pool
-#' unique_policy: a dataframe with all the possible unique policies and their according pool id
-#' fes_support: the intersection between the estimated support and the fixed effects
-#' pooled_ols: the result of the final OLS on the pooled data
+#' @return returns a list containing:\cr
+#' data: the data with new columns giving pooling information\cr
+#' marginal_support: a dataframe with all the marginals in the support and their according id\cr
+#' pools_summary: a dataframe with information on each pool\cr
+#' unique_policy: a dataframe with all the possible unique policies and their according pool id\cr
+#' fes_support: the intersection between the estimated support and the fixed effects\cr
+#' pooled_ols: the result of the final OLS on the pooled data\cr
 #' winners_effect: the result of the best pooled policy effect, downsized by the winners curse algorithm
 #' @export
 #' @examples

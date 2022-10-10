@@ -27,15 +27,15 @@ suggest_pval_OSE_cutoff(
 
 \item{scale}{is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens}
 
-\item{compare_to_zero}{is a boolean.
-If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+\item{compare_to_zero}{is a boolean.\cr
+If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)}
 }
 \value{
 returns a pval cutoff suggestion with the according support size it will produce
 }
 \description{
-Suggest one p-value cutoff that could be used the in pval one-step elimination.
+Suggest one p-value cutoff that could be used the in pval one-step elimination.\cr
 This is done by computing the grid_pval_OSE and taking the pval cutoff that create a support size equal to the number of unique policies divided by 20.
 }
 \examples{

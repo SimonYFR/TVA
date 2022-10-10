@@ -15,8 +15,8 @@ fill_marginals_matrix(marginals_matrix, data, arms, n_obs, compare_to_zero)
 
 \item{n_obs}{is the number of observations, equal to the number of rows in "data"}
 
-\item{compare_to_zero}{is a boolean.
-If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+\item{compare_to_zero}{is a boolean.\cr
+If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)}
 }
 \value{
@@ -28,7 +28,7 @@ Fill the empty marginals matrix already created
 \examples{
 arms = c('financial_incentive','reminder','information')
 A1 = c(0,0,0,0,0,1,1,1,1,1)
-A2 = c(1,1,0,0,1,1,0,0,1,1,0)
+A2 = c(1,1,0,0,1,1,0,0,1,1)
 A3 = c(0,1,2,3,0,3,2,1,0,1)
 data = data.frame(financial_incentive = A1, reminder = A2, information = A3)
 n_obs = nrow(data)

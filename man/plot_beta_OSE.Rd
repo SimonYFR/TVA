@@ -27,16 +27,16 @@ plot_beta_OSE(
 
 \item{scale}{is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens}
 
-\item{compare_to_zero}{is a boolean.
-If TRUE, the code considers that a policy dominates a marginal if all dosages are greater
+\item{compare_to_zero}{is a boolean.\cr
+If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)}
 }
 \value{
 returns the plot of the ordered betas, allowing to see the corresponding size of support for each beta cutoff in the beta one-step elimination
 }
 \description{
-Plot the ordered absolute values of betas in the beta one-step elimination.
-This allows to choose a beta cutoff according to a targeted support size.
+Plot the ordered absolute values of betas in the beta one-step elimination. \cr
+This allows to choose a beta cutoff according to a targeted support size. \cr
 This is done by simulating a one-step beta elimination.
 }
 \examples{

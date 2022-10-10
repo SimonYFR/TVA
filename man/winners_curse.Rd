@@ -13,7 +13,7 @@ winners_curse(pooled_ols, pool_ids, alpha = 0.05, beta = NULL)
 
 \item{alpha}{is the alpha used in the winners curse algorithm, default to 0.05}
 
-\item{beta}{is the beta used in the winners curse algorithm, default to NULL
+\item{beta}{is the beta used in the winners curse algorithm, default to NULL\cr
 if NULL, beta will be computed with beta = alpha / 10}
 }
 \value{

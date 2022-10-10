@@ -7,15 +7,16 @@
 weight_observations(X, W)
 }
 \arguments{
-\item{X}{contains all the observations (without the weights)}
+\item{X}{is contains all the observations (without the weights)}
 
-\item{W}{a vector containing the weights}
+\item{W}{is a vector containing the weights}
 }
 \value{
 returns the weighted observations, where observation i is weighted by sqrt(w_i)
 }
 \description{
-Weight the observations directly in the matrix
+Weight the observations directly in the matrix. \cr
+Performing OLS on the output matrix is equivalent to performing an OLS on the original matrix and specifying a weight column.
 }
 \examples{
 X = data.frame(outcome = c(2,2,3,2), financial_incentive = c(0,1,0,1), reminder = c(1,1,0,0), information = c(0,1,2,3))
