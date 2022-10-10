@@ -18,16 +18,18 @@ pval_MSE <- function(X,y,variables,pval_cutoff){
   deselect_pval <- c()
   current_sp_formula <- as.formula(paste0(y,"~",paste0(c(current_variables,0),collapse = "+")))
   current_model_ols <- estimatr::lm_robust(formula = current_sp_formula, data = X, se_type = "classical")
-  current_max_pval <- max(current_model_ols$p.value)
+  current_pvals = current_model_ols$p.value
+  current_pvals[is.na(current_pvals)]=1
+  current_max_pval <- max(current_pvals)
   n=length(variables)
   i=0
   print("Starting the multiple step elimination procedure")
   while (current_max_pval > pval_cutoff) {
     i=i+1
-    cat("\rProgress: ",i," variables eliminated on ", n-1)
-    deselect_name <- names(current_model_ols$p.value[which.max(current_model_ols$p.value)])
+    cat("\rProgress: ",i," variables eliminated on ", n)
+    deselect_name <- names(current_pvals[which.max(current_pvals)])
     deselect_list <- c(deselect_list, deselect_name)
-    deselect_pval <- c(deselect_pval, current_model_ols$p.value[which.max(current_model_ols$p.value)])
+    deselect_pval <- c(deselect_pval, current_pvals[which.max(current_pvals)])
     current_variables <- current_variables[current_variables != deselect_name]
     if (length(current_variables)==0){
       print("pval_cutoff is too strict, no variable survived")
@@ -35,7 +37,9 @@ pval_MSE <- function(X,y,variables,pval_cutoff){
     }
     current_sp_formula <- as.formula(paste0(y,"~",paste0(c(current_variables,0),collapse = "+")))
     current_model_ols <- estimatr::lm_robust(formula = current_sp_formula, data = X,se_type = "classical")
-    current_max_pval <- max(current_model_ols$p.value)
+    current_pvals = current_model_ols$p.value
+    current_pvals[is.na(current_pvals)]=1
+    current_max_pval <- max(current_pvals)
   }
   cat("\n",current_max_pval,"\n")
   support = variables[!(variables %in% deselect_list)]

@@ -150,9 +150,9 @@ weight_observations <- function(X,W){
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
 #' @return returns a list containing :\cr
-#' X, the marginals matrix ready for support estimation\cr
-#' marginals_colnames, a vector containing all the marginals names (also called the alphas)\cr
-#' variables, the list of variables that should be used in the regression (fixed effects, marginals and the intercept)
+#' - X: a dataframe containing the marginals matrix, the fixed effects, the outcome and the intercept. X is ready for support estimation\cr
+#' - marginals_colnames: a vector containing all the marginals names (also called the alphas)\cr
+#' - variables: the list of variables that should be used in the regression (fixed effects, marginals and the intercept)
 #' @export
 #' @examples
 #' arms = c('financial_incentive','reminder','information')
@@ -160,7 +160,7 @@ weight_observations <- function(X,W){
 #' y = 'outcome'
 #' w = 'weights'
 #' A1 = c(0,0,0,0,0,1,1,1,1,1)
-#' A2 = c(1,1,0,0,1,1,0,0,1,1,0)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
 #' A3 = c(0,1,2,3,0,3,2,1,0,1)
 #' F1 = c(0,1,0,0,0,1,0,1,0,0)
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
@@ -223,7 +223,7 @@ prepare_data <- function(data,arms,fes,y,w,scale,compare_to_zero){
 #' y = 'outcome'
 #' w = 'weights'
 #' A1 = c(0,0,0,0,0,1,1,1,1,1)
-#' A2 = c(1,1,0,0,1,1,0,0,1,1,0)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
 #' A3 = c(0,1,2,3,0,3,2,1,0,1)
 #' F1 = c(0,1,0,0,0,1,0,1,0,0)
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
@@ -275,7 +275,7 @@ plot_pval_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 #' y = 'outcome'
 #' w = 'weights'
 #' A1 = c(0,0,0,0,0,1,1,1,1,1)
-#' A2 = c(1,1,0,0,1,1,0,0,1,1,0)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
 #' A3 = c(0,1,2,3,0,3,2,1,0,1)
 #' F1 = c(0,1,0,0,0,1,0,1,0,0)
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
@@ -329,7 +329,7 @@ plot_pval_MSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 #' y = 'outcome'
 #' w = 'weights'
 #' A1 = c(0,0,0,0,0,1,1,1,1,1)
-#' A2 = c(1,1,0,0,1,1,0,0,1,1,0)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
 #' A3 = c(0,1,2,3,0,3,2,1,0,1)
 #' F1 = c(0,1,0,0,0,1,0,1,0,0)
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
@@ -381,7 +381,7 @@ plot_beta_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 #' y = 'outcome'
 #' w = 'weights'
 #' A1 = c(0,0,0,0,0,1,1,1,1,1)
-#' A2 = c(1,1,0,0,1,1,0,0,1,1,0)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
 #' A3 = c(0,1,2,3,0,3,2,1,0,1)
 #' F1 = c(0,1,0,0,0,1,0,1,0,0)
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
@@ -436,7 +436,7 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,scale=FALSE,co
 #' y = 'outcome'
 #' w = 'weights'
 #' A1 = c(0,0,0,0,0,1,1,1,1,1)
-#' A2 = c(1,1,0,0,1,1,0,0,1,1,0)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
 #' A3 = c(0,1,2,3,0,3,2,1,0,1)
 #' F1 = c(0,1,0,0,0,1,0,1,0,0)
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
@@ -471,7 +471,7 @@ suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compa
 #' @examples
 #' arms = c('financial_incentive','reminder','information')
 #' A1 = c(0,0,0,0,0,1,1,1,1,1)
-#' A2 = c(1,1,0,0,1,1,0,0,1,1,0)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
 #' A3 = c(0,1,2,3,0,3,2,1,0,1)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3)
 #' marginal_support_strings = c('c_0_1_1', 'c_1_1_2', 'c_1_0_1', 'c_1_0_2')
@@ -513,7 +513,7 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
 #' @examples
 #' arms = c('financial_incentive','reminder','information')
 #' A1 = c(0,0,0,0,0,1,1,1,1,1)
-#' A2 = c(1,1,0,0,1,1,0,0,1,1,0)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
 #' A3 = c(0,1,2,3,0,3,2,1,0,1)
 #' pool_id = c(0,1,0,0,0,2,0,0,0,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, pool_id = pool_id)
@@ -562,7 +562,7 @@ pools_info <- function(data,arms){
 #' y = 'outcome'
 #' w = 'weights'
 #' A1 = c(0,0,0,0,0,1,1,1,1,1)
-#' A2 = c(1,1,0,0,1,1,0,0,1,1,0)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
 #' A3 = c(0,1,2,3,0,3,2,1,0,1)
 #' F1 = c(0,1,0,0,0,1,0,1,0,0)
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
@@ -619,7 +619,7 @@ get_pooled_ols <- function(data,fes,y,w,pool_ids){
 #' y = 'outcome'
 #' w = 'weights'
 #' A1 = c(0,0,0,0,0,1,1,1,1,1)
-#' A2 = c(1,1,0,0,1,1,0,0,1,1,0)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
 #' A3 = c(0,1,2,3,0,3,2,1,0,1)
 #' F1 = c(0,1,0,0,0,1,0,1,0,0)
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
