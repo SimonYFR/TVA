@@ -620,7 +620,7 @@ get_pooled_ols <- function(data,fes,y,w,pool_ids){
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' TVA(data,arms,fes,y,w,0.3,'pval_OSE',FALSE,FALSE)
 
-TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='pval_OSE',scale=FALSE,compare_to_zero=FALSE){
+do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='pval_OSE',scale=FALSE,compare_to_zero=FALSE){
   #source('support_estimation.R')
   #source('winners_curse.R')
   #check if fake_weights column already exists

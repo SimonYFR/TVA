@@ -2,9 +2,9 @@
 
 export("%>%")
 export(N_transform)
-export(TVA)
 export(beta_OSE)
 export(create_empty_marginals_matrix)
+export(do_TVA)
 export(get_hybrid_estimate)
 export(get_hybrid_mu_alpha)
 export(get_policy_fullname)
