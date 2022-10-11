@@ -609,15 +609,13 @@ get_pooled_ols <- function(data,fes,y,w,pool_ids){
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
 #' @return returns a list containing:\cr
-#' \begin{itemize}{
-#' \item data: the data with new columns giving pooling information\cr
-#' \item marginal_support: a dataframe with all the marginals in the support and their according id\cr
-#' \item pools_summary: a dataframe with information on each pool\cr
-#' \item unique_policy: a dataframe with all the possible unique policies and their according pool id\cr
-#' \item fes_support: the intersection between the estimated support and the fixed effects\cr
-#' \item pooled_ols: the result of the final OLS on the pooled data\cr
-#' \item winners_effect: the result of the best pooled policy effect, downsized by the winners curse algorithm
-#' }
+#' * data: the data with new columns giving pooling information\cr
+#' * marginal_support: a dataframe with all the marginals in the support and their according id\cr
+#' * pools_summary: a dataframe with information on each pool\cr
+#' * unique_policy: a dataframe with all the possible unique policies and their according pool id\cr
+#' * fes_support: the intersection between the estimated support and the fixed effects\cr
+#' * pooled_ols: the result of the final OLS on the pooled data\cr
+#' * winners_effect: the result of the best pooled policy effect, downsized by the winners curse algorithm
 #' @export
 #' @examples
 #' arms = c('financial_incentive','reminder','information')

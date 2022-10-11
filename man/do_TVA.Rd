@@ -47,7 +47,7 @@ If FALSE, then they must also have the exact same activated arms (the zeros of t
 }
 \value{
 returns a list containing:\cr
-\begin{itemize}{
+\itemize{
 \item data: the data with new columns giving pooling information\cr
 \item marginal_support: a dataframe with all the marginals in the support and their according id\cr
 \item pools_summary: a dataframe with information on each pool\cr
