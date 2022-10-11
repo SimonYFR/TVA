@@ -29,13 +29,13 @@ do_TVA(
 
 \item{cutoff}{is the cutoff used in the support estimation}
 
-\item{estimation_function_name}{is the estimation function we should used. Possible functions are :\cr
+\item{estimation_function_name}{is the estimation function we should used. Possible arguments are :\cr
 \enumerate{
-\item pval_MSE: a multiple step elimination on p-values\cr
-\item pval_OSE: a one step elimination on p-values\cr
-\item puffer_N_LASSO: a LASSO OLS with a Puffer_N transformation\cr
-\item beta_OSE: a one step elimination on beta values\cr
-\item puffer_LASSO: a LASSO OLS with a Puffer transformation\cr
+\item 'pval_MSE': a multiple step elimination on p-values\cr
+\item 'pval_OSE': a one step elimination on p-values\cr
+\item 'puffer_N_LASSO': a LASSO OLS with a Puffer_N transformation\cr
+\item 'beta_OSE': a one step elimination on beta values\cr
+\item 'puffer_LASSO': a LASSO OLS with a Puffer transformation\cr
 (2) and (3) should be equivalent, as well as (4) and (5)
 }}
 
@@ -47,13 +47,15 @@ If FALSE, then they must also have the exact same activated arms (the zeros of t
 }
 \value{
 returns a list containing:\cr
-data: the data with new columns giving pooling information\cr
-marginal_support: a dataframe with all the marginals in the support and their according id\cr
-pools_summary: a dataframe with information on each pool\cr
-unique_policy: a dataframe with all the possible unique policies and their according pool id\cr
-fes_support: the intersection between the estimated support and the fixed effects\cr
-pooled_ols: the result of the final OLS on the pooled data\cr
-winners_effect: the result of the best pooled policy effect, downsized by the winners curse algorithm
+\begin{itemize}{
+\item data: the data with new columns giving pooling information\cr
+\item marginal_support: a dataframe with all the marginals in the support and their according id\cr
+\item pools_summary: a dataframe with information on each pool\cr
+\item unique_policy: a dataframe with all the possible unique policies and their according pool id\cr
+\item fes_support: the intersection between the estimated support and the fixed effects\cr
+\item pooled_ols: the result of the final OLS on the pooled data\cr
+\item winners_effect: the result of the best pooled policy effect, downsized by the winners curse algorithm
+}
 }
 \description{
 Perform the whole TVA algorithm

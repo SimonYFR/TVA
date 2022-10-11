@@ -36,7 +36,7 @@ If TRUE, the code considers that a policy dominates a marginal if all dosages ar
 If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)}
 }
 \value{
-returns a dataframe containing all the p-values in cutoffs and the according support size one would get for each of those p-values
+returns a dataframe containing all the p-values that are in  the vector "cutoffs" and the corresponding support size one would get for each of these p-values
 }
 \description{
 Simulate many pval one-step elimination for different pval cutoffs values.\cr

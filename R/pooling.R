@@ -373,7 +373,7 @@ plot_beta_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 #' @param compare_to_zero is a boolean.\cr
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
-#' @return returns a dataframe containing all the p-values in cutoffs and the according support size one would get for each of those p-values
+#' @return returns a dataframe containing all the p-values that are in  the vector "cutoffs" and the corresponding support size one would get for each of these p-values
 #' @export
 #' @examples
 #' arms = c('financial_incentive','reminder','information')
@@ -466,7 +466,11 @@ suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compa
 #' @param compare_to_zero is a boolean.\cr
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
-#' @return returns the dataframe "data" with a pool_id column that gives the id of the observation's pool, and one dummy column per pool
+#' @return returns the dataframe "data" with new columns: \cr
+#' - a pool_id column that gives the pool id of the observation's pool \cr
+#' - one dummy column per pool_id, equal to 1 if the observation belongs to this pool id, 0 otherwise \cr
+#' - one column per alpha_j, equal to 1 if the observation i is influenced by the marginal n°j, 0 otherwise. There are as many columns as alphas in the support. \cr
+#' - a "pool_influences" column, with a string of the format "c_x1_x2_x3_.." where xj is equal to 1 if the marginals n°j influences the observation, 0 otherwise. This is basically the definition of the pool the observation belongs to.
 #' @export
 #' @examples
 #' arms = c('financial_incentive','reminder','information')
@@ -593,25 +597,27 @@ get_pooled_ols <- function(data,fes,y,w,pool_ids){
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
 #' @param cutoff is the cutoff used in the support estimation
-#' @param estimation_function_name is the estimation function we should used. Possible functions are :\cr
-#' 1. pval_MSE: a multiple step elimination on p-values\cr
-#' 2. pval_OSE: a one step elimination on p-values\cr
-#' 3. puffer_N_LASSO: a LASSO OLS with a Puffer_N transformation\cr
-#' 4. beta_OSE: a one step elimination on beta values\cr
-#' 5. puffer_LASSO: a LASSO OLS with a Puffer transformation\cr
+#' @param estimation_function_name is the estimation function we should used. Possible arguments are :\cr
+#' 1. 'pval_MSE': a multiple step elimination on p-values\cr
+#' 2. 'pval_OSE': a one step elimination on p-values\cr
+#' 3. 'puffer_N_LASSO': a LASSO OLS with a Puffer_N transformation\cr
+#' 4. 'beta_OSE': a one step elimination on beta values\cr
+#' 5. 'puffer_LASSO': a LASSO OLS with a Puffer transformation\cr
 #' (2) and (3) should be equivalent, as well as (4) and (5)
 #' @param scale is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens
 #' @param compare_to_zero is a boolean.\cr
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
 #' @return returns a list containing:\cr
-#' data: the data with new columns giving pooling information\cr
-#' marginal_support: a dataframe with all the marginals in the support and their according id\cr
-#' pools_summary: a dataframe with information on each pool\cr
-#' unique_policy: a dataframe with all the possible unique policies and their according pool id\cr
-#' fes_support: the intersection between the estimated support and the fixed effects\cr
-#' pooled_ols: the result of the final OLS on the pooled data\cr
-#' winners_effect: the result of the best pooled policy effect, downsized by the winners curse algorithm
+#' \begin{itemize}{
+#' \item data: the data with new columns giving pooling information\cr
+#' \item marginal_support: a dataframe with all the marginals in the support and their according id\cr
+#' \item pools_summary: a dataframe with information on each pool\cr
+#' \item unique_policy: a dataframe with all the possible unique policies and their according pool id\cr
+#' \item fes_support: the intersection between the estimated support and the fixed effects\cr
+#' \item pooled_ols: the result of the final OLS on the pooled data\cr
+#' \item winners_effect: the result of the best pooled policy effect, downsized by the winners curse algorithm
+#' }
 #' @export
 #' @examples
 #' arms = c('financial_incentive','reminder','information')

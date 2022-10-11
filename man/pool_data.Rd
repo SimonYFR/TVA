@@ -18,7 +18,13 @@ If TRUE, the code considers that a policy dominates a marginal if all dosages ar
 If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)}
 }
 \value{
-returns the dataframe "data" with a pool_id column that gives the id of the observation's pool, and one dummy column per pool
+returns the dataframe "data" with new columns: \cr
+\itemize{
+\item a pool_id column that gives the pool id of the observation's pool \cr
+\item one dummy column per pool_id, equal to 1 if the observation belongs to this pool id, 0 otherwise \cr
+\item one column per alpha_j, equal to 1 if the observation i is influenced by the marginal n°j, 0 otherwise. There are as many columns as alphas in the support. \cr
+\item a "pool_influences" column, with a string of the format "c_x1_x2_x3_.." where xj is equal to 1 if the marginals n°j influences the observation, 0 otherwise. This is basically the definition of the pool the observation belongs to.
+}
 }
 \description{
 Take the estimated support and pool each observation in its right pool
