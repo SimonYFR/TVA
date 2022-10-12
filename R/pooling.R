@@ -469,7 +469,7 @@ suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compa
 #' @return returns the dataframe "data" with new columns: \cr
 #' * a pool_id column that gives the pool id of the observation's pool 
 #' * one dummy column per pool_id, equal to 1 if the observation belongs to this pool id, 0 otherwise 
-#' * one column per alpha_j, equal to 1 if the observation i is influenced by the marginal n°j, 0 otherwise. There are as many columns as alphas in the support. 
+#' * one column per marginal_j, equal to 1 if the observation i is influenced by the marginal n°j, 0 otherwise. There are as many columns as marginals in the support. 
 #' * a "pool_influences" column, with a string of the format "c_x1_x2_x3_.." where xj is equal to 1 if the marginals n°j influences the observation, 0 otherwise. This is basically the definition of the pool the observation belongs to.
 #' * a "pool_influences_list" column, with a string that gives all the marginals that influence the observation 
 #' @export
@@ -494,7 +494,7 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
     policy_dominates_a_i = (rowSums((t(t(data[,arms]) - a_i)< 0))==0) 
     policy_resembles_a_i = compare_to_zero | (rowSums((t(t(data[,arms]==0) - a_i==0)!=0))==0) 
     indicators = 1*policy_dominates_a_i*policy_resembles_a_i
-    data[,paste("alpha",as.character(i),sep="_")] = indicators
+    data[,paste("marginal",as.character(i),sep="_")] = indicators
     data$pool_influences = paste(data$pool_influences,indicators,sep='_') 
     
     string_replace = c('0'='','1'=paste(', ',a_i_string))
@@ -681,9 +681,9 @@ do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='p
   #pool policies
   data = pool_data(data,arms,marginal_support_strings,compare_to_zero)
   
-  #create alpha ids
-  marginal_support = data.frame(alpha = marginal_support_strings)
-  marginal_support$alpha_id = as.numeric(as.factor(marginal_support$alpha))
+  #create marginals ids
+  marginal_support = data.frame(marginal = marginal_support_strings)
+  marginal_support$marginal_id = as.numeric(as.factor(marginal_support$marginal))
   
   #give info about pools
   pools_info = pools_info(data,arms)
