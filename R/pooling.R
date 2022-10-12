@@ -517,8 +517,26 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
 #' @param data is the dataframe containing all our data and a "pool_id" column giving the pool id of each observation
 #' @param arms is a vector containing the column names of all the arms
 #' @return returns a list containing :\cr
-#' * pools_summary: a dataframe containing information on each pool (number of unique policies, number of observations, pool minimum etc...)
-#' * unique_policy: a dataframe containing all the possible unique policies with their according pool id
+#' * pools_summary: a dataframe containing information on each pool, with columns:
+#'     * "pool_id": the pool id
+#'     * "n_unique_policies": the number of unique policies inside this pool
+#'     * "n_obs": the number of observation in this pool
+#'     * "pool_influences": a string of format "c_x1_x2_x3..", where x_i equals 1 if the marginal number i influences this pool, 0 otherwise
+#'     * "pool_influences_list": a string that gives all the marginals that influence this pool
+#'     * "pool_minimum": the smallest unique policy inside this pool
+#'     * "min_arm1", "min_arm2" etc... : one column per arm, giving the minimum dosage for each arm inside this pool
+#'     * "pool_minimum_fullname": the full name of the smallest unique policy
+#'     * "policy_examples": 5 or less examples of unique policies that are inside this pool
+#' 
+#' * unique_policy: a dataframe containing information on each unique policy, with columns:
+#'     * "policy": a string in format "c_A_B_C_..." where A is the dosage on arm 1, B on arm 2 etc... This is the definition of the unique policy
+#'     * "policy_fullname": the full name of the unique policy
+#'     * "arm1", "arm2" etc...: the value on each arm of the unique policy
+#'     * "pool_id": the id of the pool the unique policy belongs to
+#'     * "pool_influences": a string of format "c_x1_x2_x3..", where x_i equals 1 if the marginal number i influences this pool, 0 otherwise
+#'     * "pool_influences_list": a string that gives all the marginals that influence this pool
+#'     
+#' 
 #' @export
 #' @examples
 #' arms = c('financial_incentive','reminder','information')
@@ -531,7 +549,7 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
 
 pools_info <- function(data,arms){
   
-  unique_policy = data[!duplicated(data[,c(arms,'pool_influences')]), ][,c(arms,'pool_influences','pool_id')] %>% as.data.frame(row.names = 1:nrow(.)) #taking all the unique policies by pool_id
+  unique_policy = data[!duplicated(data[,c(arms,'pool_influences','pool_influences_list')]), ][,c(arms,'pool_influences','pool_id','pool_influences_list')] %>% as.data.frame(row.names = 1:nrow(.)) #taking all the unique policies by pool_id
   unique_policy = unique_policy %>% dplyr::mutate(., policy = apply(unique_policy[,arms], 1, vector_to_string))  %>% dplyr::arrange(., pool_id,policy) #creating policy string column
   unique_policy$policy_fullname = sapply(unique_policy[,'policy'], get_policy_fullname, arms=arms) #create policy full name column
   
@@ -541,15 +559,17 @@ pools_info <- function(data,arms){
   
   a2 = stats::aggregate(data$pool_influences, by=list(pool_id=data$pool_id), FUN=dplyr::first) %>% setNames(.,c('pool_id','pool_influences')) #taking the pool definition (in terms of influence) by pool_id
   
-  a3 = stats::aggregate(data[,arms], by=list(pool_id=data$pool_id), FUN=min) #taking the minimum value by arm by pool_id
-  colnames(a3)[-1] <- paste("min", colnames(a3)[-1], sep = "_")
+  a3 = stats::aggregate(data$pool_influences_list, by=list(pool_id=data$pool_id), FUN=dplyr::first) %>% setNames(.,c('pool_id','pool_influences_list')) #taking the pool definition (in terms of influence) by pool_id
+  
+  a4 = stats::aggregate(data[,arms], by=list(pool_id=data$pool_id), FUN=min) #taking the minimum value by arm by pool_id
+  colnames(a4)[-1] <- paste("min", colnames(a4)[-1], sep = "_")
   
   first_5_examples = unique_policy[,c('pool_id','policy')] %>% dplyr::group_by(pool_id) %>% dplyr::slice(1:5) #taking 5 policies examples by pool_id
   last_example = unique_policy[,c('pool_id','policy')] %>% dplyr::group_by(pool_id) %>% dplyr::slice(6:6) %>% dplyr::mutate(.,policy='...') #taking the potential 6th one and overwrite it as "..." to show there are more than 5
-  a4 = rbind(first_5_examples, last_example) %>% dplyr::group_by(pool_id) %>%  dplyr::summarize(policy_examples = paste((policy),collapse=", ")) %>% as.data.frame()
+  a5 = rbind(first_5_examples, last_example) %>% dplyr::group_by(pool_id) %>%  dplyr::summarize(policy_examples = paste((policy),collapse=", ")) %>% as.data.frame()
   
-  pools_summary = merge(a0,a1,by='pool_id') %>% merge(.,a2,by='pool_id') %>% merge(.,a3,by='pool_id') %>% merge(.,a4,by='pool_id')
-  pools_summary$pool_minimum = apply(pools_summary[,colnames(a3)[-1]], 1, function(x) vector_to_string(x))
+  pools_summary = merge(a0,a1,by='pool_id') %>% merge(.,a2,by='pool_id') %>% merge(.,a3,by='pool_id') %>% merge(.,a4,by='pool_id') %>% merge(.,a5,by='pool_id')
+  pools_summary$pool_minimum = apply(pools_summary[,colnames(a4)[-1]], 1, function(x) vector_to_string(x))
   pools_summary$pool_minimum_fullname = sapply(pools_summary[,'pool_minimum'], get_policy_fullname, arms=arms)
   
   pools_summary = pools_summary[c(setdiff(names(pools_summary), 'policy_examples'), 'policy_examples')] #put policy example column at the end

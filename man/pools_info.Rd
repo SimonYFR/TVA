@@ -14,8 +14,27 @@ pools_info(data, arms)
 \value{
 returns a list containing :\cr
 \itemize{
-\item pools_summary: a dataframe containing information on each pool (number of unique policies, number of observations, pool minimum etc...)
-\item unique_policy: a dataframe containing all the possible unique policies with their according pool id
+\item pools_summary: a dataframe containing information on each pool, with columns:
+\itemize{
+\item "pool_id": the pool id
+\item "n_unique_policies": the number of unique policies inside this pool
+\item "n_obs": the number of observation in this pool
+\item "pool_influences": a string of format "c_x1_x2_x3..", where x_i equals 1 if the marginal number i influences this pool, 0 otherwise
+\item "pool_influences_list": a string that gives all the marginals that influence this pool
+\item "pool_minimum": the smallest unique policy inside this pool
+\item "min_arm1", "min_arm2" etc... : one column per arm, giving the minimum dosage for each arm inside this pool
+\item "pool_minimum_fullname": the full name of the smallest unique policy
+\item "policy_examples": 5 or less examples of unique policies that are inside this pool
+}
+\item unique_policy: a dataframe containing information on each unique policy, with columns:
+\itemize{
+\item "policy": a string in format "c_A_B_C_..." where A is the dosage on arm 1, B on arm 2 etc... This is the definition of the unique policy
+\item "policy_fullname": the full name of the unique policy
+\item "arm1", "arm2" etc...: the value on each arm of the unique policy
+\item "pool_id": the id of the pool the unique policy belongs to
+\item "pool_influences": a string of format "c_x1_x2_x3..", where x_i equals 1 if the marginal number i influences this pool, 0 otherwise
+\item "pool_influences_list": a string that gives all the marginals that influence this pool
+}
 }
 }
 \description{
