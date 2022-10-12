@@ -660,7 +660,7 @@ do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='p
   
   #create alpha ids
   marginal_support = data.frame(alpha = marginal_support_strings)
-  marginal_support$alpha_id = as.numeric(as.factor(marginal_support$marginal_support_strings))
+  marginal_support$alpha_id = as.numeric(as.factor(marginal_support$alpha))
   
   #give info about pools
   pools_info = pools_info(data,arms)
