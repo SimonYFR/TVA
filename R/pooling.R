@@ -467,10 +467,11 @@ suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compa
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
 #' @return returns the dataframe "data" with new columns: \cr
-#' - a pool_id column that gives the pool id of the observation's pool \cr
-#' - one dummy column per pool_id, equal to 1 if the observation belongs to this pool id, 0 otherwise \cr
-#' - one column per alpha_j, equal to 1 if the observation i is influenced by the marginal n°j, 0 otherwise. There are as many columns as alphas in the support. \cr
-#' - a "pool_influences" column, with a string of the format "c_x1_x2_x3_.." where xj is equal to 1 if the marginals n°j influences the observation, 0 otherwise. This is basically the definition of the pool the observation belongs to.
+#' * a pool_id column that gives the pool id of the observation's pool 
+#' * one dummy column per pool_id, equal to 1 if the observation belongs to this pool id, 0 otherwise 
+#' * one column per alpha_j, equal to 1 if the observation i is influenced by the marginal n°j, 0 otherwise. There are as many columns as alphas in the support. 
+#' * a "pool_influences" column, with a string of the format "c_x1_x2_x3_.." where xj is equal to 1 if the marginals n°j influences the observation, 0 otherwise. This is basically the definition of the pool the observation belongs to.
+#' * a "pool_influences_list" column, with a string that gives all the marginals that influence the observation 
 #' @export
 #' @examples
 #' arms = c('financial_incentive','reminder','information')
@@ -485,15 +486,20 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
   n_obs = nrow(data)
   S = length(marginal_support_strings)
   data$pool_influences = "c"
+  data$pool_influences_list = ""
   for (i in 1:S){
-    a_string_i = marginal_support_strings[i]
-    a_i = string_to_vector(a_string_i)
-    policy_dominates_a_i = (rowSums((t(t(data[,arms]) - a_i)< 0))==0)
-    policy_resembles_a_i = compare_to_zero | (rowSums((t(t(data[,arms]==0) - a_i==0)!=0))==0)
-    a_i_influences_policy = 1*policy_dominates_a_i*policy_resembles_a_i
-    data[,paste("alpha",as.character(i),sep="_")] = a_i_influences_policy
-    data$pool_influences = paste(data$pool_influences,a_i_influences_policy,sep='_')
+    a_i_string = marginal_support_strings[i] #get the current marginal in string format
+    a_i = string_to_vector(a_i_string) #get the current marginal in vector format
+    policy_dominates_a_i = (rowSums((t(t(data[,arms]) - a_i)< 0))==0) 
+    policy_resembles_a_i = compare_to_zero | (rowSums((t(t(data[,arms]==0) - a_i==0)!=0))==0) 
+    indicators = 1*policy_dominates_a_i*policy_resembles_a_i
+    data[,paste("alpha",as.character(i),sep="_")] = indicators
+    data$pool_influences = paste(data$pool_influences,indicators,sep='_') 
+    
+    string_replace = c('0'='','1'=paste(', ',a_i_string))
+    data$pool_influences_list = paste(data$pool_influences_list,string_replace[as.character(indicators)] %>% unname(),sep='_')
   }
+  data$pool_influences_list = gsub("^.{0,3}", "", data$pool_influences_list)
   data$pool_id = as.numeric(as.factor(data$pool_influences))-1 #this gives an id to each pool_influences, -1 ensures that c_0_0_.._0 has id = 0 
   
   #create dummy columns
@@ -511,8 +517,8 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
 #' @param data is the dataframe containing all our data and a "pool_id" column giving the pool id of each observation
 #' @param arms is a vector containing the column names of all the arms
 #' @return returns a list containing :\cr
-#' pools_summary: a dataframe containing information on each pool (number of unique policies, number of observations, pool minimum etc...)\cr
-#' unique_policy: a dataframe containing all the possible unique policies with their according pool id
+#' * pools_summary: a dataframe containing information on each pool (number of unique policies, number of observations, pool minimum etc...)
+#' * unique_policy: a dataframe containing all the possible unique policies with their according pool id
 #' @export
 #' @examples
 #' arms = c('financial_incentive','reminder','information')
@@ -648,14 +654,13 @@ do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='p
   total_support = f(X,y,variables,cutoff)$support
   marginal_support_strings = sort(intersect(total_support,marginals_colnames))
   fes_support = sort(intersect(total_support,fes))
-  print(marginal_support_strings)
-  
+
   #pool policies
   data = pool_data(data,arms,marginal_support_strings,compare_to_zero)
   
   #create alpha ids
-  marginal_support = data.frame(marginal_support_strings)
-  marginal_support$a_id = as.numeric(as.factor(marginal_support$marginal_support_strings))
+  marginal_support = data.frame(alpha = marginal_support_strings)
+  marginal_support$alpha_id = as.numeric(as.factor(marginal_support$marginal_support_strings))
   
   #give info about pools
   pools_info = pools_info(data,arms)

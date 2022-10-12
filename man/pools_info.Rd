@@ -13,8 +13,10 @@ pools_info(data, arms)
 }
 \value{
 returns a list containing :\cr
-pools_summary: a dataframe containing information on each pool (number of unique policies, number of observations, pool minimum etc...)\cr
-unique_policy: a dataframe containing all the possible unique policies with their according pool id
+\itemize{
+\item pools_summary: a dataframe containing information on each pool (number of unique policies, number of observations, pool minimum etc...)
+\item unique_policy: a dataframe containing all the possible unique policies with their according pool id
+}
 }
 \description{
 Compute some useful information to understand what's inside each pool
