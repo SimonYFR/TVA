@@ -66,6 +66,7 @@ get_policy_fullname <- function(policy,arms){
 #' create_empty_marginals_matrix(c(1,1,3),15)
 
 create_empty_marginals_matrix <- function(max_dosage_per_arm,n_obs){
+  cat("Creating an empty marginals matrix","\n")
   grid_list=list()
   for (max_dosage in max_dosage_per_arm){
     grid_list=append(grid_list,list(0:max_dosage))
@@ -100,6 +101,7 @@ create_empty_marginals_matrix <- function(max_dosage_per_arm,n_obs){
 #' fill_marginals_matrix(empty_marginals_matrix, data, arms, n_obs,FALSE)
 
 fill_marginals_matrix <- function(marginals_matrix,data,arms,n_obs,compare_to_zero){
+  cat("Filling the marginals matrix","\n")
   M=length(arms)
   marginals_colnames = colnames(marginals_matrix)
   
@@ -132,6 +134,7 @@ fill_marginals_matrix <- function(marginals_matrix,data,arms,n_obs,compare_to_ze
 #' weight_observations(X,W)
 
 weight_observations <- function(X,W){
+  cat("Weighting the observations","\n")
   rW = sqrt(W)
   X = X * rW
   return (X)
@@ -169,6 +172,7 @@ weight_observations <- function(X,W){
 #' prepare_data(data,arms,fes,y,w,FALSE,FALSE)
 
 prepare_data <- function(data,arms,fes,y,w,scale,compare_to_zero){
+  cat("Preparing the data","\n")
   n_obs = nrow(data)
   
   if (is.null(w)){
@@ -190,10 +194,10 @@ prepare_data <- function(data,arms,fes,y,w,scale,compare_to_zero){
   X['intercept'] = 1
   
   if (scale){
+    cat("Scaling the data for mean=0 and std=1","\n")
     scaling_variables = c(fes,marginals_colnames)
     X[,which(names(X) %in% scaling_variables)] = corpcor::wt.scale(X[,which(names(X) %in% scaling_variables)],W,center=TRUE,scale=TRUE)
   }
-  
   X = weight_observations(X,W)
   variables = c(fes,marginals_colnames,'intercept')
   
@@ -483,6 +487,7 @@ suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compa
 #' pool_data(data,arms,marginal_support_strings,FALSE)
 
 pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
+  cat("Pooling the raw data with estimated marginal support","\n")
   n_obs = nrow(data)
   S = length(marginal_support_strings)
   data$pool_influences = "c"
@@ -548,7 +553,7 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
 #' pools_info(data,arms)
 
 pools_info <- function(data,arms){
-  
+  cat("Gathering informations on pools","\n")
   unique_policy = data[!duplicated(data[,c(arms,'pool_influences','pool_influences_list')]), ][,c(arms,'pool_influences','pool_id','pool_influences_list')] %>% as.data.frame(row.names = 1:nrow(.)) #taking all the unique policies by pool_id
   unique_policy = unique_policy %>% dplyr::mutate(., policy = apply(unique_policy[,arms], 1, vector_to_string))  %>% dplyr::arrange(., pool_id,policy) #creating policy string column
   unique_policy$policy_fullname = sapply(unique_policy[,'policy'], get_policy_fullname, arms=arms) #create policy full name column
@@ -604,6 +609,7 @@ pools_info <- function(data,arms){
 #' get_pooled_ols(data,fes,y,w,pool_ids)
 
 get_pooled_ols <- function(data,fes,y,w,pool_ids){
+  cat("Performing the final OLS on pooled data","\n")
   #do we scale the data ???
   #do we keep all the fes ??? or only the fes intersect support ?
   pooled_ols_variables = c(pool_ids, fes)
@@ -658,8 +664,6 @@ get_pooled_ols <- function(data,fes,y,w,pool_ids){
 #' TVA(data,arms,fes,y,w,0.3,'pval_OSE',FALSE,FALSE)
 
 do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='pval_OSE',scale=FALSE,compare_to_zero=FALSE){
-  #source('support_estimation.R')
-  #source('winners_curse.R')
   #check if fake_weights column already exists
   #check if dosages are consistent (non negative etc..)
   
@@ -673,6 +677,8 @@ do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='p
   f = get(estimation_function_name)
   total_support = f(X,y,variables,cutoff)$support
   marginal_support_strings = sort(intersect(total_support,marginals_colnames))
+  cat("Estimated support is:","\n")
+  print(marginal_support_strings)
   fes_support = sort(intersect(total_support,fes))
 
   #pool policies
@@ -703,5 +709,7 @@ do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='p
                  ,pooled_ols=pooled_ols 
                  ,winners_effect=winners_effect
   )
+  
+  cat("Returning result","\n")
   return(result)
 }

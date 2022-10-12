@@ -12,7 +12,7 @@
 
 pval_MSE <- function(X,y,variables,pval_cutoff){
   #need to check if some columns are always 0, especially the FE
-  
+  cat("Estimating support with pval MSE and cutoff=",pval_cutoff,"\n")
   #change "sp"
   current_variables = variables
   deselect_list <- c()
@@ -93,6 +93,7 @@ pval_to_lambda <- function(X,y,variables,pval){
 #' @export
 
 pval_OSE<- function(X,y,variables,pval_cutoff){
+  cat("Estimating support with pval OSE and cutoff=",pval_cutoff,"\n")
   #need to check if some columns are always 0, especially the FE
   
   lambda = pval_to_lambda(X,y,variables,pval_cutoff)
@@ -149,6 +150,7 @@ N_transform <- function(X){
 
 
 puffer_N_LASSO <- function(X,y,variables,lambda_cutoff){
+  cat("Estimating support with puffer N LASSO and cutoff=",lambda_cutoff,"\n")
   #Estimate residual deviation to compute equivalent pval_cutoff
   pval_cutoff = lambda_to_pval(X,y,variables,lambda_cutoff)
   print("Equivalent p-value cutoff to current lambda cutoff is ")
@@ -182,6 +184,7 @@ puffer_N_LASSO <- function(X,y,variables,lambda_cutoff){
 #' @export
 
 beta_OSE <- function(X,y,variables,lambda_cutoff){
+  cat("Estimating support with beta OSE and cutoff=",lambda_cutoff,"\n")
   formula <- as.formula(paste0(y,"~",paste0(c(variables,"0"),collapse = "+")))
   model_ols <- estimatr::lm_robust(formula = formula, data = X,  se_type = "classical")
   support = names(model_ols$p.value[which(abs(model_ols$coefficients)>=lambda_cutoff)])
@@ -203,6 +206,7 @@ beta_OSE <- function(X,y,variables,lambda_cutoff){
 
 
 puffer_LASSO <- function(X,y,variables,lambda_cutoff){
+  cat("Estimating support with puffer LASSO and cutoff=",lambda_cutoff,"\n")
   #do we add the intercept column ?
   X_matrix = X[,variables] %>% as.matrix()
   Y = X[,y] %>% as.matrix()

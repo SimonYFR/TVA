@@ -17,6 +17,8 @@ winners_curse <- function(pooled_ols,pool_ids,alpha=0.05,beta=NULL){
     beta=alpha/10
   }
   
+  cat("Computing the winners curse effect with alpha=",alpha," and beta=",beta,"\n")
+  
   pooled_effects <- pooled_ols$coefficients[pool_ids]
   pooled_pval <-pooled_ols$p.value[pool_ids]
   ntreat <- length(pool_ids) + 1
