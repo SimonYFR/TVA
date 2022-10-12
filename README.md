@@ -39,7 +39,7 @@ Below are the details of each steps.
 
 The unique policies exist in a unique policy space of dimension $K=[0,R_1] \times \dots \times [0,R_M]$. One can map this unique policy space to a marginal policy space of the same dimension.  Let us specify what we mean by marginal policy space.
 
-A unique policy can be written as $r=(r_1,\dots ,r_M)$. To write this unique policy in the marginal space, we consider all the marginal policies $m = (m_1,\dots ,m_M)$ that $r$ *dominates* ($r \geq m$, meaning $r_i \geq m_i, \forall i\in[1,M]$). In that case, we say that $m$ *influences* $r$. The decomposition of $r$ in the marginal space is just the sum of all $m$ that *influence* $r$. 
+A unique policy can be written as $r=(r_1,\dots ,r_M)$. To write this unique policy in the marginal space, we consider all the marginal policies $m = (m_1,\dots ,m_M)$ that $r$ *dominates* ( $r \geq m$, meaning $r_i \geq m_i, \forall i\in[1,M]$). In that case, we say that $m$ *influences* $r$. The decomposition of $r$ in the marginal space is just the sum of all $m$ that *influence* $r$. 
 
 For example, the policy $r(1,2)$ will be decomposed on $m(0,0)+m(0,1)+m(1,0)+m(1,1)+m(1,2)$.
 
