@@ -11,14 +11,13 @@
 
 
 pval_MSE <- function(X,y,variables,pval_cutoff){
-  #need to check if some columns are always 0, especially the FE
   cat("Estimating support with pval MSE and cutoff=",pval_cutoff,"\n")
   #change "sp"
   current_variables = variables
   deselect_list <- c()
   deselect_pval <- c()
-  current_sp_formula <- as.formula(paste0(y,"~",paste0(c(current_variables,0),collapse = "+")))
-  current_model_ols <- estimatr::lm_robust(formula = current_sp_formula, data = X, se_type = "classical")
+  current_formula <- as.formula(paste0(y,"~",paste0(c(current_variables,0),collapse = "+")))
+  current_model_ols <- estimatr::lm_robust(formula = current_formula, data = X, se_type = "classical")
   current_pvals = current_model_ols$p.value
   current_pvals[is.na(current_pvals)]=1
   current_max_pval <- max(current_pvals)
@@ -36,8 +35,8 @@ pval_MSE <- function(X,y,variables,pval_cutoff){
       print("pval_cutoff is too strict, no variable survived")
       break
     }
-    current_sp_formula <- as.formula(paste0(y,"~",paste0(c(current_variables,0),collapse = "+")))
-    current_model_ols <- estimatr::lm_robust(formula = current_sp_formula, data = X,se_type = "classical")
+    current_formula <- as.formula(paste0(y,"~",paste0(c(current_variables,0),collapse = "+")))
+    current_model_ols <- estimatr::lm_robust(formula = current_formula, data = X,se_type = "classical")
     current_pvals = current_model_ols$p.value
     current_pvals[is.na(current_pvals)]=1
     current_max_pval <- max(current_pvals)
@@ -94,9 +93,6 @@ pval_to_lambda <- function(X,y,variables,pval){
 
 pval_OSE<- function(X,y,variables,pval_cutoff){
   cat("Estimating support with pval OSE and cutoff=",pval_cutoff,"\n")
-  #need to check if some columns are always 0, especially the FE
-  
-  lambda = pval_to_lambda(X,y,variables,pval_cutoff)
   
   formula <- as.formula(paste0(y,"~",paste0(c(variables,"0"),collapse = "+")))
   model_ols <- estimatr::lm_robust(formula = formula, data = X,  se_type = "classical")
@@ -151,7 +147,7 @@ N_transform <- function(X){
 
 puffer_N_LASSO <- function(X,y,variables,lambda_cutoff){
   cat("Estimating support with puffer N LASSO and cutoff=",lambda_cutoff,"\n")
-  #Estimate residual deviation to compute equivalent pval_cutoff
+  
   pval_cutoff = lambda_to_pval(X,y,variables,lambda_cutoff)
   print("Equivalent p-value cutoff to current lambda cutoff is ")
   print(pval_cutoff)
@@ -207,7 +203,7 @@ beta_OSE <- function(X,y,variables,lambda_cutoff){
 
 puffer_LASSO <- function(X,y,variables,lambda_cutoff){
   cat("Estimating support with puffer LASSO and cutoff=",lambda_cutoff,"\n")
-  #do we add the intercept column ?
+  
   X_matrix = X[,variables] %>% as.matrix()
   Y = X[,y] %>% as.matrix()
   

@@ -237,7 +237,6 @@ prepare_data <- function(data,arms,fes,y,w,scale,compare_to_zero){
 
 
 plot_pval_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_zero=FALSE){
-  #source('support_estimation.R')
   prepared_data = prepare_data(data,arms,fes,y,w,scale,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
@@ -288,7 +287,6 @@ plot_pval_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 #' plot_pval_MSE(data,arms,fes,y,w,FALSE,FALSE)
 
 plot_pval_MSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_zero=FALSE){
-  #source('support_estimation.R')
   prepared_data = prepare_data(data,arms,fes,y,w,scale,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
@@ -343,7 +341,6 @@ plot_pval_MSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 
 
 plot_beta_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_zero=FALSE){
-  #source('support_estimation.R')
   prepared_data = prepare_data(data,arms,fes,y,w,scale,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
@@ -394,7 +391,6 @@ plot_beta_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 #' grid_pval_OSE(cutoffs=NULL,data=data,arms=arms,fes=fes,y=y,w=w,scale=FALSE,compare_to_zero=FALSE)
 
 grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero=FALSE){
-  #source('support_estimation.R')
   prepared_data = prepare_data(data,arms,fes,y,w,scale,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
@@ -455,9 +451,9 @@ suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compa
   suggested_support_size = round(n_unique_policies / unique_policies_to_support_size_ratio)
   suggested_cutoff = (grid %>% dplyr::filter(.,marginal_support_size <= suggested_support_size))[1,'pval_cutoff']
   equivalent_lambda = (grid %>% dplyr::filter(.,marginal_support_size <= suggested_support_size))[1,'equivalent_lambda']
-  cat('\nSuggested support size :',suggested_support_size,'\n')
-  cat('\nAssociated pval cutoff :',suggested_cutoff,'\n')
-  cat('\nAssociated lambda cutoff in puffer_N :',equivalent_lambda,'\n')
+  cat('Suggested support size :',suggested_support_size,'\n')
+  cat('Associated pval cutoff :',suggested_cutoff,'\n')
+  cat('Associated lambda cutoff in puffer_N :',equivalent_lambda,'\n')
   return(suggested_cutoff)
 }
 
@@ -610,12 +606,13 @@ pools_info <- function(data,arms){
 
 get_pooled_ols <- function(data,fes,y,w,pool_ids){
   cat("Performing the final OLS on pooled data","\n")
-  #do we scale the data ???
-  #do we keep all the fes ??? or only the fes intersect support ?
   pooled_ols_variables = c(pool_ids, fes)
-  formula <- as.formula(paste0(y,"~",paste0(pooled_ols_variables ,collapse = "+")))
-  #clusters ??? se_type ? id_sc cluster et CR0
-  pooled_ols <- estimatr::lm_robust(formula = formula, data = data, weights = data[,w])
+  formula = as.formula(paste0(y,"~",paste0(pooled_ols_variables ,collapse = "+")))
+  if (is.null(w)){
+    pooled_ols = estimatr::lm_robust(formula = formula, data = data)
+  }else{
+    pooled_ols = estimatr::lm_robust(formula = formula, data = data, weights = data[,w])
+  }
   return(pooled_ols)
 }
 
