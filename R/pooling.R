@@ -497,7 +497,7 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
     data$pool_influences = paste(data$pool_influences,indicators,sep='_') 
     
     string_replace = c('0'='','1'=paste(', ',a_i_string))
-    data$pool_influences_list = paste(data$pool_influences_list,string_replace[as.character(indicators)] %>% unname(),sep='_')
+    data$pool_influences_list = paste(data$pool_influences_list,string_replace[as.character(indicators)] %>% unname(),sep='')
   }
   data$pool_influences_list = gsub("^.{0,3}", "", data$pool_influences_list)
   data$pool_id = as.numeric(as.factor(data$pool_influences))-1 #this gives an id to each pool_influences, -1 ensures that c_0_0_.._0 has id = 0 
@@ -659,9 +659,7 @@ do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='p
   data = pool_data(data,arms,marginal_support_strings,compare_to_zero)
   
   #create alpha ids
-  print(marginal_support_strings)
   marginal_support = data.frame(alpha = marginal_support_strings)
-  print(marginal_support)
   marginal_support$alpha_id = as.numeric(as.factor(marginal_support$alpha))
   
   #give info about pools
