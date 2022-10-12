@@ -93,9 +93,9 @@ pval_to_lambda <- function(X,y,variables,pval){
 
 pval_OSE<- function(X,y,variables,pval_cutoff){
   cat("Estimating support with pval OSE and cutoff=",pval_cutoff,"\n")
-  
-  formula <- as.formula(paste0(y,"~",paste0(c(variables,"0"),collapse = "+")))
-  model_ols <- estimatr::lm_robust(formula = formula, data = X,  se_type = "classical")
+  lambda = pval_to_lambda(X,y,variables,pval_cutoff)
+  formula = as.formula(paste0(y,"~",paste0(c(variables,"0"),collapse = "+")))
+  model_ols = estimatr::lm_robust(formula = formula, data = X,  se_type = "classical")
   support = names(model_ols$p.value[which(model_ols$p.value<=pval_cutoff)])
   
   result = list(support=support, pvals = model_ols$p.value, equiv_lambda = lambda)
