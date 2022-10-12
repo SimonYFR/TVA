@@ -678,7 +678,7 @@ do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='p
   total_support = f(X,y,variables,cutoff)$support
   marginal_support_strings = sort(intersect(total_support,marginals_colnames))
   cat("Estimated support is:","\n")
-  print(marginal_support_strings)
+  cat(marginal_support_strings,"\n")
   fes_support = sort(intersect(total_support,fes))
 
   #pool policies
