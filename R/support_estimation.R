@@ -12,7 +12,6 @@
 
 pval_MSE <- function(X,y,variables,pval_cutoff){
   cat("Estimating support with pval MSE and cutoff=",pval_cutoff,"\n")
-  #change "sp"
   current_variables = variables
   deselect_list <- c()
   deselect_pval <- c()
