@@ -24,6 +24,44 @@ Where $U$ is a dummy matrix indicating the unique policy of each observation, $F
 **TVA algorithm solves this**. In short, TVA will estimate the marginal effects in order to group unique policies together in a small number of pools that contain unique policies with similar effects, and then perform a regression on the pooled data and adjust the estimation for the winner's curse. 
 
 
+## Quick guide to use TVA
+
+### Your data
+
+Your data must be structured in a certain (but simple way). Specifically, most TVA functions will have the following arguments :
+- `data` : a dataframe containing all your observations with columns for the outcome, the dosage in each arm, the fixed effects and the possible weights.
+- `arms` : a vector containing the names of the arms columns in your dataframe.
+- `fes` : a vector containing the names of the fixed effect columns in your dataframe (equal to `c()` by default, should be left empty if there are no fixed effects). 
+- `w` : the name of the weight column (`NULL` by default, should be left `NULL` if  there are no weights). 
+
+### Other arguments
+
+Other arguments can be asked for some functions of the package:
+- `compare_to_zero` : a boolean (`FALSE` by default). If `TRUE`, it means you allow pooling two policies that might have a different set of activated arms. If `FALSE`, it means you never want to pool two policies that have a different set of activated arms. For example, the policy `(1,1)` can be pooled with `(0,1)` if `compare_to_zero` is set to `TRUE`, but it can' t be if it's set to `FALSE`. 
+- `estimation_function_name` : a string, can be equal to `pval_MSE` or `pval_OSE`. By default, it is equal to `pval_OSE`. This argument allows you to choose the function that will estimate the support of the marginal effects. In short, `pval_OSE` will be fast and `pval_MSE` will take longer, but will provide more coherent results in some edge cases. 
+- `cutoff` : a number between `0` and `1`. At first, we suggest choosing  `pval_OSE` and `cutoff=0.05`.  All the estimation functions need a cutoff value that gives some severity on including or not a marginal effect in the support. If you chose `pval_OSE`, the support is estimated by performing an OLS in the marginal space and by taking marginals that have a p-value below `cutoff`. If you chose `pval_MSE`, the support is estimated by repeating OLS in the marginal space, and removing the marginal with the largest p-value at each step, until the largest p-value is smaller than `cutoff`. 
+
+### How to use TVA
+
+Once the data is structured in the way TVA diggests it, we suggest the user doing the following: 
+
+Run `grid_pval_OSE(data=data,arms=arms,fes=fes,y=y,w=w)` or `plot_pval_OSE(data,arms,fes,y,w,compare_to_zero)` to get an idea of the support size you will obtain for different cutoff values.
+
+Then, run `result = do_TVA(data = data, arms = arms, fes = fes, y = y, cutoff = 5 * 10^(-2), w = w, estimation_function_name = 'pval_OSE')` to test the TVA algorithm for a first time. 
+
+Type :
+- `result$marginal_support` to see the marginal_support you obtained
+- `result$pools_summary` to get some information about your different pools
+- `result$unique_policy` to see all your unique policies and to witch pool they belong to
+- `result$data` to get you original dataframe but with some new columns giving pooling information
+- `result$fes_support` to see the fixed effects  that were estimated to be in the support
+- `result$pooled_ols` to get the final OLS on the pooled data
+- `result$winners_effect` to get the estimate of the best pool effect and its 95% confidence interval
+
+You can then increase (resp. decrease) the `cutoff` if you obtained too little (resp. too many) pools.
+
+
+
 ## TVA steps
 
 TVA algorithm can be decomposed in several steps:
@@ -198,4 +236,19 @@ In my simulation, I see that taking a cutoff of `1e-10` gives a support size of 
 They should give a more accurate estimation of the support than running it with `pval_OSE`.
 
 
+## Code structure
+
+The main function of the TVA package is `do_TVA`. The arguments it takes are `data`, `arms`, `fes`, `y`, `w`, `cutoff`, `estimation_function_name`, and `compare_to_zero`.
+
+First, `do_TVA` calls `prepare_data`. This function creates an empty marginals matrix by calling `create_empty_marginals_matrix` and pipes it into `fill_marginals_matrix` to put the right values inside it. This matrix is concatenated with the `fes` and `y` columns of the data, an `intercept` column and is then weighted with the `weight_observations` function. 
+
+Then, `do_TVA` estimate the support with either `pval_OSE` or `pval_MSE`. The support is split into a marginals support and a fixed effects support.
+
+The marginals support is used by the `pool_data` function, which assigns each observation to its right pool.
+
+Then, `pools_info` is called to compute some general descriptive information about each pool.
+
+The final OLS is finally computed with `get_pooled_ols`, and the winner's curse algorithm is applied to the best pool effect with `winners_curse`.
+
+In the end, `do_TVA` returns all those objects in a list. 
 
