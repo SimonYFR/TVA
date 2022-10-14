@@ -167,7 +167,6 @@ get_policy_fullname <- function(policy,arms){
 }
 
 
-#Main functions
 
 #' Create marginals matrix
 #'
@@ -317,6 +316,272 @@ prepare_data <- function(data,arms,fes,y,w,scale,compare_to_zero){
   
   return(list(X=X,variables=variables,marginals_colnames=marginals_colnames))
 }
+
+
+
+#' Pool the data
+#'
+#' Take the estimated support and pool each observation in its right pool
+#' @param data is the dataframe containing all our data
+#' @param arms is a vector containing the column names of all the arms
+#' @param marginal_support_strings is a vector containing strings that represent all the marginals in the support
+#' @param compare_to_zero is a boolean.\cr
+#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
+#' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
+#' @return returns the dataframe "data" with new columns: \cr
+#' * a pool_id column that gives the pool id of the observation's pool 
+#' * one dummy column per pool_id, equal to 1 if the observation belongs to this pool id, 0 otherwise 
+#' * one column per marginal_j, equal to 1 if the observation i is influenced by the marginal n°j, 0 otherwise. There are as many columns as marginals in the support. 
+#' * a "pool_influences" column, with a string of the format "c_x1_x2_x3_.." where xj is equal to 1 if the marginals n°j influences the observation, 0 otherwise. This is basically the definition of the pool the observation belongs to.
+#' * a "pool_influences_list" column, with a string that gives all the marginals that influence the observation 
+#' @export
+#' @examples
+#' arms = c('financial_incentive','reminder','information')
+#' A1 = c(0,0,0,0,0,1,1,1,1,1)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
+#' A3 = c(0,1,2,3,0,3,2,1,0,1)
+#' data = data.frame(financial_incentive = A1, reminder = A2, information = A3)
+#' marginal_support_strings = c('c_0_1_1', 'c_1_1_2', 'c_1_0_1', 'c_1_0_2')
+#' pool_data(data,arms,marginal_support_strings,FALSE)
+
+pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
+  n_obs = nrow(data)
+  S = length(marginal_support_strings)
+  
+  cat("Pooling the raw data with estimated marginal support of size ",S,"\n")
+
+  data$pool_influences = "c"
+  data$pool_influences_list = ""
+  data$pool_id = 0
+  if (S>=1){
+    for (i in 1:S){
+      a_i_string = marginal_support_strings[i] #get the current marginal in string format
+      a_i = string_to_vector(a_i_string) #get the current marginal in vector format
+      policy_dominates_a_i = (rowSums((t(t(data[,arms]) - a_i)< 0))==0) 
+      policy_resembles_a_i = compare_to_zero | (rowSums((t(t(data[,arms]==0) - a_i==0)!=0))==0) 
+      indicators = 1*policy_dominates_a_i*policy_resembles_a_i
+      data[,paste("marginal",as.character(i),sep="_")] = indicators
+      data$pool_influences = paste(data$pool_influences,indicators,sep='_') 
+      
+      string_replace = c('0'='','1'=paste(', ',a_i_string))
+      data$pool_influences_list = paste(data$pool_influences_list,string_replace[as.character(indicators)] %>% unname(),sep='')
+    }
+    data$pool_influences_list = gsub("^.{0,3}", "", data$pool_influences_list)
+    data$pool_id = as.numeric(as.factor(data$pool_influences))-1 #this gives an id to each pool_influences, -1 ensures that c_0_0_.._0 has id = 0 
+    #create dummy columns
+    pool_dummy = data.frame(lme4::dummy(data$pool_id))
+    pool_ids = paste("pool_id",stringr::str_sub(names(pool_dummy),2),sep="_")
+    names(pool_dummy) = pool_ids
+    data = cbind(data,pool_dummy)
+  }
+  return(data)
+}
+
+#' Give information for each pool
+#'
+#' Compute some useful information to understand what's inside each pool
+#' @param data is the dataframe containing all our data and a "pool_id" column giving the pool id of each observation
+#' @param arms is a vector containing the column names of all the arms
+#' @return returns a list containing :\cr
+#' * pools_summary: a dataframe containing information on each pool, with columns:
+#'     * "pool_id": the pool id
+#'     * "n_unique_policies": the number of unique policies inside this pool
+#'     * "n_obs": the number of observation in this pool
+#'     * "pool_influences": a string of format "c_x1_x2_x3..", where x_i equals 1 if the marginal number i influences this pool, 0 otherwise
+#'     * "pool_influences_list": a string that gives all the marginals that influence this pool
+#'     * "pool_minimum": the smallest unique policy inside this pool
+#'     * "min_arm1", "min_arm2" etc... : one column per arm, giving the minimum dosage for each arm inside this pool
+#'     * "pool_minimum_fullname": the full name of the smallest unique policy
+#'     * "policy_examples": 5 or less examples of unique policies that are inside this pool
+#' 
+#' * unique_policy: a dataframe containing information on each unique policy, with columns:
+#'     * "policy": a string in format "c_A_B_C_..." where A is the dosage on arm 1, B on arm 2 etc... This is the definition of the unique policy
+#'     * "policy_fullname": the full name of the unique policy
+#'     * "arm1", "arm2" etc...: the value on each arm of the unique policy
+#'     * "pool_id": the id of the pool the unique policy belongs to
+#'     * "pool_influences": a string of format "c_x1_x2_x3..", where x_i equals 1 if the marginal number i influences this pool, 0 otherwise
+#'     * "pool_influences_list": a string that gives all the marginals that influence this pool
+#'     
+#' 
+#' @export
+#' @examples
+#' arms = c('financial_incentive','reminder','information')
+#' A1 = c(0,0,0,0,0,1,1,1,1,1)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
+#' A3 = c(0,1,2,3,0,3,2,1,0,1)
+#' pool_id = c(0,1,0,0,0,2,0,0,0,2)
+#' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, pool_id = pool_id)
+#' pools_info(data,arms)
+
+pools_info <- function(data,arms){
+  cat("Gathering informations on pools","\n")
+  unique_policy = data[!duplicated(data[,c(arms,'pool_influences','pool_influences_list')]), ][,c(arms,'pool_influences','pool_id','pool_influences_list')] %>% as.data.frame(row.names = 1:nrow(.)) #taking all the unique policies by pool_id
+  unique_policy = unique_policy %>% dplyr::mutate(., policy = apply(unique_policy[,arms], 1, vector_to_string))  %>% dplyr::arrange(., pool_id,policy) #creating policy string column
+  unique_policy$policy_fullname = sapply(unique_policy[,'policy'], get_policy_fullname, arms=arms) #create policy full name column
+  
+  a0 = stats::aggregate(unique_policy$pool_influences, by=list(pool_id=unique_policy$pool_id), FUN=length) %>% setNames(.,c('pool_id','n_unique_policies')) #counting number of unique policies by pool_id
+  
+  a1 = stats::aggregate(data$pool_influences, by=list(pool_id=data$pool_id), FUN=length) %>% setNames(.,c('pool_id','n_obs')) #counting the number of observations by pool_id
+  
+  a2 = stats::aggregate(data$pool_influences, by=list(pool_id=data$pool_id), FUN=dplyr::first) %>% setNames(.,c('pool_id','pool_influences')) #taking the pool definition (in terms of influence) by pool_id
+  
+  a3 = stats::aggregate(data$pool_influences_list, by=list(pool_id=data$pool_id), FUN=dplyr::first) %>% setNames(.,c('pool_id','pool_influences_list')) #taking the pool definition (in terms of influence) by pool_id
+  
+  a4 = stats::aggregate(data[,arms], by=list(pool_id=data$pool_id), FUN=min) #taking the minimum value by arm by pool_id
+  colnames(a4)[-1] <- paste("min", colnames(a4)[-1], sep = "_")
+  
+  first_5_examples = unique_policy[,c('pool_id','policy')] %>% dplyr::group_by(pool_id) %>% dplyr::slice(1:5) #taking 5 policies examples by pool_id
+  last_example = unique_policy[,c('pool_id','policy')] %>% dplyr::group_by(pool_id) %>% dplyr::slice(6:6) %>% dplyr::mutate(.,policy='...') #taking the potential 6th one and overwrite it as "..." to show there are more than 5
+  a5 = rbind(first_5_examples, last_example) %>% dplyr::group_by(pool_id) %>%  dplyr::summarize(policy_examples = paste((policy),collapse=", ")) %>% as.data.frame()
+  
+  pools_summary = merge(a0,a1,by='pool_id') %>% merge(.,a2,by='pool_id') %>% merge(.,a3,by='pool_id') %>% merge(.,a4,by='pool_id') %>% merge(.,a5,by='pool_id')
+  pools_summary$pool_minimum = apply(pools_summary[,colnames(a4)[-1]], 1, function(x) vector_to_string(x))
+  pools_summary$pool_minimum_fullname = sapply(pools_summary[,'pool_minimum'], get_policy_fullname, arms=arms)
+  
+  pools_summary = pools_summary[c(setdiff(names(pools_summary), 'policy_examples'), 'policy_examples')] #put policy example column at the end
+  return(list(pools_summary = pools_summary, unique_policy = unique_policy))
+}
+
+#' Perform the final OLS
+#'
+#' Perform the final OLS on pooled data, regressing on fes and pool_id dummy columns
+#' @param data is the dataframe containing all our data and pool_id dummy columns
+#' @param fes is a vector containing the column names of all the fixed effects
+#' @param y is the column name of the outcome of interest
+#' @param w is the column name of the weights
+#' @param pool_ids is a vector containing the column names of each pool_id dummy column
+#' @return returns the ols result
+#' @export
+#' @examples
+#' arms = c('financial_incentive','reminder','information')
+#' fes = c('fes_1')
+#' y = 'outcome'
+#' w = 'weights'
+#' A1 = c(0,0,0,0,0,1,1,1,1,1)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
+#' A3 = c(0,1,2,3,0,3,2,1,0,1)
+#' F1 = c(0,1,0,0,0,1,0,1,0,0)
+#' Y  = c(5,4,3,5,4,5,4,2,3,2)
+#' W  = c(1,1,1,2,1,2,2,1,1,2)
+#' p1 = c(0,1,0,0,0,0,0,0,0,0)
+#' p2 = c(0,0,0,0,0,1,0,0,0,1)
+#' pool_ids = c('pool_id_1','pool_id_2')
+#' data = data.frame(pool_id_1 = p1, pool_id_2 = p2, financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
+#' get_pooled_ols(data,fes,y,w,pool_ids)
+
+get_pooled_ols <- function(data,fes=c(),y,w=NULL,pool_ids){
+  cat("Performing the final OLS on pooled data","\n")
+  pooled_ols_variables = c(pool_ids, fes)
+  formula = as.formula(paste0(y,"~",paste0(pooled_ols_variables ,collapse = "+")))
+  if (is.null(w)){
+    pooled_ols = estimatr::lm_robust(formula = formula, data = data)
+  }else{
+    pooled_ols = estimatr::lm_robust(formula = formula, data = data, weights = data[,w])
+  }
+  return(pooled_ols)
+}
+
+
+#' TVA Main function
+#'
+#' Perform the whole TVA algorithm
+#' @param data is the dataframe containing all our data
+#' @param arms is a vector containing the column names of all the arms
+#' @param fes is a vector containing the column names of all the fixed effects
+#' @param y is the column name of the outcome of interest
+#' @param w is the column name of the weights
+#' @param cutoff is the cutoff used in the support estimation
+#' @param estimation_function_name is the estimation function we should used. Possible arguments are :\cr
+#' 1. 'pval_MSE': a multiple step elimination on p-values\cr
+#' 2. 'pval_OSE': a one step elimination on p-values\cr
+#' 3. 'puffer_N_LASSO': a LASSO OLS with a Puffer_N transformation\cr
+#' 4. 'beta_OSE': a one step elimination on beta values\cr
+#' 5. 'puffer_LASSO': a LASSO OLS with a Puffer transformation\cr
+#' (2) and (3) should be equivalent, as well as (4) and (5)
+#' @param scale is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens
+#' @param compare_to_zero is a boolean.\cr
+#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
+#' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
+#' @return returns a list containing:\cr
+#' * data: the data with new columns giving pooling information\cr
+#' * marginal_support: a dataframe with all the marginals in the support and their according id\cr
+#' * pools_summary: a dataframe with information on each pool\cr
+#' * unique_policy: a dataframe with all the possible unique policies and their according pool id\cr
+#' * fes_support: the intersection between the estimated support and the fixed effects\cr
+#' * pooled_ols: the result of the final OLS on the pooled data\cr
+#' * winners_effect: the result of the best pooled policy effect, downsized by the winners curse algorithm
+#' @export
+#' @examples
+#' arms = c('financial_incentive','reminder','information')
+#' fes = c('fes_1')
+#' y = 'outcome'
+#' w = 'weights'
+#' A1 = c(0,0,0,0,0,1,1,1,1,1)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
+#' A3 = c(0,1,2,3,0,3,2,1,0,1)
+#' F1 = c(0,1,0,0,0,1,0,1,0,0)
+#' Y  = c(5,4,3,5,4,5,4,2,3,2)
+#' W  = c(1,1,1,2,1,2,2,1,1,2)
+#' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
+#' TVA(data,arms,fes,y,w,0.3,'pval_OSE',FALSE,FALSE)
+
+do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='pval_OSE',scale=FALSE,compare_to_zero=FALSE){
+  #check if fake_weights column already exists
+  check = check_inputs_integrity(data, arms, fes, y, cutoff, w, estimation_function_name, compare_to_zero)
+  if (!check$integrity){
+    stop(check$message)
+  }
+  
+  #prepare the data
+  prepared_data = prepare_data(data,arms,fes,y,w,scale,compare_to_zero)
+  X = prepared_data$X
+  variables = prepared_data$variables
+  marginals_colnames = prepared_data$marginals_colnames
+  
+  #get support
+  f = get(estimation_function_name)
+  total_support = f(X,y,variables,cutoff)$support
+  marginal_support_strings = sort(intersect(total_support,marginals_colnames))
+  if (marginal_support_strings %>% length() == 0){
+    stop("Estimated support is empty, current cutoff does not differentiate any policy with the control")
+  }
+  cat("Estimated support is:","\n")
+  cat(marginal_support_strings,"\n")
+  fes_support = sort(intersect(total_support,fes))
+
+  #pool policies
+  data = pool_data(data,arms,marginal_support_strings,compare_to_zero)
+  
+  #create marginals ids
+  marginal_support = data.frame(marginal = marginal_support_strings)
+  marginal_support$marginal_id = as.numeric(as.factor(marginal_support$marginal))
+  
+  #give info about pools
+  pools_info = pools_info(data,arms)
+  pools_summary = pools_info$pools_summary
+  unique_policy = pools_info$unique_policy
+  
+  #final pooled ols
+  pool_ids = paste("pool_id",c(1:max(data$pool_id)),sep="_")
+  pooled_ols = get_pooled_ols(data,fes_support,y,w,pool_ids) #should we put fes or fes_support ???
+
+  #apply winners curse
+  winners_effect = winners_curse(pooled_ols,pool_ids,alpha=0.05,beta=0.005)
+  
+  #return result
+  result =  list(data=data
+                 ,marginal_support=marginal_support
+                 ,pools_summary=pools_summary
+                 ,unique_policy = unique_policy 
+                 ,fes_support=fes_support 
+                 ,pooled_ols=pooled_ols 
+                 ,winners_effect=winners_effect
+  )
+  
+  cat("Returning result","\n")
+  return(result)
+}
+
 
 
 #' Plot p-values in the pval one-step elimination
@@ -598,275 +863,9 @@ suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compa
   suggested_number_of_pools = round(n_unique_policies / unique_policies_to_number_of_pools_ratio)
   suggested_cutoff = (grid %>% dplyr::filter(.,number_of_pools <= suggested_number_of_pools))[1,'pval_cutoff']
   equivalent_lambda = (grid %>% dplyr::filter(.,number_of_pools <= suggested_number_of_pools))[1,'equivalent_lambda']
-  cat('Suggested support size :',suggested_number_of_pools,'\n')
+  cat('Suggested number of pools :',suggested_number_of_pools,'\n')
   cat('Associated pval cutoff :',suggested_cutoff,'\n')
   cat('Associated lambda cutoff in puffer_N :',equivalent_lambda,'\n')
   return(suggested_cutoff)
 }
-
-#' Pool the data
-#'
-#' Take the estimated support and pool each observation in its right pool
-#' @param data is the dataframe containing all our data
-#' @param arms is a vector containing the column names of all the arms
-#' @param marginal_support_strings is a vector containing strings that represent all the marginals in the support
-#' @param compare_to_zero is a boolean.\cr
-#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
-#' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
-#' @return returns the dataframe "data" with new columns: \cr
-#' * a pool_id column that gives the pool id of the observation's pool 
-#' * one dummy column per pool_id, equal to 1 if the observation belongs to this pool id, 0 otherwise 
-#' * one column per marginal_j, equal to 1 if the observation i is influenced by the marginal n°j, 0 otherwise. There are as many columns as marginals in the support. 
-#' * a "pool_influences" column, with a string of the format "c_x1_x2_x3_.." where xj is equal to 1 if the marginals n°j influences the observation, 0 otherwise. This is basically the definition of the pool the observation belongs to.
-#' * a "pool_influences_list" column, with a string that gives all the marginals that influence the observation 
-#' @export
-#' @examples
-#' arms = c('financial_incentive','reminder','information')
-#' A1 = c(0,0,0,0,0,1,1,1,1,1)
-#' A2 = c(1,1,0,0,1,1,0,0,1,1)
-#' A3 = c(0,1,2,3,0,3,2,1,0,1)
-#' data = data.frame(financial_incentive = A1, reminder = A2, information = A3)
-#' marginal_support_strings = c('c_0_1_1', 'c_1_1_2', 'c_1_0_1', 'c_1_0_2')
-#' pool_data(data,arms,marginal_support_strings,FALSE)
-
-pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
-  n_obs = nrow(data)
-  S = length(marginal_support_strings)
-  
-  cat("Pooling the raw data with estimated marginal support of size ",S,"\n")
-
-  data$pool_influences = "c"
-  data$pool_influences_list = ""
-  data$pool_id = 0
-  if (S>=1){
-    for (i in 1:S){
-      a_i_string = marginal_support_strings[i] #get the current marginal in string format
-      a_i = string_to_vector(a_i_string) #get the current marginal in vector format
-      policy_dominates_a_i = (rowSums((t(t(data[,arms]) - a_i)< 0))==0) 
-      policy_resembles_a_i = compare_to_zero | (rowSums((t(t(data[,arms]==0) - a_i==0)!=0))==0) 
-      indicators = 1*policy_dominates_a_i*policy_resembles_a_i
-      data[,paste("marginal",as.character(i),sep="_")] = indicators
-      data$pool_influences = paste(data$pool_influences,indicators,sep='_') 
-      
-      string_replace = c('0'='','1'=paste(', ',a_i_string))
-      data$pool_influences_list = paste(data$pool_influences_list,string_replace[as.character(indicators)] %>% unname(),sep='')
-    }
-    data$pool_influences_list = gsub("^.{0,3}", "", data$pool_influences_list)
-    data$pool_id = as.numeric(as.factor(data$pool_influences))-1 #this gives an id to each pool_influences, -1 ensures that c_0_0_.._0 has id = 0 
-    #create dummy columns
-    pool_dummy = data.frame(lme4::dummy(data$pool_id))
-    pool_ids = paste("pool_id",stringr::str_sub(names(pool_dummy),2),sep="_")
-    names(pool_dummy) = pool_ids
-    data = cbind(data,pool_dummy)
-  }
-  return(data)
-}
-
-#' Give information for each pool
-#'
-#' Compute some useful information to understand what's inside each pool
-#' @param data is the dataframe containing all our data and a "pool_id" column giving the pool id of each observation
-#' @param arms is a vector containing the column names of all the arms
-#' @return returns a list containing :\cr
-#' * pools_summary: a dataframe containing information on each pool, with columns:
-#'     * "pool_id": the pool id
-#'     * "n_unique_policies": the number of unique policies inside this pool
-#'     * "n_obs": the number of observation in this pool
-#'     * "pool_influences": a string of format "c_x1_x2_x3..", where x_i equals 1 if the marginal number i influences this pool, 0 otherwise
-#'     * "pool_influences_list": a string that gives all the marginals that influence this pool
-#'     * "pool_minimum": the smallest unique policy inside this pool
-#'     * "min_arm1", "min_arm2" etc... : one column per arm, giving the minimum dosage for each arm inside this pool
-#'     * "pool_minimum_fullname": the full name of the smallest unique policy
-#'     * "policy_examples": 5 or less examples of unique policies that are inside this pool
-#' 
-#' * unique_policy: a dataframe containing information on each unique policy, with columns:
-#'     * "policy": a string in format "c_A_B_C_..." where A is the dosage on arm 1, B on arm 2 etc... This is the definition of the unique policy
-#'     * "policy_fullname": the full name of the unique policy
-#'     * "arm1", "arm2" etc...: the value on each arm of the unique policy
-#'     * "pool_id": the id of the pool the unique policy belongs to
-#'     * "pool_influences": a string of format "c_x1_x2_x3..", where x_i equals 1 if the marginal number i influences this pool, 0 otherwise
-#'     * "pool_influences_list": a string that gives all the marginals that influence this pool
-#'     
-#' 
-#' @export
-#' @examples
-#' arms = c('financial_incentive','reminder','information')
-#' A1 = c(0,0,0,0,0,1,1,1,1,1)
-#' A2 = c(1,1,0,0,1,1,0,0,1,1)
-#' A3 = c(0,1,2,3,0,3,2,1,0,1)
-#' pool_id = c(0,1,0,0,0,2,0,0,0,2)
-#' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, pool_id = pool_id)
-#' pools_info(data,arms)
-
-pools_info <- function(data,arms){
-  cat("Gathering informations on pools","\n")
-  unique_policy = data[!duplicated(data[,c(arms,'pool_influences','pool_influences_list')]), ][,c(arms,'pool_influences','pool_id','pool_influences_list')] %>% as.data.frame(row.names = 1:nrow(.)) #taking all the unique policies by pool_id
-  unique_policy = unique_policy %>% dplyr::mutate(., policy = apply(unique_policy[,arms], 1, vector_to_string))  %>% dplyr::arrange(., pool_id,policy) #creating policy string column
-  unique_policy$policy_fullname = sapply(unique_policy[,'policy'], get_policy_fullname, arms=arms) #create policy full name column
-  
-  a0 = stats::aggregate(unique_policy$pool_influences, by=list(pool_id=unique_policy$pool_id), FUN=length) %>% setNames(.,c('pool_id','n_unique_policies')) #counting number of unique policies by pool_id
-  
-  a1 = stats::aggregate(data$pool_influences, by=list(pool_id=data$pool_id), FUN=length) %>% setNames(.,c('pool_id','n_obs')) #counting the number of observations by pool_id
-  
-  a2 = stats::aggregate(data$pool_influences, by=list(pool_id=data$pool_id), FUN=dplyr::first) %>% setNames(.,c('pool_id','pool_influences')) #taking the pool definition (in terms of influence) by pool_id
-  
-  a3 = stats::aggregate(data$pool_influences_list, by=list(pool_id=data$pool_id), FUN=dplyr::first) %>% setNames(.,c('pool_id','pool_influences_list')) #taking the pool definition (in terms of influence) by pool_id
-  
-  a4 = stats::aggregate(data[,arms], by=list(pool_id=data$pool_id), FUN=min) #taking the minimum value by arm by pool_id
-  colnames(a4)[-1] <- paste("min", colnames(a4)[-1], sep = "_")
-  
-  first_5_examples = unique_policy[,c('pool_id','policy')] %>% dplyr::group_by(pool_id) %>% dplyr::slice(1:5) #taking 5 policies examples by pool_id
-  last_example = unique_policy[,c('pool_id','policy')] %>% dplyr::group_by(pool_id) %>% dplyr::slice(6:6) %>% dplyr::mutate(.,policy='...') #taking the potential 6th one and overwrite it as "..." to show there are more than 5
-  a5 = rbind(first_5_examples, last_example) %>% dplyr::group_by(pool_id) %>%  dplyr::summarize(policy_examples = paste((policy),collapse=", ")) %>% as.data.frame()
-  
-  pools_summary = merge(a0,a1,by='pool_id') %>% merge(.,a2,by='pool_id') %>% merge(.,a3,by='pool_id') %>% merge(.,a4,by='pool_id') %>% merge(.,a5,by='pool_id')
-  pools_summary$pool_minimum = apply(pools_summary[,colnames(a4)[-1]], 1, function(x) vector_to_string(x))
-  pools_summary$pool_minimum_fullname = sapply(pools_summary[,'pool_minimum'], get_policy_fullname, arms=arms)
-  
-  pools_summary = pools_summary[c(setdiff(names(pools_summary), 'policy_examples'), 'policy_examples')] #put policy example column at the end
-  return(list(pools_summary = pools_summary, unique_policy = unique_policy))
-}
-
-#' Perform the final OLS
-#'
-#' Perform the final OLS on pooled data, regressing on fes and pool_id dummy columns
-#' @param data is the dataframe containing all our data and pool_id dummy columns
-#' @param fes is a vector containing the column names of all the fixed effects
-#' @param y is the column name of the outcome of interest
-#' @param w is the column name of the weights
-#' @param pool_ids is a vector containing the column names of each pool_id dummy column
-#' @return returns the ols result
-#' @export
-#' @examples
-#' arms = c('financial_incentive','reminder','information')
-#' fes = c('fes_1')
-#' y = 'outcome'
-#' w = 'weights'
-#' A1 = c(0,0,0,0,0,1,1,1,1,1)
-#' A2 = c(1,1,0,0,1,1,0,0,1,1)
-#' A3 = c(0,1,2,3,0,3,2,1,0,1)
-#' F1 = c(0,1,0,0,0,1,0,1,0,0)
-#' Y  = c(5,4,3,5,4,5,4,2,3,2)
-#' W  = c(1,1,1,2,1,2,2,1,1,2)
-#' p1 = c(0,1,0,0,0,0,0,0,0,0)
-#' p2 = c(0,0,0,0,0,1,0,0,0,1)
-#' pool_ids = c('pool_id_1','pool_id_2')
-#' data = data.frame(pool_id_1 = p1, pool_id_2 = p2, financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' get_pooled_ols(data,fes,y,w,pool_ids)
-
-get_pooled_ols <- function(data,fes=c(),y,w=NULL,pool_ids){
-  cat("Performing the final OLS on pooled data","\n")
-  pooled_ols_variables = c(pool_ids, fes)
-  formula = as.formula(paste0(y,"~",paste0(pooled_ols_variables ,collapse = "+")))
-  if (is.null(w)){
-    pooled_ols = estimatr::lm_robust(formula = formula, data = data)
-  }else{
-    pooled_ols = estimatr::lm_robust(formula = formula, data = data, weights = data[,w])
-  }
-  return(pooled_ols)
-}
-
-
-#' TVA Main function
-#'
-#' Perform the whole TVA algorithm
-#' @param data is the dataframe containing all our data
-#' @param arms is a vector containing the column names of all the arms
-#' @param fes is a vector containing the column names of all the fixed effects
-#' @param y is the column name of the outcome of interest
-#' @param w is the column name of the weights
-#' @param cutoff is the cutoff used in the support estimation
-#' @param estimation_function_name is the estimation function we should used. Possible arguments are :\cr
-#' 1. 'pval_MSE': a multiple step elimination on p-values\cr
-#' 2. 'pval_OSE': a one step elimination on p-values\cr
-#' 3. 'puffer_N_LASSO': a LASSO OLS with a Puffer_N transformation\cr
-#' 4. 'beta_OSE': a one step elimination on beta values\cr
-#' 5. 'puffer_LASSO': a LASSO OLS with a Puffer transformation\cr
-#' (2) and (3) should be equivalent, as well as (4) and (5)
-#' @param scale is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens
-#' @param compare_to_zero is a boolean.\cr
-#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
-#' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
-#' @return returns a list containing:\cr
-#' * data: the data with new columns giving pooling information\cr
-#' * marginal_support: a dataframe with all the marginals in the support and their according id\cr
-#' * pools_summary: a dataframe with information on each pool\cr
-#' * unique_policy: a dataframe with all the possible unique policies and their according pool id\cr
-#' * fes_support: the intersection between the estimated support and the fixed effects\cr
-#' * pooled_ols: the result of the final OLS on the pooled data\cr
-#' * winners_effect: the result of the best pooled policy effect, downsized by the winners curse algorithm
-#' @export
-#' @examples
-#' arms = c('financial_incentive','reminder','information')
-#' fes = c('fes_1')
-#' y = 'outcome'
-#' w = 'weights'
-#' A1 = c(0,0,0,0,0,1,1,1,1,1)
-#' A2 = c(1,1,0,0,1,1,0,0,1,1)
-#' A3 = c(0,1,2,3,0,3,2,1,0,1)
-#' F1 = c(0,1,0,0,0,1,0,1,0,0)
-#' Y  = c(5,4,3,5,4,5,4,2,3,2)
-#' W  = c(1,1,1,2,1,2,2,1,1,2)
-#' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' TVA(data,arms,fes,y,w,0.3,'pval_OSE',FALSE,FALSE)
-
-do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='pval_OSE',scale=FALSE,compare_to_zero=FALSE){
-  #check if fake_weights column already exists
-  check = check_inputs_integrity(data, arms, fes, y, cutoff, w, estimation_function_name, compare_to_zero)
-  if (!check$integrity){
-    stop(check$message)
-  }
-  
-  #prepare the data
-  prepared_data = prepare_data(data,arms,fes,y,w,scale,compare_to_zero)
-  X = prepared_data$X
-  variables = prepared_data$variables
-  marginals_colnames = prepared_data$marginals_colnames
-  
-  #get support
-  f = get(estimation_function_name)
-  total_support = f(X,y,variables,cutoff)$support
-  marginal_support_strings = sort(intersect(total_support,marginals_colnames))
-  if (marginal_support_strings %>% length() == 0){
-    stop("Estimated support is empty, current cutoff does not differentiate any policy with the control")
-  }
-  cat("Estimated support is:","\n")
-  cat(marginal_support_strings,"\n")
-  fes_support = sort(intersect(total_support,fes))
-
-  #pool policies
-  data = pool_data(data,arms,marginal_support_strings,compare_to_zero)
-  
-  #create marginals ids
-  marginal_support = data.frame(marginal = marginal_support_strings)
-  marginal_support$marginal_id = as.numeric(as.factor(marginal_support$marginal))
-  
-  #give info about pools
-  pools_info = pools_info(data,arms)
-  pools_summary = pools_info$pools_summary
-  unique_policy = pools_info$unique_policy
-  
-  #final pooled ols
-  pool_ids = paste("pool_id",c(1:max(data$pool_id)),sep="_")
-  pooled_ols = get_pooled_ols(data,fes_support,y,w,pool_ids) #should we put fes or fes_support ???
-
-  #apply winners curse
-  winners_effect = winners_curse(pooled_ols,pool_ids,alpha=0.05,beta=0.005)
-  
-  #return result
-  result =  list(data=data
-                 ,marginal_support=marginal_support
-                 ,pools_summary=pools_summary
-                 ,unique_policy = unique_policy 
-                 ,fes_support=fes_support 
-                 ,pooled_ols=pooled_ols 
-                 ,winners_effect=winners_effect
-  )
-  
-  cat("Returning result","\n")
-  return(result)
-}
-
-
-
 
