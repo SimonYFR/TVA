@@ -137,7 +137,7 @@ Each pool corresponds to a set of unique policies. At this point, we assume that
 
 The estimated $\hat\eta$ can be used as it is now and if we choose one pool randomly and implement it, we can effectively expect the effect to be $\hat\eta_i$. However, it's not the case if we select the pool with the best estimated effect.
 
-Let $\hat\kappa^{\star}$ such that $\hat\eta_{\hat\kappa^{\star}} = \textup{max}(\hat\eta)$ and $\kappa^{\star}$ such that $\eta_{\kappa^{\star}} = \textup{max}(\eta)$. Then $\hat\eta_{\hat\kappa^{\star}}$ is a biased estimate of $$\eta_{\kappa^{\star}}$. In short, conditional on $\hat\kappa^{\star}$ being the best estimated pool, the probability is high that it happened by chance and that the real effect is below what we estimated (and this probability increases with the number of pools).
+Let $\hat\kappa^{\star}$ such that $\hat\eta_{\hat\kappa^{\star}} = \textup{max}(\hat\eta)$ and $\kappa^{\star}$ such that $\eta_{\kappa^{\star}} = \textup{max}(\eta)$. Then $\hat\eta_{\hat\kappa^{\star}}$ is a biased estimate of $\eta_{\kappa^{\star}}$. In short, conditional on $\hat\kappa^{\star}$ being the best estimated pool, the probability is high that it happened by chance and that the real effect is below what we estimated (and this probability increases with the number of pools).
 
 For this reason, we implement the method exposed in [Andrew's paper] and apply it in our use case. Basically, we construct a new estimator of $\hat\eta_{\hat\kappa^{\star}}$. This gives us an unbiased estimator and confidence interval for $\eta_{\kappa^{\star}}$ that one has to use if the goal of using TVA is to extract the best pool and implement it.
 
