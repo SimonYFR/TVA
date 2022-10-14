@@ -8,7 +8,7 @@ plot_pval_OSE(
   data,
   arms,
   fes = c(),
-  y = "y",
+  y,
   w = NULL,
   scale = FALSE,
   compare_to_zero = FALSE

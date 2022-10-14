@@ -537,15 +537,19 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,scale=FALSE,co
   pvals = pval_OSE(X,y,variables,0)$pvals
   
   marginal_support_sizes = c()
+  number_of_pools = c()
   lambdas = c()
   for (pval_cutoff in cutoffs){
     support = names(pvals[which(pvals<=pval_cutoff)])
     marginal_support = intersect(support,marginals_colnames)
     marginal_support_sizes = c(marginal_support_sizes, length(marginal_support))
     lambdas = c(lambdas,pval_to_lambda(X,y,variables,pval_cutoff))
+    
+    number_of_pools = c(number_of_pools, (pool_data(data,arms,marginal_support,compare_to_zero))$pool_id %>% max() +1)
+    
   }
   
-  grid = data.frame(pval_cutoff = cutoffs , equivalent_lambda = lambdas, marginal_support_size= marginal_support_sizes)
+  grid = data.frame(pval_cutoff = cutoffs , equivalent_lambda = lambdas, marginal_support_size= marginal_support_sizes, number_of_pools=number_of_pools)
   return(grid)
 }
 
@@ -627,21 +631,23 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
   S = length(marginal_support_strings)
   data$pool_influences = "c"
   data$pool_influences_list = ""
-  for (i in 1:S){
-    a_i_string = marginal_support_strings[i] #get the current marginal in string format
-    a_i = string_to_vector(a_i_string) #get the current marginal in vector format
-    policy_dominates_a_i = (rowSums((t(t(data[,arms]) - a_i)< 0))==0) 
-    policy_resembles_a_i = compare_to_zero | (rowSums((t(t(data[,arms]==0) - a_i==0)!=0))==0) 
-    indicators = 1*policy_dominates_a_i*policy_resembles_a_i
-    data[,paste("marginal",as.character(i),sep="_")] = indicators
-    data$pool_influences = paste(data$pool_influences,indicators,sep='_') 
-    
-    string_replace = c('0'='','1'=paste(', ',a_i_string))
-    data$pool_influences_list = paste(data$pool_influences_list,string_replace[as.character(indicators)] %>% unname(),sep='')
+  data$pool_id = 0
+  if (S>=1){
+    for (i in 1:S){
+      a_i_string = marginal_support_strings[i] #get the current marginal in string format
+      a_i = string_to_vector(a_i_string) #get the current marginal in vector format
+      policy_dominates_a_i = (rowSums((t(t(data[,arms]) - a_i)< 0))==0) 
+      policy_resembles_a_i = compare_to_zero | (rowSums((t(t(data[,arms]==0) - a_i==0)!=0))==0) 
+      indicators = 1*policy_dominates_a_i*policy_resembles_a_i
+      data[,paste("marginal",as.character(i),sep="_")] = indicators
+      data$pool_influences = paste(data$pool_influences,indicators,sep='_') 
+      
+      string_replace = c('0'='','1'=paste(', ',a_i_string))
+      data$pool_influences_list = paste(data$pool_influences_list,string_replace[as.character(indicators)] %>% unname(),sep='')
+    }
+    data$pool_influences_list = gsub("^.{0,3}", "", data$pool_influences_list)
+    data$pool_id = as.numeric(as.factor(data$pool_influences))-1 #this gives an id to each pool_influences, -1 ensures that c_0_0_.._0 has id = 0 
   }
-  data$pool_influences_list = gsub("^.{0,3}", "", data$pool_influences_list)
-  data$pool_id = as.numeric(as.factor(data$pool_influences))-1 #this gives an id to each pool_influences, -1 ensures that c_0_0_.._0 has id = 0 
-  
   #create dummy columns
   pool_dummy = data.frame(lme4::dummy(data$pool_id))
   pool_ids = paste("pool_id",stringr::str_sub(names(pool_dummy),2),sep="_")

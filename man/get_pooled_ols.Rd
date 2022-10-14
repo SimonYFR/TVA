@@ -4,7 +4,7 @@
 \alias{get_pooled_ols}
 \title{Perform the final OLS}
 \usage{
-get_pooled_ols(data, fes, y, w, pool_ids)
+get_pooled_ols(data, fes = c(), y, w = NULL, pool_ids)
 }
 \arguments{
 \item{data}{is the dataframe containing all our data and pool_id dummy columns}

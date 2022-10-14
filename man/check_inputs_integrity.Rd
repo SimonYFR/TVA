@@ -7,12 +7,12 @@
 check_inputs_integrity(
   data,
   arms,
-  fes,
+  fes = c(),
   y,
-  cutoff,
-  w,
-  estimation_function_name,
-  compare_to_zero
+  cutoff = 0,
+  w = NULL,
+  estimation_function_name = "pval_OSE",
+  compare_to_zero = FALSE
 )
 }
 \arguments{

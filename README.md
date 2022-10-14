@@ -34,6 +34,10 @@ Your data must be structured in a certain (but simple way). Specifically, most T
 - `fes` : a vector containing the names of the fixed effect columns in your dataframe (equal to `c()` by default, should be left empty if there are no fixed effects). 
 - `w` : the name of the weight column (`NULL` by default, should be left `NULL` if  there are no weights). 
 
+Each arm must be a type of intervention, and the values in the column gives the dosage of this intervention for each observation. If in your settup, some combinations of interventions are impossible, the program will understand that from your data and will never create such combinations. 
+
+For example if you want to test drugs effects to fight a virus, assume you have 3 drugs : `D1`, `D2` and `D3`, with 2 dosage intensities by drug. `D1` is compatible with any other drugs but taking `D2` and `D3` at the same time is very dangerous, that's why you never want to allow a unique policy to be `(?,1,1)`, because it would kill the patient. It can also be some very complex combinations that are impossible, for example `(1,2,0)` and `(1,2,2)` are possible, but `(1,2,1)` is not. In any case, if your observations do not include any forbidden combinations, the programm will understand your exclusions and automatically ignore any unique policy that never exists in your data.
+
 ### Other arguments
 
 Other arguments can be asked for some functions of the package:
@@ -45,9 +49,9 @@ Other arguments can be asked for some functions of the package:
 
 Once the data is structured in the way TVA diggests it, we suggest the user doing the following: 
 
-Run `grid_pval_OSE(data=data,arms=arms,fes=fes,y=y,w=w)` or `plot_pval_OSE(data,arms,fes,y,w,compare_to_zero)` to get an idea of the support size you will obtain for different cutoff values.
+Run `grid_pval_OSE(data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=compare_to_zero)` or `plot_pval_OSE(data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=compare_to_zero)` to get an idea of the support size you will obtain for different cutoff values with the p-value one-step elimination method.
 
-Then, run `result = do_TVA(data = data, arms = arms, fes = fes, y = y, cutoff = 5 * 10^(-2), w = w, estimation_function_name = 'pval_OSE')` to test the TVA algorithm for a first time. 
+Then, run `result = do_TVA(data = data, arms = arms, fes = fes, y = y, cutoff = 5 * 10^(-2), w = w, estimation_function_name = 'pval_OSE')` to execute the TVA algorithm.
 
 Type :
 - `result$marginal_support` to see the marginal_support you obtained
@@ -62,7 +66,7 @@ You can then increase (resp. decrease) the `cutoff` if you obtained too little (
 
 
 
-## TVA steps
+## How the algorithm works?
 
 TVA algorithm can be decomposed in several steps:
 1. Transform the data, from unique policies to marginal policies
@@ -110,9 +114,11 @@ At this stage, we now have a list of marginals that have non-zero effects, which
 Once we estimated the support of marginals, we use them to create groups of unique policies. This is the *pooling* stage. 
 
 An intuitive way to pool unique policies is to group the policies that are influenced by the exact same marginals that are in the support. Therefore, if we have two unique policies $r$ and $r'$, then:
-$\forall \, m \in S_{\alpha}, m \, \textrm{influences} \, r \Leftrightarrow m \, \textrm{influences} \, r'$
+$\forall \ m \in S_{\alpha}, m \ \textrm{influences} \ r \Leftrightarrow m \ \textrm{influences} \ r'$
 
 Thus, a pool $P_i$ can be explicitly defined by the subset of $S_{\alpha}$ that influences all the element of $P_i$. Once we fix $S_{\alpha}=(m_{i_1}, \cdots, m_{i_S})$, $P_i$ can be writen as $(x_1, \cdots , x_S)$ where $x_j=1$ if the pool is influenced by $m_{i_j}$, and $0$ otherwise.
+
+As a result, if there are $S$ marginals in the support, there can be as much as $2^S$ pools. It is often less than that, because some of the pools are empty (since there are many subsets of the support which zone of influence is actually empty).
 
 At this point, we can compute many characteristics for each pool (number of unique policies by pool, number of observations, minimal unique policy inside the pool etc.)
 
@@ -133,7 +139,7 @@ The estimated $\hat\eta$ can be used as it is now and if we choose one pool rand
 For this reason, we implemented the method exposed in [Andrew's paper] and applied it in our use case. Basically, we construct a new estimator of $\eta_I$, using the best estimated effect $\hat\eta_I$, the second best $\hat\eta_J$ and the number of pools. This gives us an unbiased estimator and confidence interval for $\eta_I$ that one has to use if the goal of using TVA is to extract the best pool and implement it.
 
 
-## Examples
+## Concrete example
 
 ### 1. Construct dummy data
 
