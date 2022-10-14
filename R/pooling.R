@@ -652,6 +652,8 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
     data$pool_influences_list = gsub("^.{0,3}", "", data$pool_influences_list)
     data$pool_id = as.numeric(as.factor(data$pool_influences))-1 #this gives an id to each pool_influences, -1 ensures that c_0_0_.._0 has id = 0 
     #create dummy columns
+    print(S)
+    print(data$pool_id %>% unique())
     pool_dummy = data.frame(lme4::dummy(data$pool_id))
     pool_ids = paste("pool_id",stringr::str_sub(names(pool_dummy),2),sep="_")
     names(pool_dummy) = pool_ids
