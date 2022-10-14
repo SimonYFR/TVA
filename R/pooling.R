@@ -816,6 +816,9 @@ do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='p
   f = get(estimation_function_name)
   total_support = f(X,y,variables,cutoff)$support
   marginal_support_strings = sort(intersect(total_support,marginals_colnames))
+  if (marginal_support_strings %>% length() == 0){
+    stop("Estimated support is empty, current cutoff does not differentiate any policy with the control")
+  }
   cat("Estimated support is:","\n")
   cat(marginal_support_strings,"\n")
   fes_support = sort(intersect(total_support,fes))
