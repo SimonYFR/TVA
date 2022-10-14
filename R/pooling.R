@@ -104,7 +104,7 @@ check_inputs_integrity <- function(data, arms, fes, y, cutoff, w, estimation_fun
     return(list(integrity=FALSE,message="arms columns should contain positive (>=0) values"))
   }
   
-  if (!(length(Reduce(intersect, list(arms,fes,y,w)))>0)){
+  if (!(length(Reduce(intersect, list(arms,fes,y,w)))=0)){
     return(list(integrity=FALSE,message="arms, fes, y and w should be different column names"))
   }
   
