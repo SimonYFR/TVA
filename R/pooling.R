@@ -351,7 +351,7 @@ prepare_data <- function(data,arms,fes,y,w,scale,compare_to_zero){
 
 
 plot_pval_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_zero=FALSE){
-  check = check_inputs_integrity(data, arms, fes, y, cutoff, w, 'pval_OSE', compare_to_zero)
+  check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
   }
@@ -406,7 +406,7 @@ plot_pval_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 #' plot_pval_MSE(data,arms,fes,y,w,FALSE,FALSE)
 
 plot_pval_MSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_zero=FALSE){
-  check = check_inputs_integrity(data, arms, fes, y, cutoff, w, 'pval_OSE', compare_to_zero)
+  check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
   }
@@ -465,7 +465,7 @@ plot_pval_MSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 
 
 plot_beta_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_zero=FALSE){
-  check = check_inputs_integrity(data, arms, fes, y, cutoff, w, 'pval_OSE', compare_to_zero)
+  check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
   }
@@ -520,7 +520,7 @@ plot_beta_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 #' grid_pval_OSE(cutoffs=NULL,data=data,arms=arms,fes=fes,y=y,w=w,scale=FALSE,compare_to_zero=FALSE)
 
 grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero=FALSE){
-  check = check_inputs_integrity(data, arms, fes, y, cutoff, w, 'pval_OSE', compare_to_zero)
+  check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
   }
@@ -579,7 +579,7 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,scale=FALSE,co
 #' suggest_pval_OSE_cutoff(data=data,arms=arms,fes=fes,y=y,w=w,scale=FALSE,compare_to_zero=FALSE)
 
 suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero=FALSE){
-  check = check_inputs_integrity(data, arms, fes, y, cutoff, w, 'pval_OSE', compare_to_zero)
+  check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
   }
