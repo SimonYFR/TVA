@@ -560,7 +560,7 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,scale=FALSE,co
 #' Suggest one p-value cutoff that could be used the in pval one-step elimination
 #'
 #' Suggest one p-value cutoff that could be used the in pval one-step elimination.\cr
-#' This is done by computing the grid_pval_OSE and taking the pval cutoff that create a support size equal to the number of unique policies divided by 20.
+#' This is done by computing the grid_pval_OSE and taking the pval cutoff that create a number of pools equal to the number of unique policies divided by 20.
 #' @param data is the dataframe containing all our data
 #' @param arms is a vector containing the column names of all the arms
 #' @param fes is a vector containing the column names of all the fixed effects
@@ -570,7 +570,7 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,scale=FALSE,co
 #' @param compare_to_zero is a boolean.\cr
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
-#' @return returns a pval cutoff suggestion with the according support size it will produce
+#' @return returns a pval cutoff suggestion with the according number of pools it will produce
 #' @export
 #' @examples
 #' arms = c('financial_incentive','reminder','information')
@@ -594,11 +594,11 @@ suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compa
   
   grid = grid_pval_OSE(cutoffs=NULL,data=data,arms=arms,fes=fes,y=y,w=w,scale=scale,compare_to_zero=compare_to_zero)
   n_unique_policies = dplyr::n_distinct(data[,arms])
-  unique_policies_to_support_size_ratio = 20
-  suggested_support_size = round(n_unique_policies / unique_policies_to_support_size_ratio)
-  suggested_cutoff = (grid %>% dplyr::filter(.,marginal_support_size <= suggested_support_size))[1,'pval_cutoff']
-  equivalent_lambda = (grid %>% dplyr::filter(.,marginal_support_size <= suggested_support_size))[1,'equivalent_lambda']
-  cat('Suggested support size :',suggested_support_size,'\n')
+  unique_policies_to_number_of_pools_ratio = 20
+  suggested_number_of_pools = round(n_unique_policies / unique_policies_to_number_of_pools_ratio)
+  suggested_cutoff = (grid %>% dplyr::filter(.,number_of_pools <= suggested_number_of_pools))[1,'pval_cutoff']
+  equivalent_lambda = (grid %>% dplyr::filter(.,number_of_pools <= suggested_number_of_pools))[1,'equivalent_lambda']
+  cat('Suggested support size :',suggested_number_of_pools,'\n')
   cat('Associated pval cutoff :',suggested_cutoff,'\n')
   cat('Associated lambda cutoff in puffer_N :',equivalent_lambda,'\n')
   return(suggested_cutoff)
@@ -630,9 +630,11 @@ suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compa
 #' pool_data(data,arms,marginal_support_strings,FALSE)
 
 pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
-  cat("Pooling the raw data with estimated marginal support","\n")
   n_obs = nrow(data)
   S = length(marginal_support_strings)
+  
+  cat("Pooling the raw data with estimated marginal support of size ",S,"\n")
+
   data$pool_influences = "c"
   data$pool_influences_list = ""
   data$pool_id = 0
@@ -652,8 +654,6 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
     data$pool_influences_list = gsub("^.{0,3}", "", data$pool_influences_list)
     data$pool_id = as.numeric(as.factor(data$pool_influences))-1 #this gives an id to each pool_influences, -1 ensures that c_0_0_.._0 has id = 0 
     #create dummy columns
-    print(S)
-    print(data$pool_id %>% unique())
     pool_dummy = data.frame(lme4::dummy(data$pool_id))
     pool_ids = paste("pool_id",stringr::str_sub(names(pool_dummy),2),sep="_")
     names(pool_dummy) = pool_ids

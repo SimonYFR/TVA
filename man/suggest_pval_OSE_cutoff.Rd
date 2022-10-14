@@ -32,11 +32,11 @@ If TRUE, the code considers that a policy dominates a marginal if all dosages ar
 If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)}
 }
 \value{
-returns a pval cutoff suggestion with the according support size it will produce
+returns a pval cutoff suggestion with the according number of pools it will produce
 }
 \description{
 Suggest one p-value cutoff that could be used the in pval one-step elimination.\cr
-This is done by computing the grid_pval_OSE and taking the pval cutoff that create a support size equal to the number of unique policies divided by 20.
+This is done by computing the grid_pval_OSE and taking the pval cutoff that create a number of pools equal to the number of unique policies divided by 20.
 }
 \examples{
 arms = c('financial_incentive','reminder','information')
