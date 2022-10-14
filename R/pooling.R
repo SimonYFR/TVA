@@ -41,7 +41,7 @@
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' check_inputs_integrity(data,arms,fes,y,w,0.3,'pval_OSE',FALSE)
 
-check_inputs_integrity <- function(data, arms, fes, y, cutoff, w, estimation_function_name, compare_to_zero){
+check_inputs_integrity <- function(data, arms, fes=c(), y, cutoff=0, w=NULL, estimation_function_name='pval_OSE', compare_to_zero=FALSE){
   
   if (!(class(data) == "data.frame")){
     return(list(integrity=FALSE, message="data should be a dataframe"))
@@ -350,7 +350,7 @@ prepare_data <- function(data,arms,fes,y,w,scale,compare_to_zero){
 #' plot_pval_OSE(data,arms,fes,y,w,FALSE,FALSE)
 
 
-plot_pval_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_zero=FALSE){
+plot_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero=FALSE){
   check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
@@ -405,7 +405,7 @@ plot_pval_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' plot_pval_MSE(data,arms,fes,y,w,FALSE,FALSE)
 
-plot_pval_MSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_zero=FALSE){
+plot_pval_MSE <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero=FALSE){
   check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
@@ -464,7 +464,7 @@ plot_pval_MSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 #' plot_beta_OSE(data,arms,fes,y,w,FALSE,FALSE)
 
 
-plot_beta_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_zero=FALSE){
+plot_beta_OSE <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero=FALSE){
   check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
@@ -743,7 +743,7 @@ pools_info <- function(data,arms){
 #' data = data.frame(pool_id_1 = p1, pool_id_2 = p2, financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' get_pooled_ols(data,fes,y,w,pool_ids)
 
-get_pooled_ols <- function(data,fes,y,w,pool_ids){
+get_pooled_ols <- function(data,fes=c(),y,w=NULL,pool_ids){
   cat("Performing the final OLS on pooled data","\n")
   pooled_ols_variables = c(pool_ids, fes)
   formula = as.formula(paste0(y,"~",paste0(pooled_ols_variables ,collapse = "+")))
