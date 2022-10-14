@@ -47,8 +47,10 @@ check_inputs_integrity <- function(data, arms, fes, y, cutoff, w, estimation_fun
     return(list(integrity=FALSE, message="data should be a dataframe"))
   }
   
-  if (!(((class(w) == "character") & (w %in% names(data))) | is.null(w))){
-    return(list(integrity=FALSE, message="w should either be NULL or a column name of data"))
+  if (!is.null(w)){
+    if (!((class(w) == "character") & (w %in% names(data)))){
+      return(list(integrity=FALSE, message="w should either be NULL or a column name of data"))
+    }
   }
   
   if (!((class(y) == "character") & (y %in% names(data)))){
@@ -115,9 +117,6 @@ check_inputs_integrity <- function(data, arms, fes, y, cutoff, w, estimation_fun
   if (!test){
     return(list(integrity=FALSE,message="arms, fes, y and w should be different column names"))
   }
-
-  
-  
   
   return(list(integrity=TRUE,message=""))
 }
