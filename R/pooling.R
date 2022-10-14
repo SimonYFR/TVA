@@ -503,7 +503,11 @@ plot_beta_OSE <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero
 #' @param compare_to_zero is a boolean.\cr
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
-#' @return returns a dataframe containing all the p-values that are in  the vector "cutoffs" and the corresponding support size one would get for each of these p-values
+#' @return returns a dataframe with columns:
+#' * 'pval_cutoff': all the p-values that are in  the vector "cutoffs" 
+#' * 'marginal_support_size' : the corresponding support size one would get for each of these p-values
+#' * 'number_of_pools': the corresponding number of pools one would get for such a support
+#' * 'equivalent_lambda': the lambda equivalent to the p-value in the Puffer N LASSO
 #' @export
 #' @examples
 #' arms = c('financial_incentive','reminder','information')
@@ -647,13 +651,12 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
     }
     data$pool_influences_list = gsub("^.{0,3}", "", data$pool_influences_list)
     data$pool_id = as.numeric(as.factor(data$pool_influences))-1 #this gives an id to each pool_influences, -1 ensures that c_0_0_.._0 has id = 0 
+    #create dummy columns
+    pool_dummy = data.frame(lme4::dummy(data$pool_id))
+    pool_ids = paste("pool_id",stringr::str_sub(names(pool_dummy),2),sep="_")
+    names(pool_dummy) = pool_ids
+    data = cbind(data,pool_dummy)
   }
-  #create dummy columns
-  pool_dummy = data.frame(lme4::dummy(data$pool_id))
-  pool_ids = paste("pool_id",stringr::str_sub(names(pool_dummy),2),sep="_")
-  names(pool_dummy) = pool_ids
-  data = cbind(data,pool_dummy)
-  
   return(data)
 }
 
