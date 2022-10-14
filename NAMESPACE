@@ -3,6 +3,7 @@
 export("%>%")
 export(N_transform)
 export(beta_OSE)
+export(check_inputs_integrity)
 export(create_empty_marginals_matrix)
 export(do_TVA)
 export(get_hybrid_estimate)

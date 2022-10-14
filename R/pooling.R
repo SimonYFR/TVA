@@ -6,7 +6,111 @@
 `%>%` = magrittr::`%>%`
 
 
-#Helping functions for the following part
+#' Check user's inputs integrity
+#'
+#' Do a bunch of checks on the inputs
+#' @param data is the dataframe containing all our data
+#' @param arms is a vector containing the column names of all the arms
+#' @param fes is a vector containing the column names of all the fixed effects
+#' @param y is the column name of the outcome of interest
+#' @param w is the column name of the weights
+#' @param cutoff is the cutoff used in the support estimation
+#' @param estimation_function_name is the estimation function we should used. Possible arguments are :\cr
+#' 1. 'pval_MSE': a multiple step elimination on p-values\cr
+#' 2. 'pval_OSE': a one step elimination on p-values\cr
+#' 3. 'puffer_N_LASSO': a LASSO OLS with a Puffer_N transformation\cr
+#' 4. 'beta_OSE': a one step elimination on beta values\cr
+#' 5. 'puffer_LASSO': a LASSO OLS with a Puffer transformation\cr
+#' (2) and (3) should be equivalent, as well as (4) and (5)
+#' @param compare_to_zero is a boolean.\cr
+#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
+#' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
+#' @return returns a message telling if the data's integrity is validated or not, and if not, for what reason
+#' @export
+#' @examples
+#' arms = c('financial_incentive','reminder','information')
+#' fes = c('fes_1')
+#' y = 'outcome'
+#' w = 'weights'
+#' A1 = c(0,0,0,0,0,1,1,1,1,1)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
+#' A3 = c(0,1,2,3,0,3,2,1,0,1)
+#' F1 = c(0,1,0,0,0,1,0,1,0,0)
+#' Y  = c(5,4,3,5,4,5,4,2,3,2)
+#' W  = c(1,1,1,2,1,2,2,1,1,2)
+#' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
+#' check_inputs_integrity(data,arms,fes,y,w,0.3,'pval_OSE',FALSE)
+
+check_inputs_integrity <- function(data, arms, fes, y, cutoff, w, estimation_function_name, compare_to_zero){
+  
+  if (!(class(data) == "data.frame")){
+    return(list(integrity=FALSE, message="data should be a dataframe"))
+  }
+  
+  if (!(((class(w) == "character") & (w %in% names(data))) | is.null(w))){
+    return(list(integrity=FALSE, message="w should either be NULL or a column name of data"))
+  }
+  
+  if (!((class(y) == "character") & (y %in% names(data)))){
+    return(list(integrity=FALSE, message="y should be a column name of data"))
+  }
+  
+  if (!(estimation_function_name %in% c('pval_OSE','pval_MSE','beta_OSE','puffer_N_LASSO','puffer_LASSO'))){
+    return(list(integrity=FALSE, message="estimation_function_name can only equal 'pval_OSE','pval_MSE','beta_OSE','puffer_N_LASSO', or 'puffer_LASSO' "))
+  }
+  
+  if (!((class(cutoff) == "numeric") & (cutoff>=0))){
+    return(list(integrity=FALSE,message="cutoff should be a positive real number"))
+  }
+  
+  if (!(class(compare_to_zero) == "logical")){
+    return(list(integrity=FALSE,message="compare_to_zero should be TRUE or FALSE"))
+  }
+  
+  test = TRUE
+  for (arm in arms){
+    test = test & (class(arm) == "character")
+  }
+  if (!test){
+    return(list(integrity=FALSE,message="arms should be a vector of strings"))
+  }
+  
+  test = TRUE
+  for (fe in fes){
+    test = test & (class(fe) == "character")
+  }
+  if (!test){
+    return(list(integrity=FALSE,message="fes should be a vector of strings"))
+  }
+  
+  if (!all(intersect(names(data),arms) == arms )){
+    return(list(integrity=FALSE,message="strings inside arms should be column names of data"))
+  }
+  
+  if (!all(intersect(names(data),fes) == fes )){
+    return(list(integrity=FALSE,message="strings inside fes should be column names of data"))
+  }
+  
+  if (!all(data[,w]>0)){
+    return(list(integrity=FALSE,message="w should be a column name of data"))
+  }
+  
+  test = TRUE
+  for (arm in arms){
+    test = test & (all(data[,arm]>=0))
+  }
+  
+  if (!test){
+    return(list(integrity=FALSE,message="arms columns should contain positive (>=0) values"))
+  }
+  
+  if (!(length(Reduce(intersect, list(arms,fes,y,w)))>0)){
+    return(list(integrity=FALSE,message="arms, fes, y and w should be different column names"))
+  }
+  
+  return(list(integrity=TRUE,message=""))
+}
+
 
 #' Going from vector to string
 #'
@@ -237,6 +341,11 @@ prepare_data <- function(data,arms,fes,y,w,scale,compare_to_zero){
 
 
 plot_pval_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_zero=FALSE){
+  check = check_inputs_integrity(data, arms, fes, y, cutoff, w, estimation_function_name, compare_to_zero)
+  if (!check$integrity){
+    stop(check$message)
+  }
+  
   prepared_data = prepare_data(data,arms,fes,y,w,scale,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
@@ -287,6 +396,11 @@ plot_pval_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 #' plot_pval_MSE(data,arms,fes,y,w,FALSE,FALSE)
 
 plot_pval_MSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_zero=FALSE){
+  check = check_inputs_integrity(data, arms, fes, y, cutoff, w, estimation_function_name, compare_to_zero)
+  if (!check$integrity){
+    stop(check$message)
+  }
+  
   prepared_data = prepare_data(data,arms,fes,y,w,scale,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
@@ -341,6 +455,11 @@ plot_pval_MSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 
 
 plot_beta_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_zero=FALSE){
+  check = check_inputs_integrity(data, arms, fes, y, cutoff, w, estimation_function_name, compare_to_zero)
+  if (!check$integrity){
+    stop(check$message)
+  }
+  
   prepared_data = prepare_data(data,arms,fes,y,w,scale,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
@@ -391,6 +510,11 @@ plot_beta_OSE <- function(data,arms,fes=c(),y='y',w=NULL,scale=FALSE,compare_to_
 #' grid_pval_OSE(cutoffs=NULL,data=data,arms=arms,fes=fes,y=y,w=w,scale=FALSE,compare_to_zero=FALSE)
 
 grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero=FALSE){
+  check = check_inputs_integrity(data, arms, fes, y, cutoff, w, estimation_function_name, compare_to_zero)
+  if (!check$integrity){
+    stop(check$message)
+  }
+  
   prepared_data = prepare_data(data,arms,fes,y,w,scale,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
@@ -445,6 +569,11 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,scale=FALSE,co
 #' suggest_pval_OSE_cutoff(data=data,arms=arms,fes=fes,y=y,w=w,scale=FALSE,compare_to_zero=FALSE)
 
 suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero=FALSE){
+  check = check_inputs_integrity(data, arms, fes, y, cutoff, w, estimation_function_name, compare_to_zero)
+  if (!check$integrity){
+    stop(check$message)
+  }
+  
   grid = grid_pval_OSE(cutoffs=NULL,data=data,arms=arms,fes=fes,y=y,w=w,scale=scale,compare_to_zero=compare_to_zero)
   n_unique_policies = dplyr::n_distinct(data[,arms])
   unique_policies_to_support_size_ratio = 20
@@ -662,7 +791,10 @@ get_pooled_ols <- function(data,fes,y,w,pool_ids){
 
 do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='pval_OSE',scale=FALSE,compare_to_zero=FALSE){
   #check if fake_weights column already exists
-  #check if dosages are consistent (non negative etc..)
+  check = check_inputs_integrity(data, arms, fes, y, cutoff, w, estimation_function_name, compare_to_zero)
+  if (!check$integrity){
+    stop(check$message)
+  }
   
   #prepare the data
   prepared_data = prepare_data(data,arms,fes,y,w,scale,compare_to_zero)
@@ -710,3 +842,7 @@ do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='p
   cat("Returning result","\n")
   return(result)
 }
+
+
+
+
