@@ -92,7 +92,7 @@ check_inputs_integrity <- function(data, arms, fes, y, cutoff, w, estimation_fun
   }
   
   if (!all(data[,w]>0)){
-    return(list(integrity=FALSE,message="w should be a column name of data"))
+    return(list(integrity=FALSE,message="column w should have strictly positive values"))
   }
   
   test = TRUE
@@ -104,9 +104,20 @@ check_inputs_integrity <- function(data, arms, fes, y, cutoff, w, estimation_fun
     return(list(integrity=FALSE,message="arms columns should contain positive (>=0) values"))
   }
   
-  if (!(length(Reduce(intersect, list(arms,fes,y,w)))==0)){
+  test = TRUE
+  test = test & (length(intersect(arms,fes))==0)
+  test = test & (length(intersect(arms,y))==0)
+  test = test & (length(intersect(arms,w))==0)
+  test = test & (length(intersect(y,fes))==0)
+  test = test & (length(intersect(w,fes))==0)
+  test = test & (length(intersect(y,w))==0)
+  
+  if (!test){
     return(list(integrity=FALSE,message="arms, fes, y and w should be different column names"))
   }
+
+  
+  
   
   return(list(integrity=TRUE,message=""))
 }
