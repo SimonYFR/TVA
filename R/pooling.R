@@ -261,7 +261,6 @@ weight_observations <- function(X,W){
 #' @param fes is a vector containing the column names of all the fixed effects
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
-#' @param scale is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens
 #' @param compare_to_zero is a boolean.\cr
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
@@ -284,7 +283,7 @@ weight_observations <- function(X,W){
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' prepare_data(data,arms,fes,y,w,FALSE,FALSE)
 
-prepare_data <- function(data,arms,fes,y,w,scale,compare_to_zero){
+prepare_data <- function(data,arms,fes,y,w,compare_to_zero){
   cat("Preparing the data","\n")
   n_obs = nrow(data)
   
@@ -306,11 +305,6 @@ prepare_data <- function(data,arms,fes,y,w,scale,compare_to_zero){
   #que faire si intercept existe déjà dans X ?
   X['intercept'] = 1
   
-  if (scale){
-    cat("Scaling the data for mean=0 and std=1","\n")
-    scaling_variables = c(fes,marginals_colnames)
-    X[,which(names(X) %in% scaling_variables)] = corpcor::wt.scale(X[,which(names(X) %in% scaling_variables)],W,center=TRUE,scale=TRUE)
-  }
   X = weight_observations(X,W)
   variables = c(fes,marginals_colnames,'intercept')
   
@@ -498,7 +492,6 @@ get_pooled_ols <- function(data,fes=c(),y,w=NULL,pool_ids){
 #' 4. 'beta_OSE': a one step elimination on beta values\cr
 #' 5. 'puffer_LASSO': a LASSO OLS with a Puffer transformation\cr
 #' (2) and (3) should be equivalent, as well as (4) and (5)
-#' @param scale is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens
 #' @param compare_to_zero is a boolean.\cr
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
@@ -525,7 +518,7 @@ get_pooled_ols <- function(data,fes=c(),y,w=NULL,pool_ids){
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' TVA(data,arms,fes,y,w,0.3,'pval_OSE',FALSE,FALSE)
 
-do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='pval_OSE',scale=FALSE,compare_to_zero=FALSE){
+do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='pval_OSE',compare_to_zero=FALSE){
   #check if fake_weights column already exists
   check = check_inputs_integrity(data, arms, fes, y, cutoff, w, estimation_function_name, compare_to_zero)
   if (!check$integrity){
@@ -533,7 +526,7 @@ do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='p
   }
   
   #prepare the data
-  prepared_data = prepare_data(data,arms,fes,y,w,scale,compare_to_zero)
+  prepared_data = prepare_data(data,arms,fes,y,w,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
@@ -594,7 +587,6 @@ do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='p
 #' @param fes is a vector containing the column names of all the fixed effects
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
-#' @param scale is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens
 #' @param compare_to_zero is a boolean.\cr
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
@@ -615,13 +607,13 @@ do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='p
 #' plot_pval_OSE(data,arms,fes,y,w,FALSE,FALSE)
 
 
-plot_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero=FALSE){
+plot_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
   check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
   }
   
-  prepared_data = prepare_data(data,arms,fes,y,w,scale,compare_to_zero)
+  prepared_data = prepare_data(data,arms,fes,y,w,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
@@ -650,7 +642,6 @@ plot_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero
 #' @param fes is a vector containing the column names of all the fixed effects
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
-#' @param scale is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens
 #' @param compare_to_zero is a boolean.\cr
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
@@ -670,13 +661,13 @@ plot_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' plot_pval_MSE(data,arms,fes,y,w,FALSE,FALSE)
 
-plot_pval_MSE <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero=FALSE){
+plot_pval_MSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
   check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
   }
   
-  prepared_data = prepare_data(data,arms,fes,y,w,scale,compare_to_zero)
+  prepared_data = prepare_data(data,arms,fes,y,w,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
@@ -708,7 +699,6 @@ plot_pval_MSE <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero
 #' @param fes is a vector containing the column names of all the fixed effects
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
-#' @param scale is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens
 #' @param compare_to_zero is a boolean.\cr
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
@@ -729,13 +719,13 @@ plot_pval_MSE <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero
 #' plot_beta_OSE(data,arms,fes,y,w,FALSE,FALSE)
 
 
-plot_beta_OSE <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero=FALSE){
+plot_beta_OSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
   check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
   }
   
-  prepared_data = prepare_data(data,arms,fes,y,w,scale,compare_to_zero)
+  prepared_data = prepare_data(data,arms,fes,y,w,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
@@ -764,7 +754,6 @@ plot_beta_OSE <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero
 #' @param fes is a vector containing the column names of all the fixed effects
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
-#' @param scale is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens
 #' @param compare_to_zero is a boolean.\cr
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
@@ -786,15 +775,15 @@ plot_beta_OSE <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' grid_pval_OSE(cutoffs=NULL,data=data,arms=arms,fes=fes,y=y,w=w,scale=FALSE,compare_to_zero=FALSE)
+#' grid_pval_OSE(cutoffs=NULL,data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=FALSE)
 
-grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero=FALSE){
+grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
   check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
   }
   
-  prepared_data = prepare_data(data,arms,fes,y,w,scale,compare_to_zero)
+  prepared_data = prepare_data(data,arms,fes,y,w,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
@@ -831,7 +820,6 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,scale=FALSE,co
 #' @param fes is a vector containing the column names of all the fixed effects
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
-#' @param scale is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens
 #' @param compare_to_zero is a boolean.\cr
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
@@ -849,15 +837,15 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,scale=FALSE,co
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' suggest_pval_OSE_cutoff(data=data,arms=arms,fes=fes,y=y,w=w,scale=FALSE,compare_to_zero=FALSE)
+#' suggest_pval_OSE_cutoff(data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=FALSE)
 
-suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,scale=FALSE,compare_to_zero=FALSE){
+suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
   check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
   }
   
-  grid = grid_pval_OSE(cutoffs=NULL,data=data,arms=arms,fes=fes,y=y,w=w,scale=scale,compare_to_zero=compare_to_zero)
+  grid = grid_pval_OSE(cutoffs=NULL,data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=compare_to_zero)
   n_unique_policies = dplyr::n_distinct(data[,arms])
   unique_policies_to_number_of_pools_ratio = 20
   suggested_number_of_pools = round(n_unique_policies / unique_policies_to_number_of_pools_ratio)

@@ -4,15 +4,7 @@
 \alias{plot_pval_OSE}
 \title{Plot p-values in the pval one-step elimination}
 \usage{
-plot_pval_OSE(
-  data,
-  arms,
-  fes = c(),
-  y,
-  w = NULL,
-  scale = FALSE,
-  compare_to_zero = FALSE
-)
+plot_pval_OSE(data, arms, fes = c(), y, w = NULL, compare_to_zero = FALSE)
 }
 \arguments{
 \item{data}{is the dataframe containing all our data}
@@ -24,8 +16,6 @@ plot_pval_OSE(
 \item{y}{is the column name of the outcome of interest}
 
 \item{w}{is the column name of the weights}
-
-\item{scale}{is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens}
 
 \item{compare_to_zero}{is a boolean.\cr
 If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr

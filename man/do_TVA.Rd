@@ -12,7 +12,6 @@ do_TVA(
   w = NULL,
   cutoff,
   estimation_function_name = "pval_OSE",
-  scale = FALSE,
   compare_to_zero = FALSE
 )
 }
@@ -38,8 +37,6 @@ do_TVA(
 \item 'puffer_LASSO': a LASSO OLS with a Puffer transformation\cr
 (2) and (3) should be equivalent, as well as (4) and (5)
 }}
-
-\item{scale}{is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens}
 
 \item{compare_to_zero}{is a boolean.\cr
 If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr

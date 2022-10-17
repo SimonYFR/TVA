@@ -10,7 +10,6 @@ suggest_pval_OSE_cutoff(
   fes = c(),
   y,
   w = NULL,
-  scale = FALSE,
   compare_to_zero = FALSE
 )
 }
@@ -24,8 +23,6 @@ suggest_pval_OSE_cutoff(
 \item{y}{is the column name of the outcome of interest}
 
 \item{w}{is the column name of the weights}
-
-\item{scale}{is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens}
 
 \item{compare_to_zero}{is a boolean.\cr
 If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
@@ -50,5 +47,5 @@ F1 = c(0,1,0,0,0,1,0,1,0,0)
 Y  = c(5,4,3,5,4,5,4,2,3,2)
 W  = c(1,1,1,2,1,2,2,1,1,2)
 data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-suggest_pval_OSE_cutoff(data=data,arms=arms,fes=fes,y=y,w=w,scale=FALSE,compare_to_zero=FALSE)
+suggest_pval_OSE_cutoff(data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=FALSE)
 }

@@ -4,7 +4,7 @@
 \alias{prepare_data}
 \title{Prepare the data}
 \usage{
-prepare_data(data, arms, fes, y, w, scale, compare_to_zero)
+prepare_data(data, arms, fes, y, w, compare_to_zero)
 }
 \arguments{
 \item{data}{is the dataframe containing all our data}
@@ -16,8 +16,6 @@ prepare_data(data, arms, fes, y, w, scale, compare_to_zero)
 \item{y}{is the column name of the outcome of interest}
 
 \item{w}{is the column name of the weights}
-
-\item{scale}{is a boolean, if TRUE, the data is going to be scaled (mean 0 and sd 1), if FALSE, nothing happens}
 
 \item{compare_to_zero}{is a boolean.\cr
 If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
