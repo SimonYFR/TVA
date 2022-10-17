@@ -792,9 +792,9 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,compare_to_zer
     cutoffs = c(5e-1,4e-1,3e-1,2e-1, 1e-1, 5e-2, 1e-2, 5e-3, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10, 1e-12, 1e-15, 1e-20, 1e-30)
   }
   
-  pvals = pval_OSE(X,y,variables,0)$pvals
-  pvals = pvals[marginals_colnames] %>% sort()
-  cutoffs = floor(pvals / 10^(floor(log(pvals, base = 10))-1))/10 * 10^(floor(log(pvals, base = 10))) #round the pvals
+  pvals = pval_OSE(X,y,variables,0)$pvals %>% sort() #
+  marginals_pvals = pvals[marginals_colnames] 
+  cutoffs = floor(marginals_pvals / 10^(floor(log(marginals_pvals, base = 10))-1))/10 * 10^(floor(log(marginals_pvals, base = 10))) #round the pvals
   cutoffs = cutoffs[2: (length(cutoffs)/3) %>% ceiling()] %>% unname() %>% unique()
   
   marginal_support_sizes = c()
@@ -803,13 +803,13 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,compare_to_zer
   differ_from_zero = c()
   
   for (pval_cutoff in cutoffs){
-    support = names(pvals[which(pvals<=pval_cutoff)]) #compute the support
-    marginal_support = intersect(support,marginals_colnames) #take the marginal support
+    total_support = names(pvals[which(pvals<=pval_cutoff)]) #compute the total_support
+    marginal_support = intersect(total_support,marginals_colnames) #take the marginal support
 
     pooled_data = (pool_data(data,arms,marginal_support,compare_to_zero))
 
     pool_ids = paste("pool_id",c(1:max(pooled_data$pool_id)),sep="_")
-    fes_support = sort(intersect(support,fes))
+    fes_support = sort(intersect(total_support,fes))
     
     pooled_ols = get_pooled_ols(pooled_data,fes_support,y,w,pool_ids,clusters) #do pooled OLS
     
