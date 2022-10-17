@@ -287,11 +287,7 @@ prepare_data <- function(data,arms,fes,y,w,compare_to_zero){
   cat("Preparing the data","\n")
   n_obs = nrow(data)
   
-  if (is.null(w)){
-    W=rep(1,n_obs)
-  }else{
-    W=data[,w]
-  }
+  if (is.null(w))  {   W=rep(1,n_obs)   }  else   {   W=data[,w]   }
   
   #creating the vector of maximum dosage per arm
   max_dosage_per_arm = sapply(data[,arms], max, na.rm = TRUE)
@@ -444,6 +440,7 @@ pools_info <- function(data,arms){
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
 #' @param pool_ids is a vector containing the column names of each pool_id dummy column
+#' @param clusters (optional) is the column name that corresponds to the clusters in the data, that should be used in the final pooled OLS. Please refer to estimatr::lm_robust documentation for more information on this parameter.
 #' @return returns the ols result
 #' @export
 #' @examples
@@ -463,15 +460,17 @@ pools_info <- function(data,arms){
 #' data = data.frame(pool_id_1 = p1, pool_id_2 = p2, financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' get_pooled_ols(data,fes,y,w,pool_ids)
 
-get_pooled_ols <- function(data,fes=c(),y,w=NULL,pool_ids){
+get_pooled_ols <- function(data,fes=c(),y,w=NULL,pool_ids, clusters){
   cat("Performing the final OLS on pooled data","\n")
+  
   pooled_ols_variables = c(pool_ids, fes)
   formula = as.formula(paste0(y,"~",paste0(pooled_ols_variables ,collapse = "+")))
-  if (is.null(w)){
-    pooled_ols = estimatr::lm_robust(formula = formula, data = data)
-  }else{
-    pooled_ols = estimatr::lm_robust(formula = formula, data = data, weights = data[,w])
-  }
+  
+  if (is.null(w))         {   W=NULL         }  else   {   W=data[,w]      }
+  if (is.null(clusters))  {   se_type='HC2'  }  else   {   se_type='CR0'   }
+
+  pooled_ols = estimatr::lm_robust(formula = formula, data = data, weights = W, clusters=clusters, se_type=se_type)
+
   return(pooled_ols)
 }
 
@@ -481,20 +480,21 @@ get_pooled_ols <- function(data,fes=c(),y,w=NULL,pool_ids){
 #' Perform the whole TVA algorithm
 #' @param data is the dataframe containing all our data
 #' @param arms is a vector containing the column names of all the arms
-#' @param fes is a vector containing the column names of all the fixed effects
+#' @param fes (optional) is a vector containing the column names of all the fixed effects, empty by default
 #' @param y is the column name of the outcome of interest
-#' @param w is the column name of the weights
+#' @param w (optional) is the column name of the weights
 #' @param cutoff is the cutoff used in the support estimation
-#' @param estimation_function_name is the estimation function we should used. Possible arguments are :\cr
+#' @param estimation_function_name (optional) is the estimation function we should used. Possible arguments are :\cr
 #' 1. 'pval_MSE': a multiple step elimination on p-values\cr
 #' 2. 'pval_OSE': a one step elimination on p-values\cr
 #' 3. 'puffer_N_LASSO': a LASSO OLS with a Puffer_N transformation\cr
 #' 4. 'beta_OSE': a one step elimination on beta values\cr
 #' 5. 'puffer_LASSO': a LASSO OLS with a Puffer transformation\cr
 #' (2) and (3) should be equivalent, as well as (4) and (5)
-#' @param compare_to_zero is a boolean.\cr
+#' @param compare_to_zero (optional) is a boolean, FALSE by default. \cr
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
+#' @param clusters (optional) is the column name that corresponds to the clusters in the data, that should be used in the final pooled OLS. Please refer to estimatr::lm_robust documentation for more information on this parameter.
 #' @return returns a list containing:\cr
 #' * data: the data with new columns giving pooling information\cr
 #' * marginal_support: a dataframe with all the marginals in the support and their according id\cr
@@ -518,7 +518,7 @@ get_pooled_ols <- function(data,fes=c(),y,w=NULL,pool_ids){
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' TVA(data,arms,fes,y,w,0.3,'pval_OSE',FALSE,FALSE)
 
-do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='pval_OSE',compare_to_zero=FALSE){
+do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='pval_OSE',compare_to_zero=FALSE,clusters=NULL){
   #check if fake_weights column already exists
   check = check_inputs_integrity(data, arms, fes, y, cutoff, w, estimation_function_name, compare_to_zero)
   if (!check$integrity){
@@ -556,7 +556,7 @@ do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='p
   
   #final pooled ols
   pool_ids = paste("pool_id",c(1:max(data$pool_id)),sep="_")
-  pooled_ols = get_pooled_ols(data,fes_support,y,w,pool_ids) #should we put fes or fes_support ???
+  pooled_ols = get_pooled_ols(data,fes_support,y,w,pool_ids,clusters)
 
   #apply winners curse
   winners_effect = winners_curse(pooled_ols,pool_ids,alpha=0.05,beta=0.005)

@@ -4,7 +4,7 @@
 \alias{get_pooled_ols}
 \title{Perform the final OLS}
 \usage{
-get_pooled_ols(data, fes = c(), y, w = NULL, pool_ids)
+get_pooled_ols(data, fes = c(), y, w = NULL, pool_ids, clusters)
 }
 \arguments{
 \item{data}{is the dataframe containing all our data and pool_id dummy columns}
@@ -16,6 +16,8 @@ get_pooled_ols(data, fes = c(), y, w = NULL, pool_ids)
 \item{w}{is the column name of the weights}
 
 \item{pool_ids}{is a vector containing the column names of each pool_id dummy column}
+
+\item{clusters}{(optional) is the column name that corresponds to the clusters in the data, that should be used in the final pooled OLS. Please refer to estimatr::lm_robust documentation for more information on this parameter.}
 }
 \value{
 returns the ols result

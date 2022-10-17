@@ -12,7 +12,8 @@ do_TVA(
   w = NULL,
   cutoff,
   estimation_function_name = "pval_OSE",
-  compare_to_zero = FALSE
+  compare_to_zero = FALSE,
+  clusters = NULL
 )
 }
 \arguments{
@@ -20,15 +21,15 @@ do_TVA(
 
 \item{arms}{is a vector containing the column names of all the arms}
 
-\item{fes}{is a vector containing the column names of all the fixed effects}
+\item{fes}{(optional) is a vector containing the column names of all the fixed effects, empty by default}
 
 \item{y}{is the column name of the outcome of interest}
 
-\item{w}{is the column name of the weights}
+\item{w}{(optional) is the column name of the weights}
 
 \item{cutoff}{is the cutoff used in the support estimation}
 
-\item{estimation_function_name}{is the estimation function we should used. Possible arguments are :\cr
+\item{estimation_function_name}{(optional) is the estimation function we should used. Possible arguments are :\cr
 \enumerate{
 \item 'pval_MSE': a multiple step elimination on p-values\cr
 \item 'pval_OSE': a one step elimination on p-values\cr
@@ -38,9 +39,11 @@ do_TVA(
 (2) and (3) should be equivalent, as well as (4) and (5)
 }}
 
-\item{compare_to_zero}{is a boolean.\cr
+\item{compare_to_zero}{(optional) is a boolean, FALSE by default. \cr
 If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)}
+
+\item{clusters}{(optional) is the column name that corresponds to the clusters in the data, that should be used in the final pooled OLS. Please refer to estimatr::lm_robust documentation for more information on this parameter.}
 }
 \value{
 returns a list containing:\cr
