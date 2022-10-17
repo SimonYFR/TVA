@@ -804,7 +804,7 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,compare_to_zer
   
   for (pval_cutoff in cutoffs){
     total_support = names(pvals[which(pvals<=pval_cutoff)]) #compute the total_support
-    marginal_support = intersect(total_support,marginals_colnames) #take the marginal support
+    marginal_support = intersect(total_support,marginals_colnames) %>% sort() #take the marginal support
 
     pooled_data = (pool_data(data,arms,marginal_support,compare_to_zero))
 
