@@ -469,7 +469,8 @@ get_pooled_ols <- function(data,fes=c(),y,w=NULL,pool_ids, clusters){
   if (is.null(w))         {   W=NULL         }  else   {   W=data[,w]      }
   if (is.null(clusters))  {   Clusters=NULL  }  else   {   Clusters=data[,clusters]    }
   if (is.null(clusters))  {   se_type='HC2'  }  else   {   se_type='CR0'   }
-
+  print(formula)
+  print(colnames(data))
   pooled_ols = estimatr::lm_robust(formula = formula, data = data, weights = W, clusters=Clusters, se_type=se_type)
 
   return(pooled_ols)
