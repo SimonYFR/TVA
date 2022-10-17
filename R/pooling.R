@@ -794,6 +794,7 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,compare_to_zer
   }
   
   pvals = pval_OSE(X,y,variables,0)$pvals
+  cutoffs = floor(pvals / 10^(floor(log(pvals, base = 10))-1))/10 * 10^(floor(log(pvals, base = 10))) #round the pvals
   
   marginal_support_sizes = c()
   number_of_pools = c()
