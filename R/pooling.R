@@ -794,9 +794,9 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,compare_to_zer
   }
   
   pvals = pval_OSE(X,y,variables,0)$pvals
-  pvals = pvals[marginals_colnames] %>%unname() %>% sort()
+  pvals = pvals[marginals_colnames] %>% sort()
   cutoffs = floor(pvals / 10^(floor(log(pvals, base = 10))-1))/10 * 10^(floor(log(pvals, base = 10))) #round the pvals
-  
+
   marginal_support_sizes = c()
   number_of_pools = c()
   lambdas = c()
@@ -810,7 +810,7 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,compare_to_zer
     
   }
   
-  grid = data.frame(pval_cutoff = cutoffs , equivalent_lambda = lambdas, marginal_support_size= marginal_support_sizes, number_of_pools=number_of_pools)
+  grid = data.frame(pval_cutoff = cutoffs %>%unname() , equivalent_lambda = lambdas, marginal_support_size= marginal_support_sizes, number_of_pools=number_of_pools)
   return(grid)
 }
 
