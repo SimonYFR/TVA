@@ -792,8 +792,8 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,compare_to_zer
     cutoffs = c(5e-1,4e-1,3e-1,2e-1, 1e-1, 5e-2, 1e-2, 5e-3, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10, 1e-12, 1e-15, 1e-20, 1e-30)
   }
   
-  pvals = pval_OSE(X,y,variables,0)$pvals %>% sort() #
-  marginals_pvals = pvals[marginals_colnames] 
+  pvals = pval_OSE(X,y,variables,0)$pvals %>% sort()
+  marginals_pvals = pvals[marginals_colnames] %>% sort()
   cutoffs = floor(marginals_pvals / 10^(floor(log(marginals_pvals, base = 10))-1))/10 * 10^(floor(log(marginals_pvals, base = 10))) #round the pvals
   cutoffs = cutoffs[2: (length(cutoffs)/3) %>% ceiling()] %>% unname() %>% unique()
   
