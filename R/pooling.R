@@ -778,7 +778,7 @@ plot_beta_OSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' grid_pval_OSE(cutoffs=NULL,data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=FALSE)
 
-grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
+grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE, clusters=NULL){
   check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
@@ -801,17 +801,31 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,compare_to_zer
   marginal_support_sizes = c()
   number_of_pools = c()
   lambdas = c()
+  differ_from_zero = c()
+  
   for (pval_cutoff in cutoffs){
-    support = names(pvals[which(pvals<=pval_cutoff)])
-    marginal_support = intersect(support,marginals_colnames)
-    marginal_support_sizes = c(marginal_support_sizes, length(marginal_support))
-    lambdas = c(lambdas,pval_to_lambda(X,y,variables,pval_cutoff))
+    support = names(pvals[which(pvals<=pval_cutoff)]) #compute the support
+    marginal_support = intersect(support,marginals_colnames) #take the marginal support
+
+    pooled_data = (pool_data(data,arms,marginal_support,compare_to_zero))
+
+    pool_ids = paste("pool_id",c(1:max(pooled_data$pool_id)),sep="_")
+    fes_support = sort(intersect(support,fes))
     
-    number_of_pools = c(number_of_pools, (pool_data(data,arms,marginal_support,compare_to_zero))$pool_id %>% max() +1)
+    pooled_ols = get_pooled_ols(pooled_data,fes_support,y,w,pool_ids,clusters) #do pooled OLS
     
+    ols_coefs = pooled_ols$coefficients 
+    pools_coefs = ols_coefs[grep("pool_id_", ols_coefs %>% names, value = TRUE)] #take pools_coefficients
+    two_bests = (pools_coefs %>% sort(.,decreasing=TRUE))[1:2] %>% names() #take the two bests
+    two_bests_differ_from_zero = all(pooled_ols$p.value[two_bests] < 0.05)
+    
+    differ_from_zero = c(differ_from_zero, two_bests_differ_from_zero)
+    number_of_pools = c(number_of_pools, pooled_data$pool_id %>% max() +1)
+    marginal_support_sizes = c(marginal_support_sizes, length(marginal_support))  
+    lambdas = c(lambdas,pval_to_lambda(X,y,variables,pval_cutoff)) 
   }
   
-  grid = data.frame(pval_cutoff = cutoffs, equivalent_lambda = lambdas, marginal_support_size= marginal_support_sizes, number_of_pools=number_of_pools)
+  grid = data.frame(pval_cutoff = cutoffs, equivalent_lambda = lambdas, marginal_support_size= marginal_support_sizes, number_of_pools=number_of_pools, differ_from_zero=differ_from_zero)
   return(grid)
 }
 
