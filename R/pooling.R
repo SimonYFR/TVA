@@ -303,7 +303,9 @@ prepare_data <- function(data,arms,y, fes=c(),w,compare_to_zero){
   marginals_colnames = names(marginals_matrix)
   
   #Creating the X matrix on which we will estimate the alphas
-  X = cbind(marginals_matrix,data[,c(y, fes=c())])
+  X = cbind(marginals_matrix, data[ , c(y, fes) ])
+  print(colnames(X))
+  
   #que faire si intercept existe déjà dans X ?
   X['intercept'] = 1
   
