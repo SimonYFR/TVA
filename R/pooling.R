@@ -847,6 +847,26 @@ grid_pval <- function(data,arms,y,fes=c(),w=NULL,estim_func='pval_OSE', compare_
   return(grid)
 }
 
+
+#' Find elbow
+#'
+#' Find the elbow of a set of points.
+#' @param X is a numeric vector
+#' @param Y is a numeric vector, same size as X
+#' @return returns the value of X corresponding to the elbow of  the curve
+#' @export
+
+elbow <- function(X,Y){
+  X = sort(X)
+  Y = sort(Y)
+  smoothed_Y = smooth.spline(X, Y, spar=0.65)$y
+  d1 <- diff(y) / diff(x) # first derivative
+  d2 <- diff(d1) / diff(x[-1]) # second derivative
+  
+  return(x[which(d2==min(d2))+1])
+}
+
+
 #' Suggest one p-value cutoff that could be used the in pval one-step elimination
 #'
 #' Suggest one p-value cutoff that could be used the in pval one-step elimination.\cr
@@ -882,45 +902,29 @@ suggest_pval_cutoff <- function(data,arms,y,target=NULL, fes=c(),w=NULL,estim_fu
     stop(check$message)
   }
   
-  # grid = grid_pval(data=data,arms=arms,y=y,fes=fes,w=w,estim_func=estim_func,compare_to_zero=compare_to_zero, clusters=clusters)
-  # 
-  # print(grid)
-  # 
-  # if (is.null(target)){
-  #   elbow = akmedoids::elbow_point( grid$marginal_support_size, grid$rsqr )$x
-  #   target = grid$marginal_support_size[which.min(abs(grid$marginal_support_size - elbow))]
-  # }
-  # 
-  # cat('Elbow is ',elbow,'\n')
-  # cat('Target is ',target,'\n')
-  # 
-  # optimums = grid[(grid$marginal_support_size %>% dplyr::between(.,round(target/2),target*2)) & (grid$differ_from_zero),]
-  # 
-  # if (nrow((optimums))==0){
-  #   best = grid[grid$marginal_support_size == target,]
-  # }else{
-  #   optimums[ optimums$marginal_support_size <= target, ] = optimums[ optimums$marginal_support_size <= target, ] %>% rev()
-  #   best = optimums[1,]
-  # }
-  # 
-  # return(best)
-  
   grid = grid_pval(data=data,arms=arms,y=y,fes=fes,w=w,estim_func=estim_func,compare_to_zero=compare_to_zero, clusters=clusters)
-  
-  
+
+  print(grid)
+
   if (is.null(target)){
-    elbow = akmedoids::elbow_point( grid$marginal_support_size, grid$rsqr )$x
+    elbow = elbow( grid$marginal_support_size, grid$rsqr)
     target = grid$marginal_support_size[which.min(abs(grid$marginal_support_size - elbow))]
   }
-  
-  possible_optimum = grid[(grid$marginal_support_size %>% dplyr::between(.,round(target/2),target*2)) & (grid$differ_from_zero),]
-  
-  if (nrow((possible_optimum))==0){
-    optimum = grid[grid$marginal_support_size == target,]
+
+  cat('Elbow is ',elbow,'\n')
+  cat('Target is ',target,'\n')
+
+  optimums = grid[(grid$marginal_support_size %>% dplyr::between(.,round(target/2),target*2)) & (grid$differ_from_zero),]
+
+  if (nrow((optimums))==0){
+    best = grid[grid$marginal_support_size == target,]
   }else{
-    optimum = possible_optimum[1,]
+    optimums[ optimums$marginal_support_size <= target, ] = optimums[ optimums$marginal_support_size <= target, ] %>% rev()
+    best = optimums[1,]
   }
+
+  return(best)
   
-  return(optimum)
+
 }
 
