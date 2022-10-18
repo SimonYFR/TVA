@@ -40,5 +40,5 @@ p1 = c(0,1,0,0,0,0,0,0,0,0)
 p2 = c(0,0,0,0,0,1,0,0,0,1)
 pool_ids = c('pool_id_1','pool_id_2')
 data = data.frame(pool_id_1 = p1, pool_id_2 = p2, financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-get_pooled_ols(data,y, fes=c(),w,pool_ids)
+get_pooled_ols(data,y, fes, w, pool_ids)
 }

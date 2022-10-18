@@ -4,7 +4,7 @@
 \alias{prepare_data}
 \title{Prepare the data}
 \usage{
-prepare_data(data, arms, y, fes = c(), w, compare_to_zero)
+prepare_data(data, arms, y, fes, w, compare_to_zero)
 }
 \arguments{
 \item{data}{is the dataframe containing all our data}

@@ -289,7 +289,7 @@ weight_observations <- function(X,W){
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' prepare_data(data,arms,y, fes,w,FALSE,FALSE)
 
-prepare_data <- function(data,arms,y, fes=c(),w,compare_to_zero){
+prepare_data <- function(data, arms, y, fes, w, compare_to_zero){
   cat("Preparing the data","\n")
   n_obs = nrow(data)
   
@@ -471,7 +471,7 @@ pools_info <- function(data,arms){
 #' p2 = c(0,0,0,0,0,1,0,0,0,1)
 #' pool_ids = c('pool_id_1','pool_id_2')
 #' data = data.frame(pool_id_1 = p1, pool_id_2 = p2, financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' get_pooled_ols(data,y, fes=c(),w,pool_ids)
+#' get_pooled_ols(data,y, fes, w, pool_ids)
 
 get_pooled_ols <- function(data,y, fes=c(),w=NULL,pool_ids, clusters){
   cat("Performing the final OLS on pooled data","\n")
@@ -529,7 +529,7 @@ get_pooled_ols <- function(data,y, fes=c(),w=NULL,pool_ids, clusters){
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' TVA(data,arms,y, fes=c(),w,0.3,'pval_OSE',FALSE,FALSE)
+#' TVA(data,arms,y, fes,w,0.3,'pval_OSE',FALSE,FALSE)
 
 do_TVA <- function(data,arms,y, fes=c(),w=NULL,cutoff,estim_func='pval_OSE',compare_to_zero=FALSE,clusters=NULL){
   #check if fake_weights column already exists
@@ -539,7 +539,7 @@ do_TVA <- function(data,arms,y, fes=c(),w=NULL,cutoff,estim_func='pval_OSE',comp
   }
   
   #prepare the data
-  prepared_data = prepare_data(data,arms,y, fes=c(),w,compare_to_zero)
+  prepared_data = prepare_data(data,arms,y, fes,w,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
@@ -617,16 +617,16 @@ do_TVA <- function(data,arms,y, fes=c(),w=NULL,cutoff,estim_func='pval_OSE',comp
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' plot_pval_OSE(data,arms,y, fes=c(),w,FALSE,FALSE)
+#' plot_pval_OSE(data,arms,y, fes,w,FALSE,FALSE)
 
 
-plot_pval_OSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
+plot_pval_OSE <- function(data, arms, y, fes=c(), w=NULL, compare_to_zero=FALSE){
   check = check_inputs_integrity(data, arms, y, fes, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
   }
   
-  prepared_data = prepare_data(data,arms,y, fes=c(),w,compare_to_zero)
+  prepared_data = prepare_data(data,arms, y, fes,w,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
@@ -673,7 +673,7 @@ plot_pval_OSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' plot_pval_MSE(data,arms,y, fes=c(),w,FALSE,FALSE)
+#' plot_pval_MSE(data,arms,y, fes,w,FALSE,FALSE)
 
 plot_pval_MSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
   check = check_inputs_integrity(data, arms, y, fes, 1, w, 'pval_OSE', compare_to_zero)
