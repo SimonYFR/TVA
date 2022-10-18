@@ -823,7 +823,7 @@ grid_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,estimation_function_name='p
       pools_coefs = ols_coefs[grep("pool_id_", ols_coefs %>% names, value = TRUE)] #take pools_coefficients
       two_bests = (pools_coefs %>% sort(.,decreasing=TRUE))[1:2] %>% names() #take the two bests
       two_bests_differ_from_zero = all(pooled_ols$p.value[two_bests] < 0.05)
-      ols_rsqr = pooled_ols$squared
+      ols_rsqr = pooled_ols$r.squared
       ols_adj_rsqr = pooled_ols$adj.r.squared
     }else{
       two_bests_differ_from_zero = NA 
