@@ -870,7 +870,10 @@ elbow <- function(X,Y){
 #' Suggest one p-value cutoff that could be used the in pval one-step elimination
 #'
 #' Suggest one p-value cutoff that could be used the in pval one-step elimination.\cr
-#' This is done by computing the grid_pval and taking the pval cutoff that create a number of pools equal to the number of unique policies divided by 20.
+#' This is done in two steps. First, we take the p-value corresponding to a target, which can be provided by the user, or which corresponds to the elbow of the R-squared vs support size curve. \cr
+#' Then, we look for p-values arround this target and check if some of them produce a final pooled OLS with two best effects that are statistically different from 0.
+#' @param support_size_target (optional) is the prior we might have on the number of marginals in the support. It is NULL by default. \cr
+#' If NULL, the code will take the support size that corresponds to the elbow of the R-squared vs support size curve.
 #' @param data is the dataframe containing all our data
 #' @param arms is a vector containing the column names of all the arms
 #' @param fes is a vector containing the column names of all the fixed effects
@@ -895,7 +898,7 @@ elbow <- function(X,Y){
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' suggest_pval_OSE_cutoff(data=data,arms=arms,y=y,fes=fes,w=w,compare_to_zero=FALSE)
 
-suggest_pval_cutoff <- function(data,arms,y,target=NULL, fes=c(),w=NULL,estim_func='pval_OSE',compare_to_zero=FALSE, clusters=NULL){
+suggest_pval_cutoff <- function(data,arms,y,support_size_target=NULL, fes=c(),w=NULL,estim_func='pval_OSE',compare_to_zero=FALSE, clusters=NULL){
   check = check_inputs_integrity(data, arms, y, fes, 1, w, estim_func, compare_to_zero, clusters)
   
   if (!check$integrity){
@@ -906,18 +909,18 @@ suggest_pval_cutoff <- function(data,arms,y,target=NULL, fes=c(),w=NULL,estim_fu
 
   print(grid)
 
-  if (is.null(target)){
+  if (is.null(support_size_target)){
     elbow = elbow(grid$marginal_support_size, grid$rsqr)
     cat('Elbow is ',elbow,'\n')
-    target = grid$marginal_support_size[which.min(abs(grid$marginal_support_size - elbow))]
+    support_size_target = grid$marginal_support_size[which.min(abs(grid$marginal_support_size - elbow))]
   }
 
-  cat('Target is ',target,'\n')
+  cat('Target is ',support_size_target,'\n')
 
-  optimums = grid[(grid$marginal_support_size %>% dplyr::between(.,round(target/2),target*2)) & (grid$differ_from_zero),]
+  optimums = grid[(grid$marginal_support_size %>% dplyr::between(.,round(support_size_target/2),support_size_target*2)) & (grid$differ_from_zero),]
 
   if (nrow((optimums))==0){
-    best = grid[grid$marginal_support_size == target,]
+    best = grid[grid$marginal_support_size == support_size_target,]
   }else{
     best = optimums[order(optimums$marginal_support_size <= target, optimums$marginal_support_size, decreasing=TRUE),][1,]
   }
