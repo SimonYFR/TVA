@@ -11,7 +11,7 @@
 
 
 pval_MSE <- function(X,y,variables,pval_cutoff){
-  cat("Estimating support with pval MSE and cutoff=",pval_cutoff,"\n")
+  cat("Estimating support with pval MSE and cutoff =",pval_cutoff,"\n")
   current_variables = variables
   deselect_list <- c()
   deselect_pval <- c()
@@ -93,7 +93,7 @@ pval_to_lambda <- function(X,y,variables,pval){
 #' @export
 
 pval_OSE<- function(X,y,variables,pval_cutoff){
-  cat("Estimating support with pval OSE and cutoff=",pval_cutoff,"\n")
+  cat("Estimating support with pval OSE and cutoff =",pval_cutoff,"\n")
   
   formula = as.formula(paste0(y,"~",paste0(c(variables,"0"),collapse = "+")))
   model_ols = estimatr::lm_robust(formula = formula, data = X,  se_type = "classical")
@@ -149,7 +149,7 @@ N_transform <- function(X){
 
 
 puffer_N_LASSO <- function(X,y,variables,lambda_cutoff){
-  cat("Estimating support with puffer N LASSO and cutoff=",lambda_cutoff,"\n")
+  cat("Estimating support with puffer N LASSO and cutoff =",lambda_cutoff,"\n")
   
   pval_cutoff = lambda_to_pval(X,y,variables,lambda_cutoff)
   cat("Equivalent p-value cutoff to current lambda cutoff is ","\n")
@@ -183,7 +183,7 @@ puffer_N_LASSO <- function(X,y,variables,lambda_cutoff){
 #' @export
 
 beta_OSE <- function(X,y,variables,lambda_cutoff){
-  cat("Estimating support with beta OSE and cutoff=",lambda_cutoff,"\n")
+  cat("Estimating support with beta OSE and cutoff =",lambda_cutoff,"\n")
   formula <- as.formula(paste0(y,"~",paste0(c(variables,"0"),collapse = "+")))
   model_ols <- estimatr::lm_robust(formula = formula, data = X,  se_type = "classical")
   support = names(model_ols$p.value[which(abs(model_ols$coefficients)>=lambda_cutoff)])
@@ -205,7 +205,7 @@ beta_OSE <- function(X,y,variables,lambda_cutoff){
 
 
 puffer_LASSO <- function(X,y,variables,lambda_cutoff){
-  cat("Estimating support with puffer LASSO and cutoff=",lambda_cutoff,"\n")
+  cat("Estimating support with puffer LASSO and cutoff =",lambda_cutoff,"\n")
   
   X_matrix = X[,variables] %>% as.matrix()
   Y = X[,y] %>% as.matrix()

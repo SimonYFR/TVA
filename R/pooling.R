@@ -804,6 +804,8 @@ grid_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,estimation_function_name='p
   marginal_support_sizes = c()
   number_of_pools = c()
   differ_from_zero = c()
+  rsqr = c()
+  adj_rsqr = c()
   
   for (pval_cutoff in cutoffs){
     total_support = names(pvals[which(pvals<=pval_cutoff)]) #compute the total_support
@@ -821,13 +823,19 @@ grid_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,estimation_function_name='p
       pools_coefs = ols_coefs[grep("pool_id_", ols_coefs %>% names, value = TRUE)] #take pools_coefficients
       two_bests = (pools_coefs %>% sort(.,decreasing=TRUE))[1:2] %>% names() #take the two bests
       two_bests_differ_from_zero = all(pooled_ols$p.value[two_bests] < 0.05)
+      ols_rsqr = pooled_ols$squared
+      ols_adj_rsqr = pooled_ols$adj.r.squared
     }else{
       two_bests_differ_from_zero = NA 
+      ols_rsqr = NA
+      ols_adj_rsqr = NA
     }
     
     differ_from_zero = c(differ_from_zero, two_bests_differ_from_zero)
     number_of_pools = c(number_of_pools, pooled_data$pool_id %>% max() +1)
-    marginal_support_sizes = c(marginal_support_sizes, length(marginal_support))  
+    marginal_support_sizes = c(marginal_support_sizes, length(marginal_support))
+    rsqr = c(rsqr, ols_rsqr )
+    adj_rsqr = c(adj_rsqr, ols_adj_rsqr)
   }
   
   grid = data.frame(pval_cutoff = cutoffs, marginal_support_size= marginal_support_sizes, number_of_pools=number_of_pools, differ_from_zero=differ_from_zero)
