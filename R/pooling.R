@@ -757,6 +757,7 @@ plot_beta_OSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
 #' @param fes is a vector containing the column names of all the fixed effects
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
+#' @param estimation_function_name is the support estimation function we want to use, either pval_OSE or pval_MSE
 #' @param compare_to_zero is a boolean.\cr
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
@@ -780,7 +781,7 @@ plot_beta_OSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' grid_pval_OSE(data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=FALSE)
 
-grid_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE, clusters=NULL){
+grid_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,estimation_function_name='pval_OSE', compare_to_zero=FALSE, clusters=NULL){
   
   check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero, clusters)
   
@@ -793,9 +794,8 @@ grid_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE, clus
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
   
-  pvals = pval_MSE(X,y,variables,0)$pvals %>% sort()
-
-  pvals = pval_OSE(X,y,variables,0)$pvals %>% sort()
+  f = get(estimation_function_name)
+  pvals = f(X,y,variables,0)$pvals %>% sort()
   marginals_pvals = pvals[marginals_colnames] %>% sort()
   
   cutoffs = floor(marginals_pvals / 10^(floor(log(marginals_pvals, base = 10))-1))/10 * 10^(floor(log(marginals_pvals, base = 10))) #round the pvals

@@ -10,6 +10,7 @@ grid_pval_OSE(
   fes = c(),
   y,
   w = NULL,
+  estimation_function_name = "pval_OSE",
   compare_to_zero = FALSE,
   clusters = NULL
 )
@@ -24,6 +25,8 @@ grid_pval_OSE(
 \item{y}{is the column name of the outcome of interest}
 
 \item{w}{is the column name of the weights}
+
+\item{estimation_function_name}{is the support estimation function we want to use, either pval_OSE or pval_MSE}
 
 \item{compare_to_zero}{is a boolean.\cr
 If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
