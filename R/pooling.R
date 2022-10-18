@@ -882,27 +882,45 @@ suggest_pval_cutoff <- function(data,arms,y,target=NULL, fes=c(),w=NULL,estim_fu
     stop(check$message)
   }
   
+  # grid = grid_pval(data=data,arms=arms,y=y,fes=fes,w=w,estim_func=estim_func,compare_to_zero=compare_to_zero, clusters=clusters)
+  # 
+  # print(grid)
+  # 
+  # if (is.null(target)){
+  #   elbow = akmedoids::elbow_point( grid$marginal_support_size, grid$rsqr )$x
+  #   target = grid$marginal_support_size[which.min(abs(grid$marginal_support_size - elbow))]
+  # }
+  # 
+  # cat('Elbow is ',elbow,'\n')
+  # cat('Target is ',target,'\n')
+  # 
+  # optimums = grid[(grid$marginal_support_size %>% dplyr::between(.,round(target/2),target*2)) & (grid$differ_from_zero),]
+  # 
+  # if (nrow((optimums))==0){
+  #   best = grid[grid$marginal_support_size == target,]
+  # }else{
+  #   optimums[ optimums$marginal_support_size <= target, ] = optimums[ optimums$marginal_support_size <= target, ] %>% rev()
+  #   best = optimums[1,]
+  # }
+  # 
+  # return(best)
+  
   grid = grid_pval(data=data,arms=arms,y=y,fes=fes,w=w,estim_func=estim_func,compare_to_zero=compare_to_zero, clusters=clusters)
   
-  print(grid)
   
   if (is.null(target)){
     elbow = akmedoids::elbow_point( grid$marginal_support_size, grid$rsqr )$x
     target = grid$marginal_support_size[which.min(abs(grid$marginal_support_size - elbow))]
   }
   
-  cat('Elbow is ',elbow,'\n')
-  cat('Target is ',target,'\n')
+  possible_optimum = grid[(grid$marginal_support_size %>% dplyr::between(.,round(target/2),target*2)) & (grid$differ_from_zero),]
   
-  optimums = grid[(grid$marginal_support_size %>% dplyr::between(.,round(target/2),target*2)) & (grid$differ_from_zero),]
-  
-  if (nrow((optimums))==0){
-    best = grid[grid$marginal_support_size == target,]
+  if (nrow((possible_optimum))==0){
+    optimum = grid[grid$marginal_support_size == target,]
   }else{
-    optimums[ optimums$marginal_support_size <= target, ] = optimums[ optimums$marginal_support_size <= target, ] %>% rev()
-    best = optimums[1,]
+    optimum = possible_optimum[1,]
   }
   
-  return(best)
+  return(optimum)
 }
 
