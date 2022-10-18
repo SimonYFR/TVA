@@ -875,7 +875,7 @@ grid_pval <- function(data,arms,y,fes=c(),w=NULL,estim_func='pval_OSE', compare_
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' suggest_pval_OSE_cutoff(data=data,arms=arms,y=y,fes=fes,w=w,compare_to_zero=FALSE)
 
-suggest_pval_cutoff <- function(data,arms,y,fes=c(),w=NULL,estim_func='pval_OSE',compare_to_zero=FALSE, clusters=NULL){
+suggest_pval_cutoff <- function(data,arms,y,target=NULL, fes=c(),w=NULL,estim_func='pval_OSE',compare_to_zero=FALSE, clusters=NULL){
   check = check_inputs_integrity(data, arms, y, fes, 1, w, estim_func, compare_to_zero, clusters)
   
   if (!check$integrity){
@@ -890,14 +890,15 @@ suggest_pval_cutoff <- function(data,arms,y,fes=c(),w=NULL,estim_func='pval_OSE'
     target = grid$marginal_support_size[which.min(abs(grid$marginal_support_size - elbow))]
   }
   
-  possible_optimum = grid[(grid$marginal_support_size %>% dplyr::between(.,round(target/2),target*2)) & (grid$differ_from_zero),]
+  optimums = grid[(grid$marginal_support_size %>% dplyr::between(.,round(target/2),target*2)) & (grid$differ_from_zero),]
   
-  if (nrow((possible_optimum))==0){
-    optimum = grid[grid$marginal_support_size == target,]
+  if (nrow((optimums))==0){
+    best = grid[grid$marginal_support_size == target,]
   }else{
-    optimum = possible_optimum[1,]
+    optimums[ optimums$marginal_support_size <= target, ] = optimums[ optimums$marginal_support_size <= target, ] %>% rev()
+    best = optimums[1,]
   }
   
-  return(optimum)
+  return(best)
 }
 

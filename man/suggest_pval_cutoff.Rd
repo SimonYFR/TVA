@@ -8,6 +8,7 @@ suggest_pval_cutoff(
   data,
   arms,
   y,
+  target = NULL,
   fes = c(),
   w = NULL,
   estim_func = "pval_OSE",
