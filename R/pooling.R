@@ -884,10 +884,13 @@ suggest_pval_cutoff <- function(data,arms,y,target=NULL, fes=c(),w=NULL,estim_fu
   
   grid = grid_pval(data=data,arms=arms,y=y,fes=fes,w=w,estim_func=estim_func,compare_to_zero=compare_to_zero, clusters=clusters)
   
+  print(grid)
+  
   if (is.null(target)){
     elbow = akmedoids::elbow_point( grid$marginal_support_size, grid$rsqr )$x
     target = grid$marginal_support_size[which.min(abs(grid$marginal_support_size - elbow))]
   }
+  
   cat('Elbow is ',elbow,'\n')
   cat('Target is ',target,'\n')
   
