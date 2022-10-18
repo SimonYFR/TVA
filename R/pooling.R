@@ -860,10 +860,10 @@ elbow <- function(X,Y){
   X = sort(X)
   Y = sort(Y)
   smoothed_Y = smooth.spline(X, Y, spar=0.65)$y
-  d1 <- diff(y) / diff(x) # first derivative
-  d2 <- diff(d1) / diff(x[-1]) # second derivative
+  d1 <- diff(smoothed_Y) / diff(X) # first derivative
+  d2 <- diff(d1) / diff(X[-1]) # second derivative
   
-  return(x[which(d2==min(d2))+1])
+  return(X[which(d2==min(d2))+1])
 }
 
 
@@ -907,7 +907,7 @@ suggest_pval_cutoff <- function(data,arms,y,target=NULL, fes=c(),w=NULL,estim_fu
   print(grid)
 
   if (is.null(target)){
-    elbow = elbow( grid$marginal_support_size, grid$rsqr)
+    elbow = elbow(grid$marginal_support_size, grid$rsqr)
     target = grid$marginal_support_size[which.min(abs(grid$marginal_support_size - elbow))]
   }
 
