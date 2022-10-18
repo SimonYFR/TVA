@@ -826,9 +826,9 @@ grid_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,estimation_function_name='p
       ols_rsqr = pooled_ols$r.squared
       ols_adj_rsqr = pooled_ols$adj.r.squared
     }else{
-      two_bests_differ_from_zero = NA 
-      ols_rsqr = NA
-      ols_adj_rsqr = NA
+      two_bests_differ_from_zero = FALSE
+      ols_rsqr = 0
+      ols_adj_rsqr = 0
     }
     
     differ_from_zero = c(differ_from_zero, two_bests_differ_from_zero)
@@ -886,10 +886,8 @@ suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=F
   unique_policies_to_number_of_pools_ratio = 20
   suggested_number_of_pools = round(n_unique_policies / unique_policies_to_number_of_pools_ratio)
   suggested_cutoff = (grid %>% dplyr::filter(.,number_of_pools <= suggested_number_of_pools))[1,'pval_cutoff']
-  equivalent_lambda = (grid %>% dplyr::filter(.,number_of_pools <= suggested_number_of_pools))[1,'equivalent_lambda']
   cat('Suggested number of pools :',suggested_number_of_pools,'\n')
   cat('Associated pval cutoff :',suggested_cutoff,'\n')
-  cat('Associated lambda cutoff in puffer_N :',equivalent_lambda,'\n')
   return(suggested_cutoff)
 }
 
