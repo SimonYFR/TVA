@@ -799,7 +799,7 @@ grid_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,estimation_function_name='p
   marginals_pvals = pvals[marginals_colnames] %>% sort(decreasing = FALSE)
   
   cutoffs = floor(marginals_pvals / 10^(floor(log(marginals_pvals, base = 10))-1))/10 * 10^(floor(log(marginals_pvals, base = 10))) #round the pvals
-  cutoffs = cutoffs[2: (length(cutoffs)/3) %>% ceiling()] %>% unname() %>% unique()
+  cutoffs = cutoffs[1: (length(cutoffs)/3) %>% ceiling()] %>% unname() %>% unique()
   
   marginal_support_sizes = c()
   number_of_pools = c()
@@ -808,18 +808,22 @@ grid_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,estimation_function_name='p
   for (pval_cutoff in cutoffs){
     total_support = names(pvals[which(pvals<=pval_cutoff)]) #compute the total_support
     marginal_support = intersect(total_support,marginals_colnames) %>% sort() #take the marginal support
-
+    
     pooled_data = pool_data(data,arms,marginal_support,compare_to_zero)
 
     pool_ids = paste("pool_id",c(1:max(pooled_data$pool_id)),sep="_")
     fes_support = sort(intersect(total_support,fes))
     
-    pooled_ols = get_pooled_ols(pooled_data,fes_support,y,w,pool_ids,clusters) #do pooled OLS
-    
-    ols_coefs = pooled_ols$coefficients 
-    pools_coefs = ols_coefs[grep("pool_id_", ols_coefs %>% names, value = TRUE)] #take pools_coefficients
-    two_bests = (pools_coefs %>% sort(.,decreasing=TRUE))[1:2] %>% names() #take the two bests
-    two_bests_differ_from_zero = all(pooled_ols$p.value[two_bests] < 0.05)
+    if (length(marginal_support)>0){
+      pooled_ols = get_pooled_ols(pooled_data,fes_support,y,w,pool_ids,clusters) #do pooled OLS
+      
+      ols_coefs = pooled_ols$coefficients 
+      pools_coefs = ols_coefs[grep("pool_id_", ols_coefs %>% names, value = TRUE)] #take pools_coefficients
+      two_bests = (pools_coefs %>% sort(.,decreasing=TRUE))[1:2] %>% names() #take the two bests
+      two_bests_differ_from_zero = all(pooled_ols$p.value[two_bests] < 0.05)
+    }else{
+      two_bests_differ_from_zero = NA 
+    }
     
     differ_from_zero = c(differ_from_zero, two_bests_differ_from_zero)
     number_of_pools = c(number_of_pools, pooled_data$pool_id %>% max() +1)
