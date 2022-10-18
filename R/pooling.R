@@ -303,13 +303,7 @@ prepare_data <- function(data, arms, y, fes, w, compare_to_zero){
   marginals_colnames = names(marginals_matrix)
   
   #Creating the X matrix on which we will estimate the alphas
-  print(fes)
-  print(y)
-  print(colnames(data))
   X = cbind(marginals_matrix, data[,c(fes,y)])
-  
-  
-  print(colnames(X))
   
   #que faire si intercept existe déjà dans X ?
   X['intercept'] = 1
@@ -630,8 +624,6 @@ plot_pval_OSE <- function(data, arms, y, fes=c(), w=NULL, compare_to_zero=FALSE)
   X = prepared_data$X
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
-  print(colnames((X)))
-  print(y)
   pvals = pval_OSE(X,y,variables,1)$pvals
   
   pvals_OSE = pvals[which(names(pvals) %in% marginals_colnames)] %>% sort() %>% data.frame()
