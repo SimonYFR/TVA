@@ -38,7 +38,6 @@ returns a dataframe with columns:
 \item 'pval_cutoff': all the p-values that are in  the vector "cutoffs"
 \item 'marginal_support_size' : the corresponding support size one would get for each of these p-values
 \item 'number_of_pools': the corresponding number of pools one would get for such a support
-\item 'equivalent_lambda': the lambda equivalent to the p-value in the Puffer N LASSO
 }
 }
 \description{
