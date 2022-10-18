@@ -838,7 +838,12 @@ grid_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,estimation_function_name='p
     adj_rsqr = c(adj_rsqr, ols_adj_rsqr)
   }
   
-  grid = data.frame(pval_cutoff = cutoffs, marginal_support_size= marginal_support_sizes, number_of_pools=number_of_pools, differ_from_zero=differ_from_zero)
+  grid = data.frame( pval_cutoff = cutoffs
+                    ,marginal_support_size= marginal_support_sizes
+                    ,number_of_pools=number_of_pools 
+                    ,differ_from_zero=differ_from_zero
+                    ,rsqr = rsqr
+                    ,adj_rsqr = adj_rsqr)
   return(grid)
 }
 
