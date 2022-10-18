@@ -43,7 +43,7 @@ pval_MSE <- function(X,y,variables,pval_cutoff){
   cat("\n",current_max_pval,"\n")
   support = variables[!(variables %in% deselect_list)]
   
-  pvals_cutoff = cummin(pvals) %>% setNames(.,deselect_list)
+  pvals_cutoff = cummin(deselect_pval) %>% setNames(.,deselect_list)
   
   result = list(support=support, pvals = setNames(deselect_pval,deselect_list), pvals_cutoff=pvals_cutoff )
   return(result)
