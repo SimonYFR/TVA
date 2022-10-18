@@ -22,7 +22,7 @@ pval_MSE <- function(X,y,variables,pval_cutoff){
   current_max_pval <- max(current_pvals)
   n=length(variables)
   i=0
-  print("Starting the multiple step elimination procedure")
+  cat("Starting the multiple step elimination procedure","\n")
   while (current_max_pval > pval_cutoff) {
     i=i+1
     cat("\rProgress: ",i," variables eliminated on ", n)
@@ -31,7 +31,7 @@ pval_MSE <- function(X,y,variables,pval_cutoff){
     deselect_pval <- c(deselect_pval, current_pvals[which.max(current_pvals)])
     current_variables <- current_variables[current_variables != deselect_name]
     if (length(current_variables)==0){
-      print("pval_cutoff is too strict, no variable survived")
+      cat("pval_cutoff is too strict, no variable survived","\n")
       break
     }
     current_formula <- as.formula(paste0(y,"~",paste0(c(current_variables,0),collapse = "+")))
@@ -43,7 +43,9 @@ pval_MSE <- function(X,y,variables,pval_cutoff){
   cat("\n",current_max_pval,"\n")
   support = variables[!(variables %in% deselect_list)]
   
-  result = list(support=support, pvals = setNames(deselect_pval,deselect_list), eliminated_variables = deselect_list)
+  pvals_cutoff = cummin(pvals) %>% setNames(.,deselect_list)
+  
+  result = list(support=support, pvals = setNames(deselect_pval,deselect_list), pvals_cutoff=pvals_cutoff )
   return(result)
   
 }
@@ -92,12 +94,14 @@ pval_to_lambda <- function(X,y,variables,pval){
 
 pval_OSE<- function(X,y,variables,pval_cutoff){
   cat("Estimating support with pval OSE and cutoff=",pval_cutoff,"\n")
-  lambda = pval_to_lambda(X,y,variables,pval_cutoff)
+  
   formula = as.formula(paste0(y,"~",paste0(c(variables,"0"),collapse = "+")))
   model_ols = estimatr::lm_robust(formula = formula, data = X,  se_type = "classical")
   support = names(model_ols$p.value[which(model_ols$p.value<=pval_cutoff)])
   
-  result = list(support=support, pvals = model_ols$p.value, equiv_lambda = lambda)
+  pvals_cutoff = sort(model_ols$p.value, decreasing=TRUE)
+  
+  result = list(support=support, pvals = model_ols$p.value, pvals_cutoff = pvals_cutoff)
   
   return(result)
 }
@@ -148,8 +152,8 @@ puffer_N_LASSO <- function(X,y,variables,lambda_cutoff){
   cat("Estimating support with puffer N LASSO and cutoff=",lambda_cutoff,"\n")
   
   pval_cutoff = lambda_to_pval(X,y,variables,lambda_cutoff)
-  print("Equivalent p-value cutoff to current lambda cutoff is ")
-  print(pval_cutoff)
+  cat("Equivalent p-value cutoff to current lambda cutoff is ","\n")
+  cat(pval_cutoff,"\n")
   
   X_matrix = X[,c(variables)] %>% as.matrix()
   Y = X[,y] %>% as.matrix()

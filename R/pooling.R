@@ -765,7 +765,6 @@ plot_beta_OSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
 #' * 'pval_cutoff': all the p-values that are in  the vector "cutoffs" 
 #' * 'marginal_support_size' : the corresponding support size one would get for each of these p-values
 #' * 'number_of_pools': the corresponding number of pools one would get for such a support
-#' * 'equivalent_lambda': the lambda equivalent to the p-value in the Puffer N LASSO
 #' @export
 #' @examples
 #' arms = c('financial_incentive','reminder','information')
@@ -795,15 +794,15 @@ grid_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,estimation_function_name='p
   marginals_colnames = prepared_data$marginals_colnames
   
   f = get(estimation_function_name)
-  pvals = f(X,y,variables,0)$pvals %>% sort()
-  marginals_pvals = pvals[marginals_colnames] %>% sort()
+  pvals = f(X,y,variables,0)$pvals_cutoff 
+  
+  marginals_pvals = pvals[marginals_colnames] %>% sort(decreasing = TRUE)
   
   cutoffs = floor(marginals_pvals / 10^(floor(log(marginals_pvals, base = 10))-1))/10 * 10^(floor(log(marginals_pvals, base = 10))) #round the pvals
   cutoffs = cutoffs[2: (length(cutoffs)/3) %>% ceiling()] %>% unname() %>% unique()
   
   marginal_support_sizes = c()
   number_of_pools = c()
-  lambdas = c()
   differ_from_zero = c()
   
   for (pval_cutoff in cutoffs){
@@ -825,10 +824,9 @@ grid_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,estimation_function_name='p
     differ_from_zero = c(differ_from_zero, two_bests_differ_from_zero)
     number_of_pools = c(number_of_pools, pooled_data$pool_id %>% max() +1)
     marginal_support_sizes = c(marginal_support_sizes, length(marginal_support))  
-    lambdas = c(lambdas,pval_to_lambda(X,y,variables,pval_cutoff)) 
   }
   
-  grid = data.frame(pval_cutoff = cutoffs, equivalent_lambda = lambdas, marginal_support_size= marginal_support_sizes, number_of_pools=number_of_pools, differ_from_zero=differ_from_zero)
+  grid = data.frame(pval_cutoff = cutoffs, marginal_support_size= marginal_support_sizes, number_of_pools=number_of_pools, differ_from_zero=differ_from_zero)
   return(grid)
 }
 
