@@ -563,7 +563,7 @@ do_TVA <- function(data,arms,y, fes=c(),w=NULL,cutoff,estim_func='pval_OSE',comp
   
   #final pooled ols
   pool_ids = paste("pool_id",c(1:max(data$pool_id)),sep="_")
-  pooled_ols = get_pooled_ols(data,fes_support,y,w,pool_ids,clusters)
+  pooled_ols = get_pooled_ols(data,y,fes_support,w,pool_ids,clusters)
 
   #apply winners curse
   winners_effect = winners_curse(pooled_ols,pool_ids,alpha=0.05,beta=0.005)
