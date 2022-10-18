@@ -8,7 +8,7 @@ suggest_pval_cutoff(
   data,
   arms,
   y,
-  target = NULL,
+  support_size_target = NULL,
   fes = c(),
   w = NULL,
   estim_func = "pval_OSE",
@@ -23,6 +23,9 @@ suggest_pval_cutoff(
 
 \item{y}{is the column name of the outcome of interest}
 
+\item{support_size_target}{(optional) is the prior we might have on the number of marginals in the support. It is NULL by default. \cr
+If NULL, the code will take the support size that corresponds to the elbow of the R-squared vs support size curve.}
+
 \item{fes}{is a vector containing the column names of all the fixed effects}
 
 \item{w}{is the column name of the weights}
@@ -36,7 +39,8 @@ returns a pval cutoff suggestion with the according number of pools it will prod
 }
 \description{
 Suggest one p-value cutoff that could be used the in pval one-step elimination.\cr
-This is done by computing the grid_pval and taking the pval cutoff that create a number of pools equal to the number of unique policies divided by 20.
+This is done in two steps. First, we take the p-value corresponding to a target, which can be provided by the user, or which corresponds to the elbow of the R-squared vs support size curve. \cr
+Then, we look for p-values arround this target and check if some of them produce a final pooled OLS with two best effects that are statistically different from 0.
 }
 \examples{
 arms = c('financial_incentive','reminder','information')
