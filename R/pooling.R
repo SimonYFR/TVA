@@ -919,7 +919,7 @@ suggest_pval_cutoff <- function(data,arms,y,target=NULL, fes=c(),w=NULL,estim_fu
   if (nrow((optimums))==0){
     best = grid[grid$marginal_support_size == target,]
   }else{
-    optimums[ optimums$marginal_support_size <= target, ] = optimums[ optimums$marginal_support_size <= target, ] %>% rev()
+    optimums[ optimums$marginal_support_size <= target, ] = t(rev(t(optimums[ optimums$marginal_support_size <= target, ])))
     best = optimums[1,]
   }
 
