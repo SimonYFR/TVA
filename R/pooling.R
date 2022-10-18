@@ -796,7 +796,7 @@ grid_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,estimation_function_name='p
   f = get(estimation_function_name)
   pvals = f(X,y,variables,0)$pvals_cutoff 
   
-  marginals_pvals = pvals[marginals_colnames] %>% sort(decreasing = TRUE)
+  marginals_pvals = pvals[marginals_colnames] %>% sort(decreasing = FALSE)
   
   cutoffs = floor(marginals_pvals / 10^(floor(log(marginals_pvals, base = 10))-1))/10 * 10^(floor(log(marginals_pvals, base = 10))) #round the pvals
   cutoffs = cutoffs[2: (length(cutoffs)/3) %>% ceiling()] %>% unname() %>% unique()
