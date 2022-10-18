@@ -817,7 +817,7 @@ grid_pval <- function(data,arms,y,fes=c(),w=NULL,estim_func='pval_OSE', compare_
     fes_support = sort(intersect(total_support,fes))
     
     if (length(marginal_support)>0){
-      pooled_ols = get_pooled_ols(pooled_data,fes_support,y,w,pool_ids,clusters) #do pooled OLS
+      pooled_ols = get_pooled_ols(pooled_data,y,fes_support,w,pool_ids,clusters) #do pooled OLS
       
       ols_coefs = pooled_ols$coefficients 
       pools_coefs = ols_coefs[grep("pool_id_", ols_coefs %>% names, value = TRUE)] #take pools_coefficients
@@ -875,7 +875,7 @@ grid_pval <- function(data,arms,y,fes=c(),w=NULL,estim_func='pval_OSE', compare_
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' suggest_pval_OSE_cutoff(data=data,arms=arms,y=y,fes=fes,w=w,compare_to_zero=FALSE)
 
-suggest_pval_OSE_cutoff <- function(data,arms,y,fes=c(),w=NULL,estim_func='pval_OSE',compare_to_zero=FALSE, clusters=NULL){
+suggest_pval_cutoff <- function(data,arms,y,fes=c(),w=NULL,estim_func='pval_OSE',compare_to_zero=FALSE, clusters=NULL){
   check = check_inputs_integrity(data, arms, y, fes, 1, w, estim_func, compare_to_zero, clusters)
   
   if (!check$integrity){
