@@ -4,14 +4,14 @@
 \alias{get_pooled_ols}
 \title{Perform the final OLS}
 \usage{
-get_pooled_ols(data, fes = c(), y, w = NULL, pool_ids, clusters)
+get_pooled_ols(data, y, fes = c(), w = NULL, pool_ids, clusters)
 }
 \arguments{
 \item{data}{is the dataframe containing all our data and pool_id dummy columns}
 
-\item{fes}{is a vector containing the column names of all the fixed effects}
-
 \item{y}{is the column name of the outcome of interest}
+
+\item{fes}{is a vector containing the column names of all the fixed effects}
 
 \item{w}{is the column name of the weights}
 
@@ -40,5 +40,5 @@ p1 = c(0,1,0,0,0,0,0,0,0,0)
 p2 = c(0,0,0,0,0,1,0,0,0,1)
 pool_ids = c('pool_id_1','pool_id_2')
 data = data.frame(pool_id_1 = p1, pool_id_2 = p2, financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-get_pooled_ols(data,fes,y,w,pool_ids)
+get_pooled_ols(data,y, fes=c(),w,pool_ids)
 }

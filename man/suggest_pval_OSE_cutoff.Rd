@@ -7,9 +7,10 @@
 suggest_pval_OSE_cutoff(
   data,
   arms,
-  fes = c(),
   y,
+  fes = c(),
   w = NULL,
+  estim_func = "pval_OSE",
   compare_to_zero = FALSE,
   clusters = NULL
 )
@@ -19,9 +20,9 @@ suggest_pval_OSE_cutoff(
 
 \item{arms}{is a vector containing the column names of all the arms}
 
-\item{fes}{is a vector containing the column names of all the fixed effects}
-
 \item{y}{is the column name of the outcome of interest}
+
+\item{fes}{is a vector containing the column names of all the fixed effects}
 
 \item{w}{is the column name of the weights}
 
@@ -34,7 +35,7 @@ returns a pval cutoff suggestion with the according number of pools it will prod
 }
 \description{
 Suggest one p-value cutoff that could be used the in pval one-step elimination.\cr
-This is done by computing the grid_pval_OSE and taking the pval cutoff that create a number of pools equal to the number of unique policies divided by 20.
+This is done by computing the grid_pval and taking the pval cutoff that create a number of pools equal to the number of unique policies divided by 20.
 }
 \examples{
 arms = c('financial_incentive','reminder','information')
@@ -48,5 +49,5 @@ F1 = c(0,1,0,0,0,1,0,1,0,0)
 Y  = c(5,4,3,5,4,5,4,2,3,2)
 W  = c(1,1,1,2,1,2,2,1,1,2)
 data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-suggest_pval_OSE_cutoff(data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=FALSE)
+suggest_pval_OSE_cutoff(data=data,arms=arms,y=y,fes=fes,w=w,compare_to_zero=FALSE)
 }

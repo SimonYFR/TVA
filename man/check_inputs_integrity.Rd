@@ -7,11 +7,11 @@
 check_inputs_integrity(
   data,
   arms,
-  fes = c(),
   y,
+  fes = c(),
   cutoff = 0,
   w = NULL,
-  estimation_function_name = "pval_OSE",
+  estim_func = "pval_OSE",
   compare_to_zero = FALSE,
   clusters = NULL
 )
@@ -21,15 +21,15 @@ check_inputs_integrity(
 
 \item{arms}{is a vector containing the column names of all the arms}
 
-\item{fes}{is a vector containing the column names of all the fixed effects}
-
 \item{y}{is the column name of the outcome of interest}
+
+\item{fes}{is a vector containing the column names of all the fixed effects}
 
 \item{cutoff}{is the cutoff used in the support estimation}
 
 \item{w}{is the column name of the weights}
 
-\item{estimation_function_name}{is the estimation function we should used. Possible arguments are :\cr
+\item{estim_func}{is the estimation function we should used. Possible arguments are :\cr
 \enumerate{
 \item 'pval_MSE': a multiple step elimination on p-values\cr
 \item 'pval_OSE': a one step elimination on p-values\cr
@@ -61,5 +61,5 @@ F1 = c(0,1,0,0,0,1,0,1,0,0)
 Y  = c(5,4,3,5,4,5,4,2,3,2)
 W  = c(1,1,1,2,1,2,2,1,1,2)
 data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-check_inputs_integrity(data,arms,fes,y,w,0.3,'pval_OSE',FALSE)
+check_inputs_integrity(data,arms,y, fes,w,0.3,'pval_OSE',FALSE)
 }

@@ -4,16 +4,16 @@
 \alias{prepare_data}
 \title{Prepare the data}
 \usage{
-prepare_data(data, arms, fes, y, w, compare_to_zero)
+prepare_data(data, arms, y, fes = c(), w, compare_to_zero)
 }
 \arguments{
 \item{data}{is the dataframe containing all our data}
 
 \item{arms}{is a vector containing the column names of all the arms}
 
-\item{fes}{is a vector containing the column names of all the fixed effects}
-
 \item{y}{is the column name of the outcome of interest}
+
+\item{fes}{is a vector containing the column names of all the fixed effects}
 
 \item{w}{is the column name of the weights}
 
@@ -44,5 +44,5 @@ F1 = c(0,1,0,0,0,1,0,1,0,0)
 Y  = c(5,4,3,5,4,5,4,2,3,2)
 W  = c(1,1,1,2,1,2,2,1,1,2)
 data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-prepare_data(data,arms,fes,y,w,FALSE,FALSE)
+prepare_data(data,arms,y, fes,w,FALSE,FALSE)
 }

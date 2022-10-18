@@ -15,7 +15,7 @@
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
 #' @param cutoff is the cutoff used in the support estimation
-#' @param estimation_function_name is the estimation function we should used. Possible arguments are :\cr
+#' @param estim_func is the estimation function we should used. Possible arguments are :\cr
 #' 1. 'pval_MSE': a multiple step elimination on p-values\cr
 #' 2. 'pval_OSE': a one step elimination on p-values\cr
 #' 3. 'puffer_N_LASSO': a LASSO OLS with a Puffer_N transformation\cr
@@ -39,9 +39,9 @@
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' check_inputs_integrity(data,arms,fes,y,w,0.3,'pval_OSE',FALSE)
+#' check_inputs_integrity(data,arms,y, fes,w,0.3,'pval_OSE',FALSE)
 
-check_inputs_integrity <- function(data, arms, fes=c(), y, cutoff=0, w=NULL, estimation_function_name='pval_OSE', compare_to_zero=FALSE, clusters=NULL){
+check_inputs_integrity <- function(data, arms, y, fes=c(), cutoff=0, w=NULL, estim_func='pval_OSE', compare_to_zero=FALSE, clusters=NULL){
   
   if (!(class(data) == "data.frame")){
     return(list(integrity=FALSE, message="data should be a dataframe"))
@@ -63,8 +63,8 @@ check_inputs_integrity <- function(data, arms, fes=c(), y, cutoff=0, w=NULL, est
     return(list(integrity=FALSE, message="y should be a column name of data"))
   }
   
-  if (!(estimation_function_name %in% c('pval_OSE','pval_MSE','beta_OSE','puffer_N_LASSO','puffer_LASSO'))){
-    return(list(integrity=FALSE, message="estimation_function_name can only equal 'pval_OSE','pval_MSE','beta_OSE','puffer_N_LASSO', or 'puffer_LASSO' "))
+  if (!(estim_func %in% c('pval_OSE','pval_MSE','beta_OSE','puffer_N_LASSO','puffer_LASSO'))){
+    return(list(integrity=FALSE, message="estim_func can only equal 'pval_OSE','pval_MSE','beta_OSE','puffer_N_LASSO', or 'puffer_LASSO' "))
   }
   
   if (!((class(cutoff) == "numeric") & (cutoff>=0))){
@@ -121,7 +121,7 @@ check_inputs_integrity <- function(data, arms, fes=c(), y, cutoff=0, w=NULL, est
   test = test & (length(intersect(y,w))==0)
   
   if (!test){
-    return(list(integrity=FALSE,message="arms, fes, y and w should be different column names"))
+    return(list(integrity=FALSE,message="arms, y, fes and w should be different column names"))
   }
   
   return(list(integrity=TRUE,message=""))
@@ -287,9 +287,9 @@ weight_observations <- function(X,W){
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' prepare_data(data,arms,fes,y,w,FALSE,FALSE)
+#' prepare_data(data,arms,y, fes,w,FALSE,FALSE)
 
-prepare_data <- function(data,arms,fes,y,w,compare_to_zero){
+prepare_data <- function(data,arms,y, fes=c(),w,compare_to_zero){
   cat("Preparing the data","\n")
   n_obs = nrow(data)
   
@@ -303,7 +303,7 @@ prepare_data <- function(data,arms,fes,y,w,compare_to_zero){
   marginals_colnames = names(marginals_matrix)
   
   #Creating the X matrix on which we will estimate the alphas
-  X = cbind(marginals_matrix,data[,c(fes,y)])
+  X = cbind(marginals_matrix,data[,c(y, fes=c())])
   #que faire si intercept existe déjà dans X ?
   X['intercept'] = 1
   
@@ -464,9 +464,9 @@ pools_info <- function(data,arms){
 #' p2 = c(0,0,0,0,0,1,0,0,0,1)
 #' pool_ids = c('pool_id_1','pool_id_2')
 #' data = data.frame(pool_id_1 = p1, pool_id_2 = p2, financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' get_pooled_ols(data,fes,y,w,pool_ids)
+#' get_pooled_ols(data,y, fes=c(),w,pool_ids)
 
-get_pooled_ols <- function(data,fes=c(),y,w=NULL,pool_ids, clusters){
+get_pooled_ols <- function(data,y, fes=c(),w=NULL,pool_ids, clusters){
   cat("Performing the final OLS on pooled data","\n")
   
   pooled_ols_variables = c(pool_ids, fes)
@@ -490,7 +490,7 @@ get_pooled_ols <- function(data,fes=c(),y,w=NULL,pool_ids, clusters){
 #' @param y is the column name of the outcome of interest
 #' @param w (optional) is the column name of the weights
 #' @param cutoff is the cutoff used in the support estimation
-#' @param estimation_function_name (optional) is the estimation function we should used. Possible arguments are :\cr
+#' @param estim_func (optional) is the estimation function we should used. Possible arguments are :\cr
 #' 1. 'pval_MSE': a multiple step elimination on p-values\cr
 #' 2. 'pval_OSE': a one step elimination on p-values\cr
 #' 3. 'puffer_N_LASSO': a LASSO OLS with a Puffer_N transformation\cr
@@ -522,23 +522,23 @@ get_pooled_ols <- function(data,fes=c(),y,w=NULL,pool_ids, clusters){
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' TVA(data,arms,fes,y,w,0.3,'pval_OSE',FALSE,FALSE)
+#' TVA(data,arms,y, fes=c(),w,0.3,'pval_OSE',FALSE,FALSE)
 
-do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='pval_OSE',compare_to_zero=FALSE,clusters=NULL){
+do_TVA <- function(data,arms,y, fes=c(),w=NULL,cutoff,estim_func='pval_OSE',compare_to_zero=FALSE,clusters=NULL){
   #check if fake_weights column already exists
-  check = check_inputs_integrity(data, arms, fes, y, cutoff, w, estimation_function_name, compare_to_zero, clusters)
+  check = check_inputs_integrity(data, arms, y, fes, cutoff, w, estim_func, compare_to_zero, clusters)
   if (!check$integrity){
     stop(check$message)
   }
   
   #prepare the data
-  prepared_data = prepare_data(data,arms,fes,y,w,compare_to_zero)
+  prepared_data = prepare_data(data,arms,y, fes=c(),w,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
   
   #get support
-  f = get(estimation_function_name)
+  f = get(estim_func)
   total_support = f(X,y,variables,cutoff)$support
   marginal_support_strings = sort(intersect(total_support,marginals_colnames))
   if (marginal_support_strings %>% length() == 0){
@@ -610,16 +610,16 @@ do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='p
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' plot_pval_OSE(data,arms,fes,y,w,FALSE,FALSE)
+#' plot_pval_OSE(data,arms,y, fes=c(),w,FALSE,FALSE)
 
 
-plot_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
-  check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
+plot_pval_OSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
+  check = check_inputs_integrity(data, arms, y, fes, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
   }
   
-  prepared_data = prepare_data(data,arms,fes,y,w,compare_to_zero)
+  prepared_data = prepare_data(data,arms,y, fes=c(),w,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
@@ -665,15 +665,15 @@ plot_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' plot_pval_MSE(data,arms,fes,y,w,FALSE,FALSE)
+#' plot_pval_MSE(data,arms,y, fes=c(),w,FALSE,FALSE)
 
-plot_pval_MSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
-  check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
+plot_pval_MSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
+  check = check_inputs_integrity(data, arms, y, fes, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
   }
   
-  prepared_data = prepare_data(data,arms,fes,y,w,compare_to_zero)
+  prepared_data = prepare_data(data,arms,y, fes,w,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
@@ -721,16 +721,16 @@ plot_pval_MSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' plot_beta_OSE(data,arms,fes,y,w,FALSE,FALSE)
+#' plot_beta_OSE(data,arms,y,fes,w,FALSE,FALSE)
 
 
-plot_beta_OSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
-  check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
+plot_beta_OSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
+  check = check_inputs_integrity(data, arms, y, fes, 1, w, 'pval_OSE', compare_to_zero)
   if (!check$integrity){
     stop(check$message)
   }
   
-  prepared_data = prepare_data(data,arms,fes,y,w,compare_to_zero)
+  prepared_data = prepare_data(data,arms,y,fes,w,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
@@ -757,7 +757,7 @@ plot_beta_OSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
 #' @param fes is a vector containing the column names of all the fixed effects
 #' @param y is the column name of the outcome of interest
 #' @param w is the column name of the weights
-#' @param estimation_function_name is the support estimation function we want to use, either pval_OSE or pval_MSE
+#' @param estim_func is the support estimation function we want to use, either pval_OSE or pval_MSE
 #' @param compare_to_zero is a boolean.\cr
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
@@ -778,22 +778,22 @@ plot_beta_OSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' grid_pval_OSE(data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=FALSE)
+#' grid_pval(data=data,arms=arms,y=y,fes=fes,w=w,compare_to_zero=FALSE)
 
-grid_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,estimation_function_name='pval_OSE', compare_to_zero=FALSE, clusters=NULL){
+grid_pval <- function(data,arms,y,fes=c(),w=NULL,estim_func='pval_OSE', compare_to_zero=FALSE, clusters=NULL){
   
-  check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero, clusters)
+  check = check_inputs_integrity(data, arms, y, fes, 1, w, estim_func, compare_to_zero, clusters)
   
   if (!check$integrity){
     stop(check$message)
   }
   
-  prepared_data = prepare_data(data,arms,fes,y,w,compare_to_zero)
+  prepared_data = prepare_data(data,arms,y, fes,w,compare_to_zero)
   X = prepared_data$X
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
   
-  f = get(estimation_function_name)
+  f = get(estim_func)
   pvals = f(X,y,variables,0)$pvals_cutoff 
   
   marginals_pvals = pvals[marginals_colnames] %>% sort(decreasing = FALSE)
@@ -850,7 +850,7 @@ grid_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,estimation_function_name='p
 #' Suggest one p-value cutoff that could be used the in pval one-step elimination
 #'
 #' Suggest one p-value cutoff that could be used the in pval one-step elimination.\cr
-#' This is done by computing the grid_pval_OSE and taking the pval cutoff that create a number of pools equal to the number of unique policies divided by 20.
+#' This is done by computing the grid_pval and taking the pval cutoff that create a number of pools equal to the number of unique policies divided by 20.
 #' @param data is the dataframe containing all our data
 #' @param arms is a vector containing the column names of all the arms
 #' @param fes is a vector containing the column names of all the fixed effects
@@ -873,21 +873,31 @@ grid_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,estimation_function_name='p
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' suggest_pval_OSE_cutoff(data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=FALSE)
+#' suggest_pval_OSE_cutoff(data=data,arms=arms,y=y,fes=fes,w=w,compare_to_zero=FALSE)
 
-suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE, clusters=NULL){
-  check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero, clusters)
+suggest_pval_OSE_cutoff <- function(data,arms,y,fes=c(),w=NULL,estim_func='pval_OSE',compare_to_zero=FALSE, clusters=NULL){
+  check = check_inputs_integrity(data, arms, y, fes, 1, w, estim_func, compare_to_zero, clusters)
+  
   if (!check$integrity){
     stop(check$message)
   }
   
-  grid = grid_pval_OSE(data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=compare_to_zero, clusters=clusters)
-  n_unique_policies = dplyr::n_distinct(data[,arms])
-  unique_policies_to_number_of_pools_ratio = 20
-  suggested_number_of_pools = round(n_unique_policies / unique_policies_to_number_of_pools_ratio)
-  suggested_cutoff = (grid %>% dplyr::filter(.,number_of_pools <= suggested_number_of_pools))[1,'pval_cutoff']
-  cat('Suggested number of pools :',suggested_number_of_pools,'\n')
-  cat('Associated pval cutoff :',suggested_cutoff,'\n')
-  return(suggested_cutoff)
+  grid = grid_pval(data=data,arms=arms,y=y,fes=fes,w=w,estim_func=estim_func,compare_to_zero=compare_to_zero, clusters=clusters)
+  
+  
+  if (is.null(target)){
+    elbow = akmedoids::elbow_point( grid$marginal_support_size, grid$rsqr )$x
+    target = grid$marginal_support_size[which.min(abs(grid$marginal_support_size - elbow))]
+  }
+  
+  possible_optimum = grid[(grid$marginal_support_size %>% dplyr::between(.,round(target/2),target*2)) & (grid$differ_from_zero),]
+  
+  if (nrow((possible_optimum))==0){
+    optimum = grid[grid$marginal_support_size == target,]
+  }else{
+    optimum = possible_optimum[1,]
+  }
+  
+  return(optimum)
 }
 
