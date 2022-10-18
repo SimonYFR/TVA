@@ -5,7 +5,6 @@
 \title{P-values / size of support grid for multiple pval cutoffs in the pval one-step elimination}
 \usage{
 grid_pval_OSE(
-  cutoffs = NULL,
   data,
   arms,
   fes = c(),
@@ -16,9 +15,6 @@ grid_pval_OSE(
 )
 }
 \arguments{
-\item{cutoffs}{is a vector containing all the cutoffs we want to test in the grid, default to NULL\cr
-if NULL, the cutoffs used is c(5e-1,4e-1,3e-1,2e-1, 1e-1, 5e-2, 1e-2, 5e-3, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10, 1e-12, 1e-15, 1e-20, 1e-30)}
-
 \item{data}{is the dataframe containing all our data}
 
 \item{arms}{is a vector containing the column names of all the arms}
@@ -58,5 +54,5 @@ F1 = c(0,1,0,0,0,1,0,1,0,0)
 Y  = c(5,4,3,5,4,5,4,2,3,2)
 W  = c(1,1,1,2,1,2,2,1,1,2)
 data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-grid_pval_OSE(cutoffs=NULL,data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=FALSE)
+grid_pval_OSE(data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=FALSE)
 }

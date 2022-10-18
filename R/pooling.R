@@ -41,7 +41,7 @@
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' check_inputs_integrity(data,arms,fes,y,w,0.3,'pval_OSE',FALSE)
 
-check_inputs_integrity <- function(data, arms, fes=c(), y, cutoff=0, w=NULL, estimation_function_name='pval_OSE', compare_to_zero=FALSE){
+check_inputs_integrity <- function(data, arms, fes=c(), y, cutoff=0, w=NULL, estimation_function_name='pval_OSE', compare_to_zero=FALSE, clusters=NULL){
   
   if (!(class(data) == "data.frame")){
     return(list(integrity=FALSE, message="data should be a dataframe"))
@@ -50,6 +50,12 @@ check_inputs_integrity <- function(data, arms, fes=c(), y, cutoff=0, w=NULL, est
   if (!is.null(w)){
     if (!((class(w) == "character") & (w %in% names(data)))){
       return(list(integrity=FALSE, message="w should either be NULL or a column name of data"))
+    }
+  }
+  
+  if (!is.null(clusters)){
+    if (!((class(clusters) == "character") & (clusters %in% names(data)))){
+      return(list(integrity=FALSE, message="clusters should either be NULL or a column name of data"))
     }
   }
   
@@ -520,7 +526,7 @@ get_pooled_ols <- function(data,fes=c(),y,w=NULL,pool_ids, clusters){
 
 do_TVA <- function(data,arms,fes=c(),y,w=NULL,cutoff,estimation_function_name='pval_OSE',compare_to_zero=FALSE,clusters=NULL){
   #check if fake_weights column already exists
-  check = check_inputs_integrity(data, arms, fes, y, cutoff, w, estimation_function_name, compare_to_zero)
+  check = check_inputs_integrity(data, arms, fes, y, cutoff, w, estimation_function_name, compare_to_zero, clusters)
   if (!check$integrity){
     stop(check$message)
   }
@@ -672,9 +678,8 @@ plot_pval_MSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
   
-  pval_MSE = pval_MSE(X,y,variables,0)
-  pvals = pval_MSE$pvals
-  eliminated_variables = pval_MSE$eliminated_variables
+  pvals = pval_MSE(X,y,variables,0)$pvals
+  eliminated_variables = names(pvals)
   
   pvals_MSE = data.frame(pvals[which(eliminated_variables %in% marginals_colnames)]) %>% setNames(.,c('pval'))
   pvals_MSE$size_of_support = rev(c(1:nrow(pvals_MSE)))
@@ -747,8 +752,6 @@ plot_beta_OSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
 #'
 #' Simulate many pval one-step elimination for different pval cutoffs values.\cr
 #' This allows to see the size of support one would get for each pval cutoff.
-#' @param cutoffs is a vector containing all the cutoffs we want to test in the grid, default to NULL\cr
-#' if NULL, the cutoffs used is c(5e-1,4e-1,3e-1,2e-1, 1e-1, 5e-2, 1e-2, 5e-3, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10, 1e-12, 1e-15, 1e-20, 1e-30)
 #' @param data is the dataframe containing all our data
 #' @param arms is a vector containing the column names of all the arms
 #' @param fes is a vector containing the column names of all the fixed effects
@@ -775,10 +778,12 @@ plot_beta_OSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' grid_pval_OSE(cutoffs=NULL,data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=FALSE)
+#' grid_pval_OSE(data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=FALSE)
 
-grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE, clusters=NULL){
-  check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
+grid_pval_OSE <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE, clusters=NULL){
+  
+  check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero, clusters)
+  
   if (!check$integrity){
     stop(check$message)
   }
@@ -788,12 +793,11 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,compare_to_zer
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
   
-  if (is.null(cutoffs)) {
-    cutoffs = c(5e-1,4e-1,3e-1,2e-1, 1e-1, 5e-2, 1e-2, 5e-3, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10, 1e-12, 1e-15, 1e-20, 1e-30)
-  }
-  
+  pvals = pval_MSE(X,y,variables,0)$pvals %>% sort()
+
   pvals = pval_OSE(X,y,variables,0)$pvals %>% sort()
   marginals_pvals = pvals[marginals_colnames] %>% sort()
+  
   cutoffs = floor(marginals_pvals / 10^(floor(log(marginals_pvals, base = 10))-1))/10 * 10^(floor(log(marginals_pvals, base = 10))) #round the pvals
   cutoffs = cutoffs[2: (length(cutoffs)/3) %>% ceiling()] %>% unname() %>% unique()
   
@@ -806,7 +810,7 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,compare_to_zer
     total_support = names(pvals[which(pvals<=pval_cutoff)]) #compute the total_support
     marginal_support = intersect(total_support,marginals_colnames) %>% sort() #take the marginal support
 
-    pooled_data = (pool_data(data,arms,marginal_support,compare_to_zero))
+    pooled_data = pool_data(data,arms,marginal_support,compare_to_zero)
 
     pool_ids = paste("pool_id",c(1:max(pooled_data$pool_id)),sep="_")
     fes_support = sort(intersect(total_support,fes))
@@ -815,11 +819,7 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,compare_to_zer
     
     ols_coefs = pooled_ols$coefficients 
     pools_coefs = ols_coefs[grep("pool_id_", ols_coefs %>% names, value = TRUE)] #take pools_coefficients
-    print('-------------------')
-    print(pools_coefs)
     two_bests = (pools_coefs %>% sort(.,decreasing=TRUE))[1:2] %>% names() #take the two bests
-    print(two_bests)
-    print(pooled_ols$p.value[two_bests])
     two_bests_differ_from_zero = all(pooled_ols$p.value[two_bests] < 0.05)
     
     differ_from_zero = c(differ_from_zero, two_bests_differ_from_zero)
@@ -860,13 +860,13 @@ grid_pval_OSE <- function(cutoffs=NULL,data,arms,fes=c(),y,w=NULL,compare_to_zer
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' suggest_pval_OSE_cutoff(data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=FALSE)
 
-suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE){
-  check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero)
+suggest_pval_OSE_cutoff <- function(data,arms,fes=c(),y,w=NULL,compare_to_zero=FALSE, clusters=NULL){
+  check = check_inputs_integrity(data, arms, fes, y, 1, w, 'pval_OSE', compare_to_zero, clusters)
   if (!check$integrity){
     stop(check$message)
   }
   
-  grid = grid_pval_OSE(cutoffs=NULL,data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=compare_to_zero)
+  grid = grid_pval_OSE(data=data,arms=arms,fes=fes,y=y,w=w,compare_to_zero=compare_to_zero, clusters=clusters)
   n_unique_policies = dplyr::n_distinct(data[,arms])
   unique_policies_to_number_of_pools_ratio = 20
   suggested_number_of_pools = round(n_unique_policies / unique_policies_to_number_of_pools_ratio)

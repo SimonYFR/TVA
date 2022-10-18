@@ -12,7 +12,8 @@ check_inputs_integrity(
   cutoff = 0,
   w = NULL,
   estimation_function_name = "pval_OSE",
-  compare_to_zero = FALSE
+  compare_to_zero = FALSE,
+  clusters = NULL
 )
 }
 \arguments{

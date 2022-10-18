@@ -10,7 +10,8 @@ suggest_pval_OSE_cutoff(
   fes = c(),
   y,
   w = NULL,
-  compare_to_zero = FALSE
+  compare_to_zero = FALSE,
+  clusters = NULL
 )
 }
 \arguments{
