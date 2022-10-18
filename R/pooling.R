@@ -303,6 +303,9 @@ prepare_data <- function(data,arms,y, fes=c(),w,compare_to_zero){
   marginals_colnames = names(marginals_matrix)
   
   #Creating the X matrix on which we will estimate the alphas
+  print(fes)
+  print(y)
+  print(colnames(data))
   X = cbind(marginals_matrix, data[,c(fes,y)])
   
   
