@@ -908,10 +908,10 @@ suggest_pval_cutoff <- function(data,arms,y,target=NULL, fes=c(),w=NULL,estim_fu
 
   if (is.null(target)){
     elbow = elbow(grid$marginal_support_size, grid$rsqr)
+    cat('Elbow is ',elbow,'\n')
     target = grid$marginal_support_size[which.min(abs(grid$marginal_support_size - elbow))]
   }
 
-  cat('Elbow is ',elbow,'\n')
   cat('Target is ',target,'\n')
 
   optimums = grid[(grid$marginal_support_size %>% dplyr::between(.,round(target/2),target*2)) & (grid$differ_from_zero),]
