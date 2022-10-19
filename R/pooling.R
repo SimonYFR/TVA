@@ -680,7 +680,7 @@ plot_pval_MSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
   
   pval_MSE = pval_MSE(X,y,variables,0)
   max_pvals = (pval_MSE$pvals)[marginals_colnames] %>% sort(decreasing = TRUE)
-  thresholds_MSE = data.frame( threshold = cummin(max_pval), max_pval = max_pvals, size_of_support = rev(c(1:length(max_pvals))))
+  thresholds_MSE = data.frame( threshold = cummin(max_pvals), max_pval = max_pvals, size_of_support = rev(c(1:length(max_pvals))))
   
   # thresholds_MSE = data.frame(thresholds[which(eliminated_variables %in% marginals_colnames)]) %>% setNames(.,c('max_pval'))
   # thresholds_MSE$size_of_support = rev(c(1:nrow(thresholds_MSE)))
