@@ -332,9 +332,10 @@ weight_observations <- function(X,W){
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
 #' @return returns a list containing :\cr
-#' - X: a dataframe containing the marginals matrix, the fixed effects, the outcome and the intercept. X is ready for support estimation\cr
-#' - marginals_colnames: a vector containing all the marginals names (also called the alphas)\cr
-#' - variables: the list of variables that should be used in the regression (fixed effects, marginals and the intercept)
+#' * X: a dataframe containing the marginals matrix, the fixed effects, the outcome and the intercept. X is ready for support estimation\cr
+#' * arms: a vector containing the columns with the dosages on each arms (no more dummy columns if it was provided by the user). \cr
+#' * marginals_colnames: a vector containing all the marginals names (also called the alphas)\cr
+#' * variables: the list of variables that should be used in the regression (fixed effects, marginals and the intercept)
 #' @export
 #' @examples
 #' arms = c('financial_incentive','reminder','information')
@@ -379,7 +380,7 @@ prepare_data <- function(data, arms, y, fes, w, compare_to_zero){
   X = weight_observations(X,W)
   variables = c(fes,marginals_colnames,'intercept')
   
-  return(list(X=X,variables=variables,marginals_colnames=marginals_colnames))
+  return(list(X=X,arms=arms,variables=variables,marginals_colnames=marginals_colnames))
 }
 
 
@@ -603,6 +604,7 @@ do_TVA <- function(data,arms,y, fes=c(),w=NULL,cutoff,estim_func='pval_OSE',comp
   #prepare the data
   prepared_data = prepare_data(data,arms,y, fes,w,compare_to_zero)
   X = prepared_data$X
+  arms = prepared_data$arms
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
   
@@ -690,6 +692,7 @@ plot_pval_OSE <- function(data, arms, y, fes=c(), w=NULL, compare_to_zero=FALSE)
   
   prepared_data = prepare_data(data,arms, y, fes,w,compare_to_zero)
   X = prepared_data$X
+  arms = prepared_data$arms
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
   thresholds = pval_OSE(X,y,variables,1)$thresholds
@@ -744,6 +747,7 @@ plot_pval_MSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
   
   prepared_data = prepare_data(data,arms,y, fes,w,compare_to_zero)
   X = prepared_data$X
+  arms = prepared_data$arms
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
   
@@ -799,6 +803,7 @@ plot_beta_OSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
   
   prepared_data = prepare_data(data,arms,y,fes,w,compare_to_zero)
   X = prepared_data$X
+  arms = prepared_data$arms
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
   
@@ -857,6 +862,7 @@ grid_pval <- function(data,arms,y,fes=c(),w=NULL,estim_func='pval_OSE', compare_
   
   prepared_data = prepare_data(data,arms,y, fes,w,compare_to_zero)
   X = prepared_data$X
+  arms = prepared_data$arms
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
   
