@@ -140,9 +140,9 @@ check_inputs_integrity <- function(data, arms, y, fes=c(), cutoff=0, w=NULL, est
   
 
   test = TRUE
-  test = test & (length(intersect(arms,fes))==0)
-  test = test & (length(intersect(arms,y))==0)
-  test = test & (length(intersect(arms,w))==0)
+  test = test & (length(intersect(arms %>% unlist(),fes))==0)
+  test = test & (length(intersect(arms %>% unlist(),y))==0)
+  test = test & (length(intersect(arms %>% unlist(),w))==0)
   test = test & (length(intersect(y,fes))==0)
   test = test & (length(intersect(w,fes))==0)
   test = test & (length(intersect(y,w))==0)
