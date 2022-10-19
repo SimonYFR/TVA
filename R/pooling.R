@@ -627,10 +627,10 @@ plot_pval_OSE <- function(data, arms, y, fes=c(), w=NULL, compare_to_zero=FALSE)
   thresholds = pval_OSE(X,y,variables,1)$thresholds
   
   thresholds_OSE = thresholds[which(names(thresholds) %in% marginals_colnames)] %>% sort() %>% data.frame()
-  thresholds_OSE = thresholds_OSE %>% setNames(.,c('pval'))
+  thresholds_OSE = thresholds_OSE %>% setNames(.,c('threshold'))
   thresholds_OSE$size_of_support = c(1:nrow(thresholds_OSE))
   
-  plot = ggplot2::ggplot(data=thresholds_OSE, ggplot2::aes(x=size_of_support, y=thresholds)) +
+  plot = ggplot2::ggplot(data=thresholds_OSE, ggplot2::aes(x=size_of_support, y=threshold)) +
     ggplot2::geom_line(linetype = "dashed")+
     ggplot2::geom_point()+
     ggplot2::scale_y_continuous(trans='log10')
@@ -681,14 +681,14 @@ plot_pval_MSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
   thresholds = pval_MSE(X,y,variables,0)$thresholds
   eliminated_variables = names(thresholds)
   
-  thresholds_MSE = data.frame(thresholds[which(eliminated_variables %in% marginals_colnames)]) %>% setNames(.,c('pval'))
+  thresholds_MSE = data.frame(thresholds[which(eliminated_variables %in% marginals_colnames)]) %>% setNames(.,c('max_pval'))
   thresholds_MSE$size_of_support = rev(c(1:nrow(thresholds_MSE)))
-  thresholds_MSE$pval_cutoff = cummin(thresholds_MSE$pval)
+  thresholds_MSE$threshold = cummin(thresholds_MSE$max_pval)
   
   plot = ggplot2::ggplot(data=thresholds_MSE, ggplot2::aes(x=size_of_support)) +
-    ggplot2::geom_line(ggplot2::aes(y = pval), color="black", linetype="dashed") +
-    ggplot2::geom_line(ggplot2::aes(y = pval_cutoff), color="steelblue") +
-    ggplot2::geom_point(ggplot2::aes(y = pval), color="black")+
+    ggplot2::geom_line(ggplot2::aes(y = max_pval), color="black", linetype="dashed") +
+    ggplot2::geom_line(ggplot2::aes(y = threshold), color="steelblue") +
+    ggplot2::geom_point(ggplot2::aes(y = max_pval), color="black")+
     ggplot2::scale_y_continuous(trans='log10')
   
   return(plot)
