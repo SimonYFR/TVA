@@ -45,6 +45,9 @@ pval_MSE <- function(X,y,variables,threshold){
   
   thresholds = cummin(deselect_pval) %>% setNames(.,deselect_list)
   
+  print(thresholds)
+  print(setNames(deselect_pval,deselect_list))
+  
   result = list(support=support, pvals = setNames(deselect_pval,deselect_list), thresholds=thresholds )
   return(result)
   
