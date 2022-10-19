@@ -75,13 +75,52 @@ check_inputs_integrity <- function(data, arms, y, fes=c(), cutoff=0, w=NULL, est
     return(list(integrity=FALSE,message="compare_to_zero should be TRUE or FALSE"))
   }
   
+  if (!length(arms)>0){
+    return(list(integrity=FALSE,message="arms can't be empty"))
+  }
+  
   test = TRUE
-  for (arm in arms){
-    test = test & (class(arm) == "character")
+  for (e in unlist(arms)){
+    test = test & (class(e) == "character")
   }
   if (!test){
-    return(list(integrity=FALSE,message="arms should be a vector of strings"))
+    return(list(integrity=FALSE,message="arms should contain only strings or list of strings"))
   }
+  
+  if (!all(intersect(names(data),arms %>% unlist()) == arms %>% unlist() )){
+    return(list(integrity=FALSE,message="strings inside arms should be column names of data"))
+  }
+  
+  if (any(duplicated(unlist(arms)))){
+    return(list(integrity=FALSE,message="arms can not contained columns names duplicates"))
+  }
+  
+  
+  if (unlist(arms) %>% length() == length(arms) ){
+    test = TRUE
+    for (arm in arms){
+      test = test & (all(data[,arm]>=0))
+    }
+    if (!test){
+      return(list(integrity=FALSE,message="arms columns should contain positive (>=0) values"))
+    }
+  }else{
+    if (!all( (data[,unlist(arms)]==0) | (data[,unlist(arms)]==1) )){
+      return(list(integrity=FALSE,message="if arms is a list of lists, all the column names should refer to dummy columns with values that are 0 or 1"))
+    }
+    for (e in arms){
+      if (!all( data[,e] %>% rowSums() < 2 )){
+        return(list(integrity=FALSE,message="if arms is a list of lists, all the column names inside a common list must be mutually exclusive indicators. One observation can't have two different dosages on the same arm."))
+      }
+    }
+    if (!names(arms) %>% length() == arms %>% length()){
+      return(list(integrity=FALSE,message="if arms is a list of lists, all lists inside arms should be named"))
+    }
+    if (any(duplicated(names(arms)))){
+      return(list(integrity=FALSE,message="if arms is a list of lists, two lists can't have the same name"))
+    }
+  }
+  
   
   test = TRUE
   for (fe in fes){
@@ -89,10 +128,6 @@ check_inputs_integrity <- function(data, arms, y, fes=c(), cutoff=0, w=NULL, est
   }
   if (!test){
     return(list(integrity=FALSE,message="fes should be a vector of strings"))
-  }
-  
-  if (!all(intersect(names(data),arms) == arms )){
-    return(list(integrity=FALSE,message="strings inside arms should be column names of data"))
   }
   
   if (!all(intersect(names(data),fes) == fes )){
@@ -103,15 +138,7 @@ check_inputs_integrity <- function(data, arms, y, fes=c(), cutoff=0, w=NULL, est
     return(list(integrity=FALSE,message="column w should have strictly positive values"))
   }
   
-  test = TRUE
-  for (arm in arms){
-    test = test & (all(data[,arm]>=0))
-  }
-  
-  if (!test){
-    return(list(integrity=FALSE,message="arms columns should contain positive (>=0) values"))
-  }
-  
+
   test = TRUE
   test = test & (length(intersect(arms,fes))==0)
   test = test & (length(intersect(arms,y))==0)
@@ -125,6 +152,35 @@ check_inputs_integrity <- function(data, arms, y, fes=c(), cutoff=0, w=NULL, est
   }
   
   return(list(integrity=TRUE,message=""))
+}
+
+#' From dummy columns to dosages columns
+#'
+#' Going from the dummy columns to a unique column per arm with the dosages
+#' @param data is a dataframe with the data 
+#' @param arms is a named list, and each element of the list is a vector containing the dummy columns of one arm dosages, in the order of increasing dosages and without the dosage 0 dummy. The name of this element must be the arm name. 
+#' @return returns the dataframe "data" with one column per arm showing the dosage.
+#' @export
+#' @examples
+#' sms_lvl_1 = c(0,0,0,1,0,1)
+#' sms_lvl_2 = c(0,1,1,0,0,0)
+#' incentive_lvl_1 = c(1,0,1,0,1,0)
+#' incentive_lvl_2 = c(0,0,0,1,0,1)
+#' information_lvl_1 = c(1,0,0,1,0,1)
+#' information_lvl_2 = c(0,0,0,0,1,0)
+#' information_lvl_3 = c(0,1,1,0,0,0)
+#' arms = list(sms = c('sms_lvl_1','sms_lvl_2'),
+#'             incentive = c('incentive_lvl_1','incentive_lvl_2'),
+#'             info = c('information_lvl_1','information_lvl_2','information_lvl_3'))
+#' df = data.frame(sms_lvl_1, sms_lvl_2, incentive_lvl_1, incentive_lvl_2, information_lvl_1, information_lvl_2, information_lvl_3)
+#' create_dosages_from_dummies(data,arms)
+
+
+create_dosages_from_dummies <- function(data,arms){
+  for (k in seq_along(arms)){
+    data[,names(arms)[k]] = rowSums(t(t(data[,arms[[k]] ])*seq_along(arms[[k]])))
+  }
+  return(list(data=data,arms=names(arms)))
 }
 
 
@@ -294,6 +350,13 @@ prepare_data <- function(data, arms, y, fes, w, compare_to_zero){
   n_obs = nrow(data)
   
   if (is.null(w))  {   W=rep(1,n_obs)   }  else   {   W=data[,w]   }
+  
+  #check if arms is a list of string or a list of lists of strings
+  if (unlist(arms) %>% length() != length(arms) ){ 
+    preprocess = create_dosages_from_dummies(data,arms)
+    data = preprocess$data
+    arms = preprocess$arms
+  }
   
   #creating the vector of maximum dosage per arm
   max_dosage_per_arm = sapply(data[,arms], max, na.rm = TRUE)
@@ -669,6 +732,7 @@ plot_pval_OSE <- function(data, arms, y, fes=c(), w=NULL, compare_to_zero=FALSE)
 
 plot_pval_MSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
   check = check_inputs_integrity(data, arms, y, fes, 1, w, 'pval_OSE', compare_to_zero)
+  
   if (!check$integrity){
     stop(check$message)
   }
