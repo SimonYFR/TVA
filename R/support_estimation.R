@@ -45,9 +45,6 @@ pval_MSE <- function(X,y,variables,threshold){
   
   thresholds = cummin(deselect_pval) %>% setNames(.,deselect_list)
   
-  print(thresholds)
-  print(setNames(deselect_pval,deselect_list))
-  
   result = list(support=support, pvals = setNames(deselect_pval,deselect_list), thresholds=thresholds )
   return(result)
   
@@ -167,7 +164,7 @@ puffer_N_LASSO <- function(X,y,variables,lambda){
   X_PT = puffer_result[[1]]
   Y_PT = puffer_result[[2]]
   
-  lambda_cutoff_glm = lambda_cutoff/nrow(X_PT) #this normalization is needed as glmnet considers a different optimization function
+  lambda_cutoff_glm = lambda/nrow(X_PT) #this normalization is needed as glmnet considers a different optimization function
   lasso_model=glmnet::glmnet(X_PT,Y_PT,alpha=1,lambda = lambda_cutoff_glm, intercept=FALSE,standardize=FALSE) #intercept is already in X dataframe and scaling is treated in the main function
   support=names(coef(lasso_model)[,1][which(abs(coef(lasso_model)[,1]) > 0)])
   

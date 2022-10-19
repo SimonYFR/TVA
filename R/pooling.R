@@ -683,10 +683,6 @@ plot_pval_MSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
   max_pvals = max_pvals[names(max_pvals) %in% marginals_colnames]
   thresholds_MSE = data.frame( threshold = cummin(max_pvals), max_pval = max_pvals, size_of_support = rev(c(1:length(max_pvals))))
   
-  # thresholds_MSE = data.frame(thresholds[which(eliminated_variables %in% marginals_colnames)]) %>% setNames(.,c('max_pval'))
-  # thresholds_MSE$size_of_support = rev(c(1:nrow(thresholds_MSE)))
-  # thresholds_MSE$threshold = cummin(thresholds_MSE$max_pval)
-  
   plot = ggplot2::ggplot(data=thresholds_MSE, ggplot2::aes(x=size_of_support)) +
     ggplot2::geom_line(ggplot2::aes(y = max_pval), color="black", linetype="dashed") +
     ggplot2::geom_line(ggplot2::aes(y = threshold), color="steelblue") +
