@@ -109,9 +109,6 @@ check_inputs_integrity <- function(data, arms, y, fes=c(), cutoff=0, w=NULL, est
       return(list(integrity=FALSE,message="if arms is a list of lists, all the column names should refer to dummy columns with values that are 0 or 1"))
     }
     for (e in arms){
-      print(e)
-      print(data[,e])
-      print(data[,e] %>%rowSums())
       if (length(e)==0){
         return(list(integrity=FALSE,message="arms can't contain any empty list"))
       }
