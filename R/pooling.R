@@ -364,8 +364,12 @@ prepare_data <- function(data, arms, y, fes, w, compare_to_zero){
     arms = preprocess$arms
   }
   
+  print(arms)
+  
   #creating the vector of maximum dosage per arm
   max_dosage_per_arm = sapply(data[,arms], max, na.rm = TRUE)
+  
+  print(max_dosage_per_arm)
   
   #Initializing the marginal space matrix
   marginals_matrix = create_empty_marginals_matrix(max_dosage_per_arm,n_obs) %>% fill_marginals_matrix(.,data,arms,n_obs,compare_to_zero)
