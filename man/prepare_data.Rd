@@ -25,6 +25,7 @@ If FALSE, then they must also have the exact same activated arms (the zeros of t
 returns a list containing :\cr
 \itemize{
 \item X: a dataframe containing the marginals matrix, the fixed effects, the outcome and the intercept. X is ready for support estimation\cr
+\item data: the original dataframe with new columns for arm dosages (if dummy arm columns were provided by the user)
 \item arms: a vector containing the columns with the dosages on each arms (no more dummy columns if it was provided by the user). \cr
 \item marginals_colnames: a vector containing all the marginals names (also called the alphas)\cr
 \item variables: the list of variables that should be used in the regression (fixed effects, marginals and the intercept)

@@ -333,6 +333,7 @@ weight_observations <- function(X,W){
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
 #' @return returns a list containing :\cr
 #' * X: a dataframe containing the marginals matrix, the fixed effects, the outcome and the intercept. X is ready for support estimation\cr
+#' * data: the original dataframe with new columns for arm dosages (if dummy arm columns were provided by the user)
 #' * arms: a vector containing the columns with the dosages on each arms (no more dummy columns if it was provided by the user). \cr
 #' * marginals_colnames: a vector containing all the marginals names (also called the alphas)\cr
 #' * variables: the list of variables that should be used in the regression (fixed effects, marginals and the intercept)
@@ -364,12 +365,8 @@ prepare_data <- function(data, arms, y, fes, w, compare_to_zero){
     arms = preprocess$arms
   }
   
-  print(arms)
-  
   #creating the vector of maximum dosage per arm
   max_dosage_per_arm = sapply(data[,arms], max, na.rm = TRUE)
-  
-  print(max_dosage_per_arm)
   
   #Initializing the marginal space matrix
   marginals_matrix = create_empty_marginals_matrix(max_dosage_per_arm,n_obs) %>% fill_marginals_matrix(.,data,arms,n_obs,compare_to_zero)
@@ -384,7 +381,7 @@ prepare_data <- function(data, arms, y, fes, w, compare_to_zero){
   X = weight_observations(X,W)
   variables = c(fes,marginals_colnames,'intercept')
   
-  return(list(X=X,arms=arms,variables=variables,marginals_colnames=marginals_colnames))
+  return(list(X=X,data=data,arms=arms,variables=variables,marginals_colnames=marginals_colnames))
 }
 
 
@@ -608,6 +605,7 @@ do_TVA <- function(data,arms,y, fes=c(),w=NULL,cutoff,estim_func='pval_OSE',comp
   #prepare the data
   prepared_data = prepare_data(data,arms,y, fes,w,compare_to_zero)
   X = prepared_data$X
+  data = prepared_data$data
   arms = prepared_data$arms
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
@@ -696,6 +694,7 @@ plot_pval_OSE <- function(data, arms, y, fes=c(), w=NULL, compare_to_zero=FALSE)
   
   prepared_data = prepare_data(data,arms, y, fes,w,compare_to_zero)
   X = prepared_data$X
+  data = prepared_data$data
   arms = prepared_data$arms
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
@@ -751,6 +750,7 @@ plot_pval_MSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
   
   prepared_data = prepare_data(data,arms,y, fes,w,compare_to_zero)
   X = prepared_data$X
+  data = prepared_data$data
   arms = prepared_data$arms
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
@@ -807,6 +807,7 @@ plot_beta_OSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
   
   prepared_data = prepare_data(data,arms,y,fes,w,compare_to_zero)
   X = prepared_data$X
+  data = prepared_data$data
   arms = prepared_data$arms
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
@@ -856,6 +857,7 @@ plot_beta_OSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' grid_pval(data=data,arms=arms,y=y,fes=fes,w=w,compare_to_zero=FALSE)
 
+
 grid_pval <- function(data,arms,y,fes=c(),w=NULL,estim_func='pval_OSE', compare_to_zero=FALSE, clusters=NULL){
   
   check = check_inputs_integrity(data, arms, y, fes, 1, w, estim_func, compare_to_zero, clusters)
@@ -866,6 +868,7 @@ grid_pval <- function(data,arms,y,fes=c(),w=NULL,estim_func='pval_OSE', compare_
   
   prepared_data = prepare_data(data,arms,y, fes,w,compare_to_zero)
   X = prepared_data$X
+  data = prepared_data$data
   arms = prepared_data$arms
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
