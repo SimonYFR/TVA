@@ -26,7 +26,7 @@ returns the plot of the ordered p-values, allowing to see the corresponding size
 }
 \description{
 Plot the ordered p-values in the one-step elimination. \cr
-This allows to choose a p-value cutoff according to a targeted support size. \cr
+This allows to choose a thresholds according to a targeted support size. \cr
 This is done by simulating a one-step p-value elimination.
 }
 \examples{

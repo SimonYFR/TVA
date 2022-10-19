@@ -5,13 +5,13 @@
 #' @param X is the regression matrix with the marginals, the fixed effects, the outcome of interest
 #' @param y is the outcome of interest
 #' @param variables is a vector containing all the variables we want to regress on
-#' @param pval_cutoff is the cutoff on p-values
+#' @param threshold is the threshold on p-values
 #' @return returns the estimated support
 #' @export
 
 
-pval_MSE <- function(X,y,variables,pval_cutoff){
-  cat("Estimating support with pval MSE and cutoff =",pval_cutoff,"\n")
+pval_MSE <- function(X,y,variables,threshold){
+  cat("Estimating support with pval MSE and threshold =",threshold,"\n")
   current_variables = variables
   deselect_list <- c()
   deselect_pval <- c()
@@ -23,7 +23,7 @@ pval_MSE <- function(X,y,variables,pval_cutoff){
   n=length(variables)
   i=0
   cat("Starting the multiple step elimination procedure","\n")
-  while (current_max_pval > pval_cutoff) {
+  while (current_max_pval > threshold) {
     i=i+1
     cat("\rProgress: ",i," variables eliminated on ", n)
     deselect_name <- names(current_pvals[which.max(current_pvals)])
@@ -31,7 +31,7 @@ pval_MSE <- function(X,y,variables,pval_cutoff){
     deselect_pval <- c(deselect_pval, current_pvals[which.max(current_pvals)])
     current_variables <- current_variables[current_variables != deselect_name]
     if (length(current_variables)==0){
-      cat("pval_cutoff is too strict, no variable survived","\n")
+      cat("threshold is too strict, no variable survived","\n")
       break
     }
     current_formula <- as.formula(paste0(y,"~",paste0(c(current_variables,0),collapse = "+")))
@@ -43,39 +43,39 @@ pval_MSE <- function(X,y,variables,pval_cutoff){
   cat("\n",current_max_pval,"\n")
   support = variables[!(variables %in% deselect_list)]
   
-  pvals_cutoff = cummin(deselect_pval) %>% setNames(.,deselect_list)
+  thresholds = cummin(deselect_pval) %>% setNames(.,deselect_list)
   
-  result = list(support=support, pvals = setNames(deselect_pval,deselect_list), pvals_cutoff=pvals_cutoff )
+  result = list(support=support, pvals = setNames(deselect_pval,deselect_list), thresholds=thresholds )
   return(result)
   
 }
 
-#' From lambda to pval cutoff
+#' From lambda to threshold
 #'
-#' Compute the equivalent p-value between Puffer_N LASSO lambda and pval one-step elimination
+#' Compute the equivalent threshold for the lambda of Puffer_N LASSO and pval one-step elimination
 #' @param X is the regression matrix with the marginals, the fixed effects, the outcome of interest
 #' @param y is the outcome of interest
-#' @return returns the pval equivalent to lambda 
+#' @return returns the threshold equivalent to lambda 
 #' @export
 
 
 
-lambda_to_pval <- function(X,y,variables,lambda){
+lambda_to_threshold <- function(X,y,variables,lambda){
   formula <- as.formula(paste0(y,"~",paste0(c(variables,"0"),collapse = "+")))
   model_ols <- estimatr::lm_robust(formula = formula, data = X,  se_type = "classical")
-  pval = 2*(1-pnorm(lambda/sqrt(model_ols$res_var)))
-  return(pval)
+  threshold = 2*(1-pnorm(lambda/sqrt(model_ols$res_var)))
+  return(threshold)
 }
 
-#' From pval to lambda cutoff
+#' From threshold to lambda 
 #'
-#' Compute the equivalent lambda between Puffer_N LASSO lambda and pval one-step elimination
+#' Compute the equivalent lambda between Puffer_N LASSO and threshold in pval one-step elimination
 #' @param X is the regression matrix with the marginals, the fixed effects, the outcome of interest
 #' @param y is the outcome of interest
 #' @return returns the lambda equivalent to pval 
 #' @export
 
-pval_to_lambda <- function(X,y,variables,pval){
+threshold_to_lambda <- function(X,y,variables,pval){
   formula <- as.formula(paste0(y,"~",paste0(c(variables,"0"),collapse = "+")))
   model_ols <- estimatr::lm_robust(formula = formula, data = X,  se_type = "classical")
   lambda = model_ols$res_var %>% sqrt() * qnorm(1-pval/2)
@@ -88,20 +88,20 @@ pval_to_lambda <- function(X,y,variables,pval){
 #' @param X is the regression matrix with the marginals, the fixed effects, the outcome of interest
 #' @param y is the outcome of interest
 #' @param variables is a vector containing all the variables we want to regress on
-#' @param pval_cutoff is the cutoff on p-values
+#' @param threshold is the threshold on p-values
 #' @return returns the estimated support
 #' @export
 
-pval_OSE<- function(X,y,variables,pval_cutoff){
-  cat("Estimating support with pval OSE and cutoff =",pval_cutoff,"\n")
+pval_OSE<- function(X,y,variables,threshold){
+  cat("Estimating support with pval OSE and threshold =",threshold,"\n")
   
   formula = as.formula(paste0(y,"~",paste0(c(variables,"0"),collapse = "+")))
   model_ols = estimatr::lm_robust(formula = formula, data = X,  se_type = "classical")
-  support = names(model_ols$p.value[which(model_ols$p.value<=pval_cutoff)])
+  support = names(model_ols$p.value[which(model_ols$p.value<=threshold)])
   
-  pvals_cutoff = sort(model_ols$p.value, decreasing=TRUE)
+  thresholds = sort(model_ols$p.value, decreasing=TRUE)
   
-  result = list(support=support, pvals = model_ols$p.value, pvals_cutoff = pvals_cutoff)
+  result = list(support=support, pvals = model_ols$p.value, thresholds = thresholds)
   
   return(result)
 }
@@ -143,17 +143,17 @@ N_transform <- function(X){
 #' @param X is the regression matrix with the marginals, the fixed effects, the outcome of interest
 #' @param y is the outcome of interest
 #' @param variables is a vector containing all the variables we want to regress on
-#' @param lambda_cutoff is the cutoff on beta values
+#' @param lambda is the cutoff on beta values
 #' @return returns the estimated support
 #' @export
 
 
-puffer_N_LASSO <- function(X,y,variables,lambda_cutoff){
-  cat("Estimating support with puffer N LASSO and cutoff =",lambda_cutoff,"\n")
+puffer_N_LASSO <- function(X,y,variables,lambda){
+  cat("Estimating support with puffer N LASSO and lambda =",lambda,"\n")
   
-  pval_cutoff = lambda_to_pval(X,y,variables,lambda_cutoff)
-  cat("Equivalent p-value cutoff to current lambda cutoff is ","\n")
-  cat(pval_cutoff,"\n")
+  threshold = lambda_to_threshold(X,y,variables,lambda)
+  cat("Equivalent p-value threshold to current lambda is ","\n")
+  cat(threshold,"\n")
   
   X_matrix = X[,c(variables)] %>% as.matrix()
   Y = X[,y] %>% as.matrix()
@@ -178,15 +178,15 @@ puffer_N_LASSO <- function(X,y,variables,lambda_cutoff){
 #' @param X is the regression matrix with the marginals, the fixed effects, the outcome of interest
 #' @param y is the outcome of interest
 #' @param variables is a vector containing all the variables we want to regress on
-#' @param lambda_cutoff is the cutoff on beta values
+#' @param lambda is the cutoff on beta values
 #' @return returns the estimated support
 #' @export
 
-beta_OSE <- function(X,y,variables,lambda_cutoff){
-  cat("Estimating support with beta OSE and cutoff =",lambda_cutoff,"\n")
+beta_OSE <- function(X,y,variables,lambda){
+  cat("Estimating support with beta OSE and lambda =",lambda,"\n")
   formula <- as.formula(paste0(y,"~",paste0(c(variables,"0"),collapse = "+")))
   model_ols <- estimatr::lm_robust(formula = formula, data = X,  se_type = "classical")
-  support = names(model_ols$p.value[which(abs(model_ols$coefficients)>=lambda_cutoff)])
+  support = names(model_ols$p.value[which(abs(model_ols$coefficients)>=lambda)])
   
   result = list(support=support, beta = model_ols$coefficients)
   return(result)
@@ -198,14 +198,14 @@ beta_OSE <- function(X,y,variables,lambda_cutoff){
 #' @param X is the regression matrix with the marginals, the fixed effects, the outcome of interest
 #' @param y is the outcome of interest
 #' @param variables is a vector containing all the variables we want to regress on
-#' @param lambda_cutoff is the cutoff on beta values
+#' @param lambda is the cutoff on beta values
 #' @return returns the estimated support
 #' @export
 
 
 
-puffer_LASSO <- function(X,y,variables,lambda_cutoff){
-  cat("Estimating support with puffer LASSO and cutoff =",lambda_cutoff,"\n")
+puffer_LASSO <- function(X,y,variables,lambda){
+  cat("Estimating support with puffer LASSO and lambda =",lambda,"\n")
   
   X_matrix = X[,variables] %>% as.matrix()
   Y = X[,y] %>% as.matrix()
@@ -214,7 +214,7 @@ puffer_LASSO <- function(X,y,variables,lambda_cutoff){
   X_PT = puffer_result[[1]]
   Y_PT = puffer_result[[2]]
   
-  lambda_cutoff_glm = lambda_cutoff/nrow(X_PT) #this normalization is needed as glmnet considers a different optimization function
+  lambda_cutoff_glm = lambda/nrow(X_PT) #this normalization is needed as glmnet considers a different optimization function
   
   lasso_model=glmnet::glmnet(X_PT,Y_PT,alpha=1,lambda=lambda_cutoff_glm,intercept=FALSE,standardize=FALSE)
   support=names(coef(lasso_model)[,1][which(abs(coef(lasso_model)[,1]) > 0)])

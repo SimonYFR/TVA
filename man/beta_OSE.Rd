@@ -4,7 +4,7 @@
 \alias{beta_OSE}
 \title{beta one-step elimination}
 \usage{
-beta_OSE(X, y, variables, lambda_cutoff)
+beta_OSE(X, y, variables, lambda)
 }
 \arguments{
 \item{X}{is the regression matrix with the marginals, the fixed effects, the outcome of interest}
@@ -13,7 +13,7 @@ beta_OSE(X, y, variables, lambda_cutoff)
 
 \item{variables}{is a vector containing all the variables we want to regress on}
 
-\item{lambda_cutoff}{is the cutoff on beta values}
+\item{lambda}{is the cutoff on beta values}
 }
 \value{
 returns the estimated support

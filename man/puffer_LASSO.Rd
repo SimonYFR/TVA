@@ -4,7 +4,7 @@
 \alias{puffer_LASSO}
 \title{Puffer LASSO}
 \usage{
-puffer_LASSO(X, y, variables, lambda_cutoff)
+puffer_LASSO(X, y, variables, lambda)
 }
 \arguments{
 \item{X}{is the regression matrix with the marginals, the fixed effects, the outcome of interest}
@@ -13,7 +13,7 @@ puffer_LASSO(X, y, variables, lambda_cutoff)
 
 \item{variables}{is a vector containing all the variables we want to regress on}
 
-\item{lambda_cutoff}{is the cutoff on beta values}
+\item{lambda}{is the cutoff on beta values}
 }
 \value{
 returns the estimated support

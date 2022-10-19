@@ -4,7 +4,7 @@
 \alias{pval_MSE}
 \title{pval multi-step elimination}
 \usage{
-pval_MSE(X, y, variables, pval_cutoff)
+pval_MSE(X, y, variables, threshold)
 }
 \arguments{
 \item{X}{is the regression matrix with the marginals, the fixed effects, the outcome of interest}
@@ -13,7 +13,7 @@ pval_MSE(X, y, variables, pval_cutoff)
 
 \item{variables}{is a vector containing all the variables we want to regress on}
 
-\item{pval_cutoff}{is the cutoff on p-values}
+\item{threshold}{is the threshold on p-values}
 }
 \value{
 returns the estimated support

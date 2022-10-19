@@ -61,5 +61,5 @@ F1 = c(0,1,0,0,0,1,0,1,0,0)
 Y  = c(5,4,3,5,4,5,4,2,3,2)
 W  = c(1,1,1,2,1,2,2,1,1,2)
 data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-check_inputs_integrity(data,arms,y, fes,w,0.3,'pval_OSE',FALSE)
+check_inputs_integrity(data=data, arms=arms, y=y, fes=fes, w=w, cutoff = 0.3, estim_func='pval_OSE', FALSE)
 }

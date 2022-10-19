@@ -39,7 +39,7 @@
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' check_inputs_integrity(data,arms,y, fes,w,0.3,'pval_OSE',FALSE)
+#' check_inputs_integrity(data=data, arms=arms, y=y, fes=fes, w=w, cutoff = 0.3, estim_func='pval_OSE', FALSE)
 
 check_inputs_integrity <- function(data, arms, y, fes=c(), cutoff=0, w=NULL, estim_func='pval_OSE', compare_to_zero=FALSE, clusters=NULL){
   
@@ -587,7 +587,7 @@ do_TVA <- function(data,arms,y, fes=c(),w=NULL,cutoff,estim_func='pval_OSE',comp
 #' Plot p-values in the pval one-step elimination
 #'
 #' Plot the ordered p-values in the one-step elimination. \cr
-#' This allows to choose a p-value cutoff according to a targeted support size. \cr
+#' This allows to choose a thresholds according to a targeted support size. \cr
 #' This is done by simulating a one-step p-value elimination.
 #' @param data is the dataframe containing all our data
 #' @param arms is a vector containing the column names of all the arms
@@ -624,13 +624,13 @@ plot_pval_OSE <- function(data, arms, y, fes=c(), w=NULL, compare_to_zero=FALSE)
   X = prepared_data$X
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
-  pvals = pval_OSE(X,y,variables,1)$pvals
+  thresholds = pval_OSE(X,y,variables,1)$thresholds
   
-  pvals_OSE = pvals[which(names(pvals) %in% marginals_colnames)] %>% sort() %>% data.frame()
-  pvals_OSE = pvals_OSE %>% setNames(.,c('pval'))
-  pvals_OSE$size_of_support = c(1:nrow(pvals_OSE))
+  thresholds_OSE = thresholds[which(names(thresholds) %in% marginals_colnames)] %>% sort() %>% data.frame()
+  thresholds_OSE = thresholds_OSE %>% setNames(.,c('pval'))
+  thresholds_OSE$size_of_support = c(1:nrow(thresholds_OSE))
   
-  plot = ggplot2::ggplot(data=pvals_OSE, ggplot2::aes(x=size_of_support, y=pval)) +
+  plot = ggplot2::ggplot(data=thresholds_OSE, ggplot2::aes(x=size_of_support, y=thresholds)) +
     ggplot2::geom_line(linetype = "dashed")+
     ggplot2::geom_point()+
     ggplot2::scale_y_continuous(trans='log10')
@@ -641,7 +641,7 @@ plot_pval_OSE <- function(data, arms, y, fes=c(), w=NULL, compare_to_zero=FALSE)
 #' Plot p-values in the pval multi-step elimination
 #'
 #' Plot the ordered p-values in the multi-step elimination. \cr
-#' This allows to choose a p-value cutoff according to a targeted support size. \cr
+#' This allows to choose a thresholds_OSE according to a targeted support size. \cr
 #' This is done by simulating a multi-step p-value elimination.
 #' @param data is the dataframe containing all our data
 #' @param arms is a vector containing the column names of all the arms
@@ -678,14 +678,14 @@ plot_pval_MSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
   variables = prepared_data$variables
   marginals_colnames = prepared_data$marginals_colnames
   
-  pvals = pval_MSE(X,y,variables,0)$pvals
-  eliminated_variables = names(pvals)
+  thresholds = pval_MSE(X,y,variables,0)$thresholds
+  eliminated_variables = names(thresholds)
   
-  pvals_MSE = data.frame(pvals[which(eliminated_variables %in% marginals_colnames)]) %>% setNames(.,c('pval'))
-  pvals_MSE$size_of_support = rev(c(1:nrow(pvals_MSE)))
-  pvals_MSE$pval_cutoff = cummin(pvals_MSE$pval)
+  thresholds_MSE = data.frame(thresholds[which(eliminated_variables %in% marginals_colnames)]) %>% setNames(.,c('pval'))
+  thresholds_MSE$size_of_support = rev(c(1:nrow(thresholds_MSE)))
+  thresholds_MSE$pval_cutoff = cummin(thresholds_MSE$pval)
   
-  plot = ggplot2::ggplot(data=pvals_MSE, ggplot2::aes(x=size_of_support)) +
+  plot = ggplot2::ggplot(data=thresholds_MSE, ggplot2::aes(x=size_of_support)) +
     ggplot2::geom_line(ggplot2::aes(y = pval), color="black", linetype="dashed") +
     ggplot2::geom_line(ggplot2::aes(y = pval_cutoff), color="steelblue") +
     ggplot2::geom_point(ggplot2::aes(y = pval), color="black")+
@@ -794,12 +794,12 @@ grid_pval <- function(data,arms,y,fes=c(),w=NULL,estim_func='pval_OSE', compare_
   marginals_colnames = prepared_data$marginals_colnames
   
   f = get(estim_func)
-  pvals = f(X,y,variables,0)$pvals_cutoff 
+  thresholds = f(X,y,variables,0)$thresholds 
   
-  marginals_pvals = pvals[marginals_colnames] %>% sort(decreasing = FALSE)
+  m_thresholds = thresholds[marginals_colnames] %>% sort(decreasing = FALSE)
   
-  cutoffs = floor(marginals_pvals / 10^(floor(log(marginals_pvals, base = 10))-1))/10 * 10^(floor(log(marginals_pvals, base = 10))) #round the pvals
-  cutoffs = cutoffs[1: (length(cutoffs)/3) %>% ceiling()] %>% unname() %>% unique()
+  gridval = floor(m_thresholds / 10^(floor(log(m_thresholds, base = 10))-1))/10 * 10^(floor(log(m_thresholds, base = 10))) #round the pvals
+  gridval = gridval[1: (length(gridval)/3) %>% ceiling()] %>% unname() %>% unique()
   
   marginal_support_sizes = c()
   number_of_pools = c()
@@ -807,8 +807,8 @@ grid_pval <- function(data,arms,y,fes=c(),w=NULL,estim_func='pval_OSE', compare_
   rsqr = c()
   adj_rsqr = c()
   
-  for (pval_cutoff in cutoffs){
-    total_support = names(pvals[which(pvals<=pval_cutoff)]) #compute the total_support
+  for (threshold in gridval){
+    total_support = names(thresholds[which(thresholds<=threshold)]) #compute the total_support
     marginal_support = intersect(total_support,marginals_colnames) %>% sort() #take the marginal support
     
     pooled_data = pool_data(data,arms,marginal_support,compare_to_zero)
@@ -838,7 +838,7 @@ grid_pval <- function(data,arms,y,fes=c(),w=NULL,estim_func='pval_OSE', compare_
     adj_rsqr = c(adj_rsqr, ols_adj_rsqr)
   }
   
-  grid = data.frame( pval_cutoff = cutoffs
+  grid = data.frame( threshold = gridval
                     ,marginal_support_size= marginal_support_sizes
                     ,number_of_pools=number_of_pools 
                     ,differ_from_zero=differ_from_zero
