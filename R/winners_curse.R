@@ -1,3 +1,10 @@
+#################################################################
+#
+#------ This file contains the functions related to the winner's 
+#------ curse adjustment 
+#
+#################################################################
+
 
 #' Winners curse
 #'
@@ -99,4 +106,9 @@ ptmvnorm_extended <- function(q, mu, sigma, lb, ub) {
   if (q <= lb)  { return(0)  }
   return(TruncatedNormal::ptmvnorm(q, mu, sigma, lb, ub))
   
-} 
+}
+
+#################################################################
+# END
+#################################################################
+

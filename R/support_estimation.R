@@ -1,3 +1,10 @@
+#################################################################
+#
+#------ This file contains the main support estimation functions 
+#------ (one and multiple step elimination, soft thresholding)
+#
+#################################################################
+
 
 #' pval multi-step elimination
 #'
@@ -224,6 +231,11 @@ puffer_LASSO <- function(X,y,variables,lambda){
   return (result)
 }
 
+
+
+#################################################################
+# END
+#################################################################
 
 
 

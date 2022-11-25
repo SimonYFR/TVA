@@ -9,7 +9,7 @@ check_inputs_integrity(
   arms,
   y,
   fes = c(),
-  cutoff = 0,
+  cutoff = NULL,
   w = NULL,
   estim_func = "pval_OSE",
   compare_to_zero = FALSE,
@@ -25,7 +25,7 @@ check_inputs_integrity(
 
 \item{fes}{is a vector containing the column names of all the fixed effects}
 
-\item{cutoff}{is the cutoff used in the support estimation}
+\item{cutoff}{is the cutoff used in the support estimation. This can be empty.}
 
 \item{w}{is the column name of the weights}
 

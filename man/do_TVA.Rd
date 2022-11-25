@@ -10,7 +10,7 @@ do_TVA(
   y,
   fes = c(),
   w = NULL,
-  cutoff,
+  cutoff = NULL,
   estim_func = "pval_OSE",
   compare_to_zero = FALSE,
   clusters = NULL
@@ -27,7 +27,7 @@ do_TVA(
 
 \item{w}{(optional) is the column name of the weights}
 
-\item{cutoff}{is the cutoff used in the support estimation}
+\item{cutoff}{is the cutoff used in the support estimation. If empty, TVA will suggest its own cutoff based on the penalty / support size tradeoff.}
 
 \item{estim_func}{(optional) is the estimation function we should used. Possible arguments are :\cr
 \enumerate{
