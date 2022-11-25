@@ -27,7 +27,7 @@ do_TVA(
 
 \item{w}{(optional) is the column name of the weights}
 
-\item{cutoff}{is the cutoff used in the support estimation. If empty, TVA will suggest its own cutoff based on the penalty / support size tradeoff.}
+\item{cutoff}{(optional) is the cutoff used in the support estimation. If empty, TVA will suggest its own cutoff based on the penalty / support size tradeoff.}
 
 \item{estim_func}{(optional) is the estimation function we should used. Possible arguments are :\cr
 \enumerate{

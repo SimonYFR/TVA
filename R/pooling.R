@@ -575,7 +575,7 @@ get_pooled_ols <- function(data,y, fes=c(),w=NULL,pool_ids, clusters){
 #' @param fes (optional) is a vector containing the column names of all the fixed effects, empty by default
 #' @param y is the column name of the outcome of interest
 #' @param w (optional) is the column name of the weights
-#' @param cutoff is the cutoff used in the support estimation. If empty, TVA will suggest its own cutoff based on the penalty / support size tradeoff.
+#' @param cutoff (optional) is the cutoff used in the support estimation. If empty, TVA will suggest its own cutoff based on the penalty / support size tradeoff.
 #' @param estim_func (optional) is the estimation function we should used. Possible arguments are :\cr
 #' 1. 'pval_MSE': a multiple step elimination on p-values\cr
 #' 2. 'pval_OSE': a one step elimination on p-values\cr
