@@ -345,12 +345,12 @@ suggest_pval_cutoff <- function(data,arms,y,support_size_target=NULL, fes=c(),w=
   
   grid = grid_pval(data=data,arms=arms,y=y,fes=fes,w=w,estim_func=estim_func,compare_to_zero=compare_to_zero, clusters=clusters)
   
-  print(grid)
-  
   if (is.null(support_size_target)){
     elbow = elbow(grid$marginal_support_size, grid$rsqr)
     cat('Elbow is ',elbow,'\n')
     support_size_target = grid$marginal_support_size[which.min(abs(grid$marginal_support_size - elbow))]
+  }else{
+    support_size_target = grid$marginal_support_size[which.min(abs(grid$marginal_support_size - support_size_target))]
   }
   
   cat('Target is ',support_size_target,'\n')
@@ -360,7 +360,8 @@ suggest_pval_cutoff <- function(data,arms,y,support_size_target=NULL, fes=c(),w=
   if (nrow((optimums))==0){
     best = grid[grid$marginal_support_size == support_size_target,]
   }else{
-    best = optimums[order(optimums$marginal_support_size <= support_size_target, optimums$marginal_support_size, decreasing=TRUE),][1,]
+    optimums$distance_from_target = abs(optimums$marginal_support_size - support_size_target)
+    best = optimums[order(optimums$marginal_support_size <= support_size_target, optimums$distance_from_target, decreasing=FALSE),][1,]
   }
   
   return(best)
