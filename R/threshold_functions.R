@@ -397,8 +397,6 @@ grid_lambda <- function(data,arms,y,fes=c(),w=NULL,compare_to_zero=FALSE, cluste
 #' @export
 
 elbow <- function(X,Y){
-  X = sort(X)
-  Y = sort(Y)
   smoothed_Y = smooth.spline(X, Y, spar=0.65)$y
   d1 <- diff(smoothed_Y) / diff(X) # first derivative
   d2 <- diff(d1) / diff(X[-1]) # second derivative
