@@ -466,11 +466,7 @@ suggest_cutoff <- function(data,arms,y,support_size_target=NULL, fes=c(),w=NULL,
     best = grid[grid$marginal_support_size == support_size_target,]
   }else{
     optimums$distance_from_target = abs(optimums$marginal_support_size - support_size_target)
-    if (estim_func=='beta_OSE'){
-      best = optimums[order(optimums$marginal_support_size > support_size_target, optimums$distance_from_target, decreasing=FALSE),][1,]
-    }else{
-      best = optimums[order(optimums$marginal_support_size <= support_size_target, optimums$distance_from_target, decreasing=FALSE),][1,]
-    }
+    best = optimums[order(optimums$marginal_support_size <= support_size_target, optimums$distance_from_target, decreasing=FALSE),][1,]
   }
   
   return(best)

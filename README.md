@@ -248,7 +248,7 @@ The main function of the TVA package is `do_TVA`. The arguments it takes are `da
 
 First, `do_TVA` calls `prepare_data`. This function creates an empty marginals matrix by calling `create_empty_marginals_matrix` and pipes it into `fill_marginals_matrix` to put the right values inside it. This matrix is concatenated with the `fes` and `y` columns of the data, an `intercept` column and is then weighted with the `weight_observations` function. 
 
-Then, `do_TVA` estimates the support with either `pval_OSE` or `pval_MSE`. The support is split into a marginals support and a fixed effects support.
+Then, `do_TVA` estimates the support with one of the following estimation functions: `pval_OSE`, `pval_MSE`, `beta_OSE`, `Puffer` or `Puffer_N`. The support is split into a marginals support and a fixed effects support.
 
 The marginals support is used by the `pool_data` function, which assigns each observation to its right pool.
 
@@ -257,4 +257,20 @@ Then, `pools_info` is called to compute some general descriptive information abo
 The final OLS is computed with `get_pooled_ols`, and the winner's curse algorithm is applied to the best pool effect with `winners_curse`.
 
 In the end, `do_TVA` returns all those objects in a list. 
+
+Note that some estimation functions take p-values as penalty arguments while for others lasso-penalties $\lamda$ can be specified. The table below summarizes the penalty arguments and relationships between the different estimation functions.
+
+| Estimation function  | Description | Penalty argument |
+| :---:        |    :----:   |  :----:   | 
+| `pval_OSE`      | One step elimination       | p-value cutoff  |
+| `pval_OSE`  | Multiple step elimination      |  p-value cutoff |
+| `beta_OSE` | Beta thresholing | $\beta$ cutoff |
+| `Puffer` | Puffer-transformed Lasso | $\lambda$ penalty |
+| `Puffer_N` | N-Puffer-transformed Lasso | $\lambda$ penalty |
+
+
+
+
+
+
 
