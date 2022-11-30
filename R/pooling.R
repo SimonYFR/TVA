@@ -589,6 +589,7 @@ get_pooled_ols <- function(data,y, fes=c(),w=NULL,pool_ids, clusters){
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
 #' @param clusters (optional) is the column name that corresponds to the clusters in the data, that should be used in the final pooled OLS. Please refer to estimatr::lm_robust documentation for more information on this parameter.
+#' @param details is a boolean, if FALSE, the output will not show the pools' details on which marginals are influencing them
 #' @return returns a list containing:\cr
 #' * data: the data with new columns giving pooling information\cr
 #' * marginal_support: a dataframe with all the marginals in the support and their according id\cr
@@ -603,16 +604,17 @@ get_pooled_ols <- function(data,y, fes=c(),w=NULL,pool_ids, clusters){
 #' fes = c('fes_1')
 #' y = 'outcome'
 #' w = 'weights'
+#' show_details = TRUE
 #' A1 = c(0,0,0,0,0,1,1,1,1,1)
 #' A2 = c(1,1,0,0,1,1,0,0,1,1)
 #' A3 = c(0,1,2,3,0,3,2,1,0,1)
 #' F1 = c(0,1,0,0,0,1,0,1,0,0)
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
-#' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
+#' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W, details=show_details)
 #' TVA(data,arms,y, fes,w,0.3,'pval_OSE',FALSE,FALSE)
 
-do_TVA <- function(data, arms, y, fes=c(), w = NULL, cutoff = NULL, estim_func = 'pval_OSE', compare_to_zero = FALSE, clusters = NULL){
+do_TVA <- function(data, arms, y, fes=c(), w = NULL, cutoff = NULL, estim_func = 'pval_OSE', compare_to_zero = FALSE, clusters = NULL, details = FALSE){
   
   #check if fake_weights column already exists
   check = check_inputs_integrity(data, arms, y, fes, cutoff, w, estim_func, compare_to_zero, clusters)
@@ -668,6 +670,14 @@ do_TVA <- function(data, arms, y, fes=c(), w = NULL, cutoff = NULL, estim_func =
 
   #Apply winners curse
   winners_effect = winners_curse(pooled_ols,pool_ids,alpha=0.05,beta=0.005)
+  
+  #Remove details
+  if (!details){
+    pools_summary = subset(pools_summary, select = -c(pool_influences, pool_influences_list))
+    unique_policy = subset(unique_policy, select = -c(pool_influences, pool_influences_list))
+    data = subset(data, select = -c(pool_influences, pool_influences_list))
+    data = data %>% dplyr::select(-contains("marginal_"))
+  }
   
   #Return result
   result =  list(data=data

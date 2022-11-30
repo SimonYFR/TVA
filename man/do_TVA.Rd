@@ -13,7 +13,8 @@ do_TVA(
   cutoff = NULL,
   estim_func = "pval_OSE",
   compare_to_zero = FALSE,
-  clusters = NULL
+  clusters = NULL,
+  details = FALSE
 )
 }
 \arguments{
@@ -44,6 +45,8 @@ If TRUE, the code considers that a policy dominates a marginal if all dosages ar
 If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)}
 
 \item{clusters}{(optional) is the column name that corresponds to the clusters in the data, that should be used in the final pooled OLS. Please refer to estimatr::lm_robust documentation for more information on this parameter.}
+
+\item{details}{is a boolean, if FALSE, the output will not show the pools' details on which marginals are influencing them}
 }
 \value{
 returns a list containing:\cr
@@ -65,12 +68,13 @@ arms = c('financial_incentive','reminder','information')
 fes = c('fes_1')
 y = 'outcome'
 w = 'weights'
+show_details = TRUE
 A1 = c(0,0,0,0,0,1,1,1,1,1)
 A2 = c(1,1,0,0,1,1,0,0,1,1)
 A3 = c(0,1,2,3,0,3,2,1,0,1)
 F1 = c(0,1,0,0,0,1,0,1,0,0)
 Y  = c(5,4,3,5,4,5,4,2,3,2)
 W  = c(1,1,1,2,1,2,2,1,1,2)
-data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
+data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W, details=show_details)
 TVA(data,arms,y, fes,w,0.3,'pval_OSE',FALSE,FALSE)
 }
