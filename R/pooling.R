@@ -644,9 +644,9 @@ do_TVA <- function(data, arms, y, fes=c(), w = NULL, cutoff = NULL, estim_func =
   
   if (is.null(cutoff)) {      #If no cutoff was provided, suggest cutoff
     cat("No cutoff provided. Suggesting cutoff... \n")
-    quiet_suggest_pval = purrr::quietly(suggest_pval_cutoff)  #This is to avoid all the additional printing
-    cutoff = quiet_suggest_pval(data=data, arms=arms, y=y, fes=fes, w=w, estim_func = estim_func, compare_to_zero=compare_to_zero, clusters=clusters)$result$threshold
-    cat("Suggested cutoff is ", cutoff, " (run \"suggest_pval_cutoff\" for details) \n")
+    quiet_suggest_cutoff = purrr::quietly(suggest_cutoff)  #This is to avoid all the additional printing
+    cutoff = quiet_suggest_cutoff(data=data, arms=arms, y=y, fes=fes, w=w, estim_func = estim_func, compare_to_zero=compare_to_zero, clusters=clusters)$result$threshold
+    cat("Suggested cutoff is ", cutoff, " (run \"suggest_cutoff\" for details) \n")
   }
   
   
