@@ -14,7 +14,9 @@ do_TVA(
   estim_func = "pval_OSE",
   compare_to_zero = FALSE,
   clusters = NULL,
-  details = FALSE
+  details = FALSE,
+  alpha = 0.05,
+  beta = 0.005
 )
 }
 \arguments{
@@ -44,9 +46,13 @@ do_TVA(
 If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)}
 
-\item{clusters}{(optional) is the column name that corresponds to the clusters in the data, that should be used in the final pooled OLS. Please refer to estimatr::lm_robust documentation for more information on this parameter.}
+\item{clusters}{(optional) is the column name that corresponds to the clusters in the data, that should be used in the final pooled OLS. Please refer to estimatr::lm_robust documentation for more information on this parameter. \cr}
 
-\item{details}{is a boolean, if FALSE, the output will not show the pools' details on which marginals are influencing them}
+\item{details}{(optional) is a boolean, if FALSE, the output will not show the pools' details on which marginals are influencing them \cr}
+
+\item{alpha}{(optional) is the alpha parameter in the winner's curse hybrid estimate \cr}
+
+\item{beta}{(optional) is the beta parameter in the winner's curse hybrid estimate \cr}
 }
 \value{
 returns a list containing:\cr
@@ -57,7 +63,7 @@ returns a list containing:\cr
 \item unique_policy: a dataframe with all the possible unique policies and their according pool id\cr
 \item fes_support: the intersection between the estimated support and the fixed effects\cr
 \item pooled_ols: the result of the final OLS on the pooled data\cr
-\item winners_effect: the result of the best pooled policy effect, downsized by the winners curse algorithm
+\item winners_hybrid_estimate: the result of the best pooled policy effect, downsized by the winners curse algorithm
 }
 }
 \description{

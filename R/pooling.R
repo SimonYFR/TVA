@@ -48,7 +48,7 @@
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
 #' check_inputs_integrity(data=data, arms=arms, y=y, fes=fes, w=w, cutoff = 0.3, estim_func='pval_OSE', FALSE)
 
-check_inputs_integrity <- function(data, arms, y, fes=c(), cutoff=NULL, w=NULL, estim_func='pval_OSE', compare_to_zero=FALSE, clusters=NULL){
+check_inputs_integrity <- function(data, arms, y, fes=c(), cutoff=NULL, w=NULL, estim_func='pval_OSE', compare_to_zero=FALSE, clusters=NULL, details = FALSE, alpha = 0.05, beta = 0.005){
   
   if (!(class(data) == "data.frame")){
     return(list(integrity=FALSE, message="data should be a dataframe"))
@@ -80,8 +80,24 @@ check_inputs_integrity <- function(data, arms, y, fes=c(), cutoff=NULL, w=NULL, 
     }
   }
   
+  if (!is.null(alpha)) {
+    if (!((class(alpha) == "numeric") & (alpha>=0) & (alpha<=1) )){
+      return(list(integrity=FALSE,message="alpha should be a positive real number smaller than 1"))
+    }
+  }
+  
+  if (!is.null(beta)) {
+    if (!((class(beta) == "numeric") & (beta>=0) & (beta<=1) )){
+      return(list(integrity=FALSE,message="beta should be a positive real number smaller than 1"))
+    }
+  }
+  
   if (!(class(compare_to_zero) == "logical")){
     return(list(integrity=FALSE,message="compare_to_zero should be TRUE or FALSE"))
+  }
+  
+  if (!(class(details) == "logical")){
+    return(list(integrity=FALSE,message="details should be TRUE or FALSE"))
   }
   
   if (!length(arms)>0){
@@ -589,8 +605,10 @@ get_pooled_ols <- function(data,y, fes=c(),w=NULL,pool_ids, clusters){
 #' @param compare_to_zero (optional) is a boolean, FALSE by default. \cr
 #' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
 #' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
-#' @param clusters (optional) is the column name that corresponds to the clusters in the data, that should be used in the final pooled OLS. Please refer to estimatr::lm_robust documentation for more information on this parameter.
-#' @param details is a boolean, if FALSE, the output will not show the pools' details on which marginals are influencing them
+#' @param clusters (optional) is the column name that corresponds to the clusters in the data, that should be used in the final pooled OLS. Please refer to estimatr::lm_robust documentation for more information on this parameter. \cr
+#' @param details (optional) is a boolean, if FALSE, the output will not show the pools' details on which marginals are influencing them \cr
+#' @param alpha (optional) is the alpha parameter in the winner's curse hybrid estimate \cr
+#' @param beta (optional) is the beta parameter in the winner's curse hybrid estimate \cr
 #' @return returns a list containing:\cr
 #' * data: the data with new columns giving pooling information\cr
 #' * marginal_support: a dataframe with all the marginals in the support and their according id\cr
@@ -598,7 +616,7 @@ get_pooled_ols <- function(data,y, fes=c(),w=NULL,pool_ids, clusters){
 #' * unique_policy: a dataframe with all the possible unique policies and their according pool id\cr
 #' * fes_support: the intersection between the estimated support and the fixed effects\cr
 #' * pooled_ols: the result of the final OLS on the pooled data\cr
-#' * winners_effect: the result of the best pooled policy effect, downsized by the winners curse algorithm
+#' * winners_hybrid_estimate: the result of the best pooled policy effect, downsized by the winners curse algorithm
 #' @export
 #' @examples
 #' arms = c('financial_incentive','reminder','information')
@@ -615,10 +633,10 @@ get_pooled_ols <- function(data,y, fes=c(),w=NULL,pool_ids, clusters){
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W, details=show_details)
 #' TVA(data,arms,y, fes,w,0.3,'pval_OSE',FALSE,FALSE)
 
-do_TVA <- function(data, arms, y, fes=c(), w = NULL, cutoff = NULL, estim_func = 'pval_OSE', compare_to_zero = FALSE, clusters = NULL, details = FALSE){
+do_TVA <- function(data, arms, y, fes=c(), w = NULL, cutoff = NULL, estim_func = 'pval_OSE', compare_to_zero = FALSE, clusters = NULL, details = FALSE, alpha=0.05, beta=0.005){
   
   #check if fake_weights column already exists
-  check = check_inputs_integrity(data, arms, y, fes, cutoff, w, estim_func, compare_to_zero, clusters)
+  check = check_inputs_integrity(data = data, arms = arms, y = y, fes = fes, cutoff = cutoff, w = w, estim_func = estim_func, compare_to_zero= compare_to_zero, clusters = clusters, details = details, alpha = alpha, beta = beta)
   
   if (!check$integrity){
     stop(check$message)
@@ -670,7 +688,7 @@ do_TVA <- function(data, arms, y, fes=c(), w = NULL, cutoff = NULL, estim_func =
   pooled_ols = get_pooled_ols(data,y,fes_support,w,pool_ids,clusters)
 
   #Apply winners curse
-  winners_effect = winners_curse(pooled_ols,pool_ids,alpha=0.05,beta=0.005)
+  winners_hybrid_estimate = winners_curse(pooled_ols,pool_ids,alpha=alpha,beta=beta)
   
   #Remove details
   if (!details){
@@ -687,7 +705,7 @@ do_TVA <- function(data, arms, y, fes=c(), w = NULL, cutoff = NULL, estim_func =
                  ,unique_policy = unique_policy 
                  ,fes_support=fes_support 
                  ,pooled_ols=pooled_ols 
-                 ,winners_effect=winners_effect
+                 ,winners_hybrid_estimate=winners_hybrid_estimate
   )
   
   cat("Returning result","\n")

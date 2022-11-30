@@ -13,7 +13,10 @@ check_inputs_integrity(
   w = NULL,
   estim_func = "pval_OSE",
   compare_to_zero = FALSE,
-  clusters = NULL
+  clusters = NULL,
+  details = FALSE,
+  alpha = 0.05,
+  beta = 0.005
 )
 }
 \arguments{
