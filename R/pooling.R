@@ -495,7 +495,7 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
 pools_info <- function(data,arms){
   cat("Gathering informations on pools","\n")
   unique_policy = data[!duplicated(data[,c(arms,'pool_influences','pool_influences_list')]), ][,c(arms,'pool_influences','pool_id','pool_influences_list')] %>% as.data.frame(row.names = 1:nrow(.)) #taking all the unique policies by pool_id
-  unique_policy = unique_policy %>% dplyr::mutate(., policy = apply(unique_policy[,arms], 1, vector_to_string()))  %>% dplyr::arrange(., pool_id,policy) #creating policy string column
+  unique_policy = unique_policy %>% dplyr::mutate(., policy = apply(unique_policy[,arms], 1, vector_to_string)  %>% dplyr::arrange(., pool_id,policy) #creating policy string column
   unique_policy$policy_fullname = sapply(unique_policy[,'policy'], get_policy_fullname, arms=arms) #create policy full name column
   
   a0 = stats::aggregate(unique_policy$pool_influences, by=list(pool_id=unique_policy$pool_id), FUN=length) %>% setNames(.,c('pool_id','n_unique_policies')) #counting number of unique policies by pool_id
