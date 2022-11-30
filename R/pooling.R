@@ -203,25 +203,26 @@ create_dosages_from_dummies <- function(data,arms){
 #'
 #' Create a string representing the vector
 #' @param vector is a vector of any size and containing integers
-#' @param first_char is a string that appears at the beginning of the vector, equals "c" by default
-#' @return returns a string representing the vector in format 'c_A_B_C_D_...' where A,B,C,D,.. are the integers in the vector
+#' @param first_char is a string that appears at the beginning of the vector, equals "p" by default
+#' @return returns a string representing the vector in format 'p_A_B_C_D_...' where A,B,C,D,.. are the integers in the vector
 #' @export
 #' @examples
 #' vector_to_string(c(1,2,3,4,5))
 #' vector_to_string(c(10))
 
-vector_to_string <- function(vector,first_char="c"){
+vector_to_string <- function(vector,first_char="p"){
   return(paste0(c(paste0(c(paste0(first_char,"_"),paste0(vector,collapse='_')),collapse=''),''),collapse=''))
 }
 
 #' Going from string to vector
 #'
 #' Create a vector from its string representation 
-#' @param string is a string in the format 'c_A_B_C_D_..' where A,B,C,D,.. are integers
+#' @param string is a string in the format 'p_A_B_C_D_..' where A,B,C,D,.. are integers
 #' @return returns a vector containing the values represented by the string, c(A,B,C,D,...)
 #' @export
 #' @examples
-#' string_to_vector('c_1_2_3_4_5')
+#' string_to_vector('p_1_2_3_4_5')
+#' string_to_vector('c_1_0_5')
 
 string_to_vector <- function(string){
   return(stringr::str_split(substring(string,3,nchar(string)),'_')[[1]] %>% as.integer())
@@ -494,7 +495,7 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
 pools_info <- function(data,arms){
   cat("Gathering informations on pools","\n")
   unique_policy = data[!duplicated(data[,c(arms,'pool_influences','pool_influences_list')]), ][,c(arms,'pool_influences','pool_id','pool_influences_list')] %>% as.data.frame(row.names = 1:nrow(.)) #taking all the unique policies by pool_id
-  unique_policy = unique_policy %>% dplyr::mutate(., policy = apply(unique_policy[,arms], 1, vector_to_string(., first_char = "p")))  %>% dplyr::arrange(., pool_id,policy) #creating policy string column
+  unique_policy = unique_policy %>% dplyr::mutate(., policy = apply(unique_policy[,arms], 1, vector_to_string()))  %>% dplyr::arrange(., pool_id,policy) #creating policy string column
   unique_policy$policy_fullname = sapply(unique_policy[,'policy'], get_policy_fullname, arms=arms) #create policy full name column
   
   a0 = stats::aggregate(unique_policy$pool_influences, by=list(pool_id=unique_policy$pool_id), FUN=length) %>% setNames(.,c('pool_id','n_unique_policies')) #counting number of unique policies by pool_id
@@ -513,7 +514,7 @@ pools_info <- function(data,arms){
   a5 = rbind(first_5_examples, last_example) %>% dplyr::group_by(pool_id) %>%  dplyr::summarize(policy_examples = paste((policy),collapse=", ")) %>% as.data.frame()
   
   pools_summary = merge(a0,a1,by='pool_id') %>% merge(.,a2,by='pool_id') %>% merge(.,a3,by='pool_id') %>% merge(.,a4,by='pool_id') %>% merge(.,a5,by='pool_id')
-  pools_summary$pool_minimum = apply(pools_summary[,colnames(a4)[-1]], 1, function(x) vector_to_string(x, first_char = "p"))
+  pools_summary$pool_minimum = apply(pools_summary[,colnames(a4)[-1]], 1, function(x) vector_to_string(x))
   pools_summary$pool_minimum_fullname = sapply(pools_summary[,'pool_minimum'], get_policy_fullname, arms=arms)
   
   pools_summary = pools_summary[c(setdiff(names(pools_summary), 'policy_examples'), 'policy_examples')] #put policy example column at the end

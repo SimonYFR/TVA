@@ -4,15 +4,15 @@
 \alias{vector_to_string}
 \title{Going from vector to string}
 \usage{
-vector_to_string(vector, first_char = "c")
+vector_to_string(vector, first_char = "p")
 }
 \arguments{
 \item{vector}{is a vector of any size and containing integers}
 
-\item{first_char}{is a string that appears at the beginning of the vector, equals "c" by default}
+\item{first_char}{is a string that appears at the beginning of the vector, equals "p" by default}
 }
 \value{
-returns a string representing the vector in format 'c_A_B_C_D_...' where A,B,C,D,.. are the integers in the vector
+returns a string representing the vector in format 'p_A_B_C_D_...' where A,B,C,D,.. are the integers in the vector
 }
 \description{
 Create a string representing the vector

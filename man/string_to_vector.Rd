@@ -7,7 +7,7 @@
 string_to_vector(string)
 }
 \arguments{
-\item{string}{is a string in the format 'c_A_B_C_D_..' where A,B,C,D,.. are integers}
+\item{string}{is a string in the format 'p_A_B_C_D_..' where A,B,C,D,.. are integers}
 }
 \value{
 returns a vector containing the values represented by the string, c(A,B,C,D,...)
@@ -16,5 +16,6 @@ returns a vector containing the values represented by the string, c(A,B,C,D,...)
 Create a vector from its string representation
 }
 \examples{
-string_to_vector('c_1_2_3_4_5')
+string_to_vector('p_1_2_3_4_5')
+string_to_vector('c_1_0_5')
 }
