@@ -260,13 +260,21 @@ In the end, `do_TVA` returns all those objects in a list.
 
 Note that some estimation functions take p-values as penalty arguments while for others lasso-penalties $\lamda$ can be specified. The table below summarizes the penalty arguments and relationships between the different estimation functions.
 
+<style>
+tr:nth-child(even) {
+  background-color: #b2b2b2;
+  color: #f4f4f4;
+}
+</style>
+
+
 | Estimation function  | Description | Penalty argument |
 | :---:        |    :----:   |  :----:   | 
 | `pval_OSE`      | One step elimination       | p-value cutoff  |
-| `pval_OSE`  | Multiple step elimination      |  p-value cutoff |
-| `beta_OSE` | Beta thresholing | $\beta$ cutoff |
-| `Puffer` | Puffer-transformed Lasso | $\lambda$ penalty |
-| `Puffer_N` | N-Puffer-transformed Lasso | $\lambda$ penalty |
+| `pval_MSE`  | Multiple step elimination      |  p-value cutoff |
+| `beta_OSE` | Beta thresholding | $\beta$ cutoff |
+| `puffer_LASSO` | Puffer-transformed Lasso | $\lambda$ penalty |
+| `puffer_N_LASSO` | N-Puffer-transformed Lasso | $\lambda$ penalty |
 
 
 
