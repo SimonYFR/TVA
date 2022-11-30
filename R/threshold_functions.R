@@ -215,11 +215,11 @@ plot_beta_OSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
 
 plot_cutoff_vs_support_size <- function(data,arms,y, fes=c(),w=NULL, estim_func="pval_OSE", compare_to_zero=FALSE){
   if (estim_func=='beta_OSE'){
-    plot = plot_beta_OSE(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE)
+    plot = plot_beta_OSE(data,arms,y, fes=fes,w=w,compare_to_zero=compare_to_zero)
   }else if (estim_func=='pval_OSE'){
-    plot = plot_pval_OSE(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE)
+    plot = plot_pval_OSE(data,arms,y, fes=fes,w=w,compare_to_zero=compare_to_zero)
   }else if (estim_func=='pval_MSE'){
-    plot = plot_pval_MSE(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE)
+    plot = plot_pval_MSE(data,arms,y, fes=fes,w=w,compare_to_zero=compare_to_zero)
   }else{
     return("estim_func must be either beta_OSE, pval_OSE or pval_MSE")
   }
