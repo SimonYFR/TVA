@@ -21,10 +21,10 @@ returns a list containing :\cr
 \item "n_obs": the number of observation in this pool
 \item "pool_influences": a string of format "i_x1_x2_x3..", where x_i equals 1 if the marginal number i influences this pool, 0 otherwise
 \item "pool_influences_list": a string that gives all the marginals that influence this pool
-\item "pool_minimum": the smallest unique policy inside this pool
+\item "pool_minimum_intensity": the smallest unique policy inside this pool
 \item "min_arm1", "min_arm2" etc... : one column per arm, giving the minimum dosage for each arm inside this pool
-\item "pool_minimum_fullname": the full name of the smallest unique policy
-\item "policy_examples": 5 or less examples of unique policies that are inside this pool
+\item "pool_minimum_intensity_fullname": the full name of the smallest unique policy
+\item "examples_of_contained_policies": 5 or less examples of unique policies that are inside this pool
 }
 \item unique_policy: a dataframe containing information on each unique policy, with columns:
 \itemize{
