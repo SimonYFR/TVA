@@ -258,14 +258,7 @@ The final OLS is computed with `get_pooled_ols`, and the winner's curse algorith
 
 In the end, `do_TVA` returns all those objects in a list. 
 
-Note that some estimation functions take p-values as penalty arguments while for others lasso-penalties $\lamda$ can be specified. The table below summarizes the penalty arguments and relationships between the different estimation functions.
-
-<style>
-tr:nth-child(even) {
-  background-color: #b2b2b2;
-  color: #f4f4f4;
-}
-</style>
+Note that some estimation functions take p-values as penalty arguments while for others lasso-penalties $\lambda$ can be specified. The table below summarizes the penalty arguments and relationships between the different estimation functions.
 
 
 | Estimation function  | Description | Penalty argument |
@@ -273,8 +266,15 @@ tr:nth-child(even) {
 | `pval_OSE`      | One step elimination       | p-value cutoff  |
 | `pval_MSE`  | Multiple step elimination      |  p-value cutoff |
 | `beta_OSE` | Beta thresholding | $\beta$ cutoff |
-| `puffer_LASSO` | Puffer-transformed Lasso | $\lambda$ penalty |
-| `puffer_N_LASSO` | N-Puffer-transformed Lasso | $\lambda$ penalty |
+
+
+Some of these methods are strictly equivalent to LASSO-based computations which and are highlighted below. Note however that the LASSO based estimations require inverting matrices which in practice tends to be slower than their elimination counterparts. For these computational reasons, if `puffer_LASSO` or `puffer_N_LASSO` are chosen the user needs to specify a `lambda` cutoff (penalty). 
+| Estimation function  | Description | Penalty argument | Equivalence | Mapping |
+| :---:        |    :----:   |  :----:   | :---:        |    :----:   | 
+| `puffer_LASSO` | Puffer-transformed Lasso | $\lambda$ penalty | `beta_OSE`  | $p = \beta$ |
+| `puffer_N_LASSO` | N-Puffer-transformed Lasso | $\lambda$ penalty | `pval_OSE` | $p = 2(1 - \Phi (\lambda\sqrt(n) / \sigma )) | 
+
+
 
 
 
