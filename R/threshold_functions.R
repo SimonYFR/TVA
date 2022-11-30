@@ -335,8 +335,8 @@ grid_lambda <- function(data,arms,y,fes=c(),w=NULL,compare_to_zero=FALSE, cluste
   
   f = get(estim_func)
   
-  thresholds = f(X,y,variables,0)$beta 
-  m_thresholds = thresholds[marginals_colnames] %>% abs() %>% sort(decreasing = TRUE) 
+  thresholds = f(X,y,variables,0)$beta %>% abs()
+  m_thresholds = thresholds[marginals_colnames] %>% sort(decreasing = TRUE) 
   
   gridval = floor(m_thresholds / 10^(floor(log(m_thresholds, base = 10))-1))/10 * 10^(floor(log(m_thresholds, base = 10))) #round the pvals
   gridval = gridval[1: (length(gridval)/3) %>% ceiling()] %>% unname() %>% unique()
