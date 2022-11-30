@@ -41,5 +41,5 @@ F1 = c(0,1,0,0,0,1,0,1,0,0)
 Y  = c(5,4,3,5,4,5,4,2,3,2)
 W  = c(1,1,1,2,1,2,2,1,1,2)
 data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-plot_pval_OSE(data,arms,y, fes,w,FALSE,FALSE)
+plot_pval_OSE(data,arms,y, fes,w,FALSE)
 }

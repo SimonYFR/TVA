@@ -32,7 +32,7 @@
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' plot_pval_OSE(data,arms,y, fes,w,FALSE,FALSE)
+#' plot_pval_OSE(data,arms,y, fes,w,FALSE)
 
 
 plot_pval_OSE <- function(data, arms, y, fes=c(), w=NULL, compare_to_zero=FALSE){
@@ -91,7 +91,7 @@ plot_pval_OSE <- function(data, arms, y, fes=c(), w=NULL, compare_to_zero=FALSE)
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' plot_pval_MSE(data,arms,y, fes,w,FALSE,FALSE)
+#' plot_pval_MSE(data,arms,y, fes,w,FALSE)
 
 plot_pval_MSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
   check = check_inputs_integrity(data, arms, y, fes, 1, w, 'pval_OSE', compare_to_zero)
@@ -151,7 +151,7 @@ plot_pval_MSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
 #' Y  = c(5,4,3,5,4,5,4,2,3,2)
 #' W  = c(1,1,1,2,1,2,2,1,1,2)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
-#' plot_beta_OSE(data,arms,y,fes,w,FALSE,FALSE)
+#' plot_beta_OSE(data,arms,y,fes,w,FALSE)
 
 
 plot_beta_OSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
@@ -180,6 +180,49 @@ plot_beta_OSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
     ggplot2::ylab("Beta") +
     ggplot2::theme_bw()
   
+  return(plot)
+}
+
+#' Plot cutoff vs marginal support size
+#'
+#' Plot cutoff vs marginal support size for each method. \cr
+#' @param data is the dataframe containing all our data
+#' @param arms is a vector containing the column names of all the arms
+#' @param fes (optional) is a vector containing the column names of all the fixed effects
+#' @param y is the column name of the outcome of interest
+#' @param w (optional) is the column name of the weights
+#' @param estim_func (optional) is the estimation method (pval_OSE, pval_MSE or beta_OSE), pval_OSE by default
+#' @param compare_to_zero (optional) is a boolean.\cr
+#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
+#' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
+#' @return returns the plot of the ordered betas, allowing to see the corresponding size of support for each beta cutoff in the beta one-step elimination
+#' @export
+#' @examples
+#' arms = c('financial_incentive','reminder','information')
+#' fes = c('fes_1')
+#' y = 'outcome'
+#' w = 'weights'
+#' A1 = c(0,0,0,0,0,1,1,1,1,1)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
+#' A3 = c(0,1,2,3,0,3,2,1,0,1)
+#' F1 = c(0,1,0,0,0,1,0,1,0,0)
+#' Y  = c(5,4,3,5,4,5,4,2,3,2)
+#' W  = c(1,1,1,2,1,2,2,1,1,2)
+#' estim_func = "pval_MSE"
+#' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
+#' plot_cutoff_vs_support_size(data=data, arms=arms, y=y, fes=fes, w=w, estim_func=estim_func, compare_to_zero=FALSE)
+#' 
+
+plot_cutoff_vs_support_size <- function(data,arms,y, fes=c(),w=NULL, estim_func="pval_OSE", compare_to_zero=FALSE){
+  if (estim_func=='beta_OSE'){
+    plot = plot_beta_OSE(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE)
+  }else if (estim_func=='pval_OSE'){
+    plot = plot_pval_OSE(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE)
+  }else if (estim_func=='pval_MSE'){
+    plot = plot_pval_MSE(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE)
+  }else{
+    return("estim_func must be either beta_OSE, pval_OSE or pval_MSE")
+  }
   return(plot)
 }
 
