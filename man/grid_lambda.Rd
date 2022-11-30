@@ -2,7 +2,7 @@
 % Please edit documentation in R/threshold_functions.R
 \name{grid_lambda}
 \alias{grid_lambda}
-\title{Lambdas / size of support grid for multiple lambdas cutoffs in the beta one-step elimination}
+\title{Lambdas cutoff grid}
 \usage{
 grid_lambda(
   data,
@@ -39,7 +39,6 @@ returns a dataframe with columns:
 }
 \description{
 Simulate many beta one-step elimination for different lambdas cutoffs values.\cr
-This allows to see the size of support one would get for each lambda cutoff.
 }
 \examples{
 arms = c('financial_incentive','reminder','information')

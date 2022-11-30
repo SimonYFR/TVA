@@ -183,10 +183,9 @@ plot_beta_OSE <- function(data,arms,y, fes=c(),w=NULL,compare_to_zero=FALSE){
   return(plot)
 }
 
-#' P-values / size of support grid for multiple pval cutoffs in the pval one-step or multiple-step elimination
+#' Pval cutoff grid
 #'
-#' Simulate many pval one-step elimination for different pval cutoffs values.\cr
-#' This allows to see the size of support one would get for each pval cutoff.
+#' Simulate many pval one-step or multiple-step elimination for different pval cutoffs values.\cr
 #' @param data is the dataframe containing all our data
 #' @param arms is a vector containing the column names of all the arms
 #' @param fes is a vector containing the column names of all the fixed effects
@@ -286,10 +285,9 @@ grid_pval <- function(data,arms,y,fes=c(),w=NULL,estim_func='pval_OSE', compare_
 }
 
 
-#' Lambdas / size of support grid for multiple lambdas cutoffs in the beta one-step elimination
+#' Lambdas cutoff grid
 #'
 #' Simulate many beta one-step elimination for different lambdas cutoffs values.\cr
-#' This allows to see the size of support one would get for each lambda cutoff.
 #' @param data is the dataframe containing all our data
 #' @param arms is a vector containing the column names of all the arms
 #' @param fes is a vector containing the column names of all the fixed effects
@@ -388,6 +386,49 @@ grid_lambda <- function(data,arms,y,fes=c(),w=NULL,compare_to_zero=FALSE, cluste
 }
 
 
+
+#' Cutoff grid
+#'
+#' @param data is the dataframe containing all our data
+#' @param arms is a vector containing the column names of all the arms
+#' @param fes is a vector containing the column names of all the fixed effects
+#' @param y is the column name of the outcome of interest
+#' @param w is the column name of the weights
+#' @param estim_func is the support estimation function we want to use, either pval_OSE or pval_MSE
+#' @param compare_to_zero is a boolean.\cr
+#' If TRUE, the code considers that a policy dominates a marginal if all dosages are greater\cr
+#' If FALSE, then they must also have the exact same activated arms (the zeros of the policy vectors are at identical indexes)
+#' @return returns a dataframe with columns:
+#' * 'pval_cutoff': all the p-values
+#' * 'marginal_support_size' : the corresponding support size one would get for each of these p-values
+#' * 'number_of_pools': the corresponding number of pools one would get for such a support
+#' @export
+#' @examples
+#' arms = c('financial_incentive','reminder','information')
+#' fes = c('fes_1')
+#' y = 'outcome'
+#' w = 'weights'
+#' A1 = c(0,0,0,0,0,1,1,1,1,1)
+#' A2 = c(1,1,0,0,1,1,0,0,1,1)
+#' A3 = c(0,1,2,3,0,3,2,1,0,1)
+#' F1 = c(0,1,0,0,0,1,0,1,0,0)
+#' Y  = c(5,4,3,5,4,5,4,2,3,2)
+#' W  = c(1,1,1,2,1,2,2,1,1,2)
+#' data = data.frame(financial_incentive = A1, reminder = A2, information = A3, fes_1 = F1, outcome = Y, weights=W)
+#' grid_pval(data=data,arms=arms,y=y,fes=fes,w=w,compare_to_zero=FALSE)
+
+grid_cutoff <- function(data,arms,y,fes=c(),w=NULL, estim_func='pval_OSE', compare_to_zero=FALSE, clusters=NULL){
+  if (estim_func=='beta_OSE'){
+    grid = grid_lambda(data=data,arms=arms,y=y,fes=fes,w=w, compare_to_zero=compare_to_zero, clusters=clusters)
+  }else if ((estim_func=='pval_OSE')|(estim_func=='pval_MSE')){
+    grid = grid_pval(data=data,arms=arms,y=y,fes=fes,w=w, estim_func=estim_func,compare_to_zero=compare_to_zero, clusters=clusters)
+  }else{
+    return("estim_func must be either beta_OSE, pval_OSE or pval_MSE")
+  }
+  return(grid)
+}
+
+
 #' Find elbow
 #'
 #' Find the elbow of a set of points.
@@ -443,13 +484,9 @@ suggest_cutoff <- function(data,arms,y,support_size_target=NULL, fes=c(),w=NULL,
   if (!check$integrity){
     stop(check$message)
   }
-  
-  if (estim_func=='beta_OSE'){
-    grid = grid_lambda(data=data,arms=arms,y=y,fes=fes,w=w,compare_to_zero=compare_to_zero, clusters=clusters)
-  }else{
-    grid = grid_pval(data=data,arms=arms,y=y,fes=fes,w=w,estim_func=estim_func,compare_to_zero=compare_to_zero, clusters=clusters)
-  }
-  
+
+  grid = grid_cutoff(data=data,arms=arms,y=y,fes=fes,w=w,estim_func=estim_func,compare_to_zero=compare_to_zero, clusters=clusters)
+
   if (is.null(support_size_target)){
     elbow = elbow(grid$marginal_support_size, grid$rsqr)
     cat('Elbow is ',elbow,'\n')
