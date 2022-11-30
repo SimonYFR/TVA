@@ -203,14 +203,15 @@ create_dosages_from_dummies <- function(data,arms){
 #'
 #' Create a string representing the vector
 #' @param vector is a vector of any size and containing integers
+#' @param first_char is a string that appears at the beginning of the vector, equals "c" by default
 #' @return returns a string representing the vector in format 'c_A_B_C_D_...' where A,B,C,D,.. are the integers in the vector
 #' @export
 #' @examples
 #' vector_to_string(c(1,2,3,4,5))
 #' vector_to_string(c(10))
 
-vector_to_string <- function(vector){
-  return(paste0(c(paste0(c('c_',paste0(vector,collapse='_')),collapse=''),''),collapse=''))
+vector_to_string <- function(vector,first_char="c"){
+  return(paste0(c(paste0(c(paste0(first_char,"_"),paste0(vector,collapse='_')),collapse=''),''),collapse=''))
 }
 
 #' Going from string to vector
@@ -229,13 +230,13 @@ string_to_vector <- function(string){
 #' Going from policy concise string to a full name
 #'
 #' Create the policy full name from its string representation
-#' @param policy is a policy in the format 'c_A_B_C_D_..' where A,B,C,D,... are integers representing the dosage for arm 1,2,3,4,...\cr
-#' For example, 'c_1_0_2' means arm 1 has dosage 1, arm 2 is not activated and arm 3 has dosage 2
+#' @param policy is a policy in the format 'p_A_B_C_D_..' where A,B,C,D,... are integers representing the dosage for arm 1,2,3,4,...\cr
+#' For example, 'p_1_0_2' means arm 1 has dosage 1, arm 2 is not activated and arm 3 has dosage 2
 #' @param arms is a vector containing the arms' names and of the same length as the vector representation of the policy
 #' @return returns the full name of the policy with the dosage of each arm
 #' @export
 #' @examples
-#' get_policy_fullname('c_1_0_2', c('financial_incentive','reminder','information'))
+#' get_policy_fullname('p_1_0_2', c('financial_incentive','reminder','information'))
 
 get_policy_fullname <- function(policy,arms){
   policy_vector = string_to_vector(policy)
@@ -263,7 +264,7 @@ create_empty_marginals_matrix <- function(max_dosage_per_arm,n_obs){
   }
   grid=expand.grid(grid_list)
   
-  marginals_colnames = apply(grid, 1, function(x) vector_to_string(x))
+  marginals_colnames = apply(grid, 1, function(x) vector_to_string(x,first_char = "m"))
   marginals_matrix = setNames(data.frame(matrix(0,ncol = (nrow(grid)) , nrow = n_obs) ),  marginals_colnames)
   
   return(marginals_matrix)
@@ -303,7 +304,7 @@ fill_marginals_matrix <- function(marginals_matrix,data,arms,n_obs,compare_to_ze
   }
   
   marginals_matrix = marginals_matrix[, colSums(marginals_matrix != 0) > 0]
-  control_marginal_index = which(names(marginals_matrix) %in% c(vector_to_string(rep(0,M)) ))
+  control_marginal_index = which(names(marginals_matrix) %in% c(vector_to_string(rep(0,M), first_char = "m") ))
   if (length(control_marginal_index) > 0){
     marginals_matrix = marginals_matrix[ , -control_marginal_index]
   }
@@ -409,7 +410,7 @@ prepare_data <- function(data, arms, y, fes, w, compare_to_zero){
 #' * a pool_id column that gives the pool id of the observation's pool 
 #' * one dummy column per pool_id, equal to 1 if the observation belongs to this pool id, 0 otherwise 
 #' * one column per marginal_j, equal to 1 if the observation i is influenced by the marginal n°j, 0 otherwise. There are as many columns as marginals in the support. 
-#' * a "pool_influences" column, with a string of the format "c_x1_x2_x3_.." where xj is equal to 1 if the marginals n°j influences the observation, 0 otherwise. This is basically the definition of the pool the observation belongs to.
+#' * a "pool_influences" column, with a string of the format "i_x1_x2_x3_.." where xj is equal to 1 if the marginals n°j influences the observation, 0 otherwise. This is basically the definition of the pool the observation belongs to.
 #' * a "pool_influences_list" column, with a string that gives all the marginals that influence the observation 
 #' @export
 #' @examples
@@ -418,7 +419,7 @@ prepare_data <- function(data, arms, y, fes, w, compare_to_zero){
 #' A2 = c(1,1,0,0,1,1,0,0,1,1)
 #' A3 = c(0,1,2,3,0,3,2,1,0,1)
 #' data = data.frame(financial_incentive = A1, reminder = A2, information = A3)
-#' marginal_support_strings = c('c_0_1_1', 'c_1_1_2', 'c_1_0_1', 'c_1_0_2')
+#' marginal_support_strings = c('m_0_1_1', 'm_1_1_2', 'm_1_0_1', 'm_1_0_2')
 #' pool_data(data,arms,marginal_support_strings,FALSE)
 
 pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
@@ -427,7 +428,7 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
   
   cat("Pooling the raw data with estimated marginal support of size ",S,"\n")
 
-  data$pool_influences = "c"
+  data$pool_influences = "i"
   data$pool_influences_list = ""
   data$pool_id = 0
   if (S>=1){
@@ -444,7 +445,7 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
       data$pool_influences_list = paste(data$pool_influences_list,string_replace[as.character(indicators)] %>% unname(),sep='')
     }
     data$pool_influences_list = gsub("^.{0,3}", "", data$pool_influences_list)
-    data$pool_id = as.numeric(as.factor(data$pool_influences))-1 #this gives an id to each pool_influences, -1 ensures that c_0_0_.._0 has id = 0 
+    data$pool_id = as.numeric(as.factor(data$pool_influences))-1 #this gives an id to each pool_influences, -1 ensures that i_0_0_.._0 has id = 0 
     #create dummy columns
     pool_dummy = data.frame(lme4::dummy(data$pool_id))
     pool_ids = paste("pool_id",stringr::str_sub(names(pool_dummy),2),sep="_")
@@ -464,7 +465,7 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
 #'     * "pool_id": the pool id
 #'     * "n_unique_policies": the number of unique policies inside this pool
 #'     * "n_obs": the number of observation in this pool
-#'     * "pool_influences": a string of format "c_x1_x2_x3..", where x_i equals 1 if the marginal number i influences this pool, 0 otherwise
+#'     * "pool_influences": a string of format "i_x1_x2_x3..", where x_i equals 1 if the marginal number i influences this pool, 0 otherwise
 #'     * "pool_influences_list": a string that gives all the marginals that influence this pool
 #'     * "pool_minimum": the smallest unique policy inside this pool
 #'     * "min_arm1", "min_arm2" etc... : one column per arm, giving the minimum dosage for each arm inside this pool
@@ -472,11 +473,11 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
 #'     * "policy_examples": 5 or less examples of unique policies that are inside this pool
 #' 
 #' * unique_policy: a dataframe containing information on each unique policy, with columns:
-#'     * "policy": a string in format "c_A_B_C_..." where A is the dosage on arm 1, B on arm 2 etc... This is the definition of the unique policy
+#'     * "policy": a string in format "p_A_B_C_..." where A is the dosage on arm 1, B on arm 2 etc... This is the definition of the unique policy
 #'     * "policy_fullname": the full name of the unique policy
 #'     * "arm1", "arm2" etc...: the value on each arm of the unique policy
 #'     * "pool_id": the id of the pool the unique policy belongs to
-#'     * "pool_influences": a string of format "c_x1_x2_x3..", where x_i equals 1 if the marginal number i influences this pool, 0 otherwise
+#'     * "pool_influences": a string of format "i_x1_x2_x3..", where x_i equals 1 if the marginal number i influences this pool, 0 otherwise
 #'     * "pool_influences_list": a string that gives all the marginals that influence this pool
 #'     
 #' 
@@ -493,7 +494,7 @@ pool_data <- function(data,arms,marginal_support_strings,compare_to_zero){
 pools_info <- function(data,arms){
   cat("Gathering informations on pools","\n")
   unique_policy = data[!duplicated(data[,c(arms,'pool_influences','pool_influences_list')]), ][,c(arms,'pool_influences','pool_id','pool_influences_list')] %>% as.data.frame(row.names = 1:nrow(.)) #taking all the unique policies by pool_id
-  unique_policy = unique_policy %>% dplyr::mutate(., policy = apply(unique_policy[,arms], 1, vector_to_string))  %>% dplyr::arrange(., pool_id,policy) #creating policy string column
+  unique_policy = unique_policy %>% dplyr::mutate(., policy = apply(unique_policy[,arms], 1, vector_to_string(., first_char = "p")))  %>% dplyr::arrange(., pool_id,policy) #creating policy string column
   unique_policy$policy_fullname = sapply(unique_policy[,'policy'], get_policy_fullname, arms=arms) #create policy full name column
   
   a0 = stats::aggregate(unique_policy$pool_influences, by=list(pool_id=unique_policy$pool_id), FUN=length) %>% setNames(.,c('pool_id','n_unique_policies')) #counting number of unique policies by pool_id
@@ -512,7 +513,7 @@ pools_info <- function(data,arms){
   a5 = rbind(first_5_examples, last_example) %>% dplyr::group_by(pool_id) %>%  dplyr::summarize(policy_examples = paste((policy),collapse=", ")) %>% as.data.frame()
   
   pools_summary = merge(a0,a1,by='pool_id') %>% merge(.,a2,by='pool_id') %>% merge(.,a3,by='pool_id') %>% merge(.,a4,by='pool_id') %>% merge(.,a5,by='pool_id')
-  pools_summary$pool_minimum = apply(pools_summary[,colnames(a4)[-1]], 1, function(x) vector_to_string(x))
+  pools_summary$pool_minimum = apply(pools_summary[,colnames(a4)[-1]], 1, function(x) vector_to_string(x, first_char = "p"))
   pools_summary$pool_minimum_fullname = sapply(pools_summary[,'pool_minimum'], get_policy_fullname, arms=arms)
   
   pools_summary = pools_summary[c(setdiff(names(pools_summary), 'policy_examples'), 'policy_examples')] #put policy example column at the end

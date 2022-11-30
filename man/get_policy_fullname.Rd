@@ -7,8 +7,8 @@
 get_policy_fullname(policy, arms)
 }
 \arguments{
-\item{policy}{is a policy in the format 'c_A_B_C_D_..' where A,B,C,D,... are integers representing the dosage for arm 1,2,3,4,...\cr
-For example, 'c_1_0_2' means arm 1 has dosage 1, arm 2 is not activated and arm 3 has dosage 2}
+\item{policy}{is a policy in the format 'p_A_B_C_D_..' where A,B,C,D,... are integers representing the dosage for arm 1,2,3,4,...\cr
+For example, 'p_1_0_2' means arm 1 has dosage 1, arm 2 is not activated and arm 3 has dosage 2}
 
 \item{arms}{is a vector containing the arms' names and of the same length as the vector representation of the policy}
 }
@@ -19,5 +19,5 @@ returns the full name of the policy with the dosage of each arm
 Create the policy full name from its string representation
 }
 \examples{
-get_policy_fullname('c_1_0_2', c('financial_incentive','reminder','information'))
+get_policy_fullname('p_1_0_2', c('financial_incentive','reminder','information'))
 }
