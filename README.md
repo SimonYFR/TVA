@@ -273,6 +273,15 @@ Some of these methods are strictly equivalent to LASSO-based computations which 
 | :---:        |    :----:   |  :----:   | :---:        |    :----:   | 
 | `puffer_LASSO` | Puffer-transformed Lasso | $\beta = \lambda$ | `beta_OSE`  | $\beta = \lambda$ |
 | `puffer_N_LASSO` | N-Puffer-transformed Lasso |  $\beta = \lambda$ | `pval_OSE` | $p = 2(1 - \Phi (\lambda\sqrt(n) / \sigma ))$ | 
+Some of these methods are strictly equivalent to LASSO-based computations which are highlighted below. Note however that the LASSO based estimations require inverting matrices which in practice tends to be slower than their elimination counterparts. For these computational reasons, if `puffer_LASSO` or `puffer_N_LASSO` are chosen the user needs to specify a `lambda` cutoff (penalty).
+
+Some of these methods are strictly equivalent to LASSO-based computations which are highlighted below. Note however that the LASSO based estimations require inverting matrices which in practice tends to be slower than their elimination counterparts. For these computational reasons, if `puffer_LASSO` or `puffer_N_LASSO` are chosen the user needs to specify a `lambda` cutoff (penalty).
+
+
+| Estimation function   | Description                   | Penalty argument  | Equivalent to | Mapping                                       |           
+| :---:                 | :----:                        | :---:             | :----:        | :----:                                        | 
+| `puffer_LASSO`        | Puffer-transformed Lasso      | $\lambda$ penalty | `beta_OSE`    | $\beta = \lambda$                             |
+| `puffer_N_LASSO`      | N-Puffer-transformed Lasso    | $\lambda$ penalty | `pval_OSE`    | $p = 2(1 - \Phi (\lambda\sqrt(n) / \sigma ))$ |
 
 
 
