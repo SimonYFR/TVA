@@ -1,4 +1,4 @@
-# TVA r-package
+# TVA R-package
 
 ##  Introduction
 
