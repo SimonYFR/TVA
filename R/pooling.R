@@ -708,6 +708,17 @@ do_TVA <- function(data, arms, y, fes=c(), w = NULL, cutoff = NULL, estim_func =
                  ,winners_hybrid_estimate=winners_hybrid_estimate
   )
   
+  for (k in result$pools_summary$pool_id){
+    
+    current_pool_id = list(
+      unique_policy = unique_policy[unique_policy$pool_id==k,]$policy %>% unname(),
+      pool_influences = pools_summary[pools_summary$pool_id==k,]$pool_influences,
+      pool_minimum_intensity = pools_summary[pools_summary$pool_id==k,]$pool_minimum_intensity
+    )
+    
+    result[[paste0("pool_id_",k)]] = current_pool_id
+  }
+  
   cat("Returning result","\n")
   return(result)
 }
