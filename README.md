@@ -280,8 +280,9 @@ Some of these methods are strictly equivalent to LASSO-based computations which 
 
 ___
 
-$\beta = \lambda$ $\beta = \lambda$ 
-$\beta = \lambda$ $p = 2(1 - \Phi (\lambda\sqrt(n) / \sigma ))$ 
+| a | b |
+| $\beta = \lambda$ | $\beta = \lambda$ |
+| $\beta = \lambda$ | $p = 2(1 - \Phi (\lambda\sqrt(n) / \sigma ))$ |
 
 
 
