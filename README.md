@@ -275,8 +275,8 @@ Some of these methods are strictly equivalent to LASSO-based computations which 
 
 | Estimation function   | Description                   | Penalty argument  | Equivalent to | Mapping                                       |           
 | :---:                 | :----:                        | :---:             | :----:        | :----:                                        | 
-| `puffer_LASSO`        | Puffer-transformed Lasso      | $\beta = \lambda$ | `beta_OSE`    | $\beta = \lambda$                             |
-| `puffer_N_LASSO`      | N-Puffer-transformed Lasso    | $\beta = \lambda$ | `pval_OSE`    | $p = 2(1 - \Phi (\lambda\sqrt(n) / \sigma ))$ |
+| `puffer_LASSO`        | Puffer-transformed Lasso      | $\lambda$ penalty | `beta_OSE`    | $\beta = \lambda$                             |
+| `puffer_N_LASSO`      | N-Puffer-transformed Lasso    | $\lambda$ penalty | `pval_OSE`    | $p = 2(1 - \Phi (\lambda\sqrt(n) / \sigma ))$ |
 
 
 
