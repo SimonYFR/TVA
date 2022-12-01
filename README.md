@@ -280,8 +280,8 @@ Some of these methods are strictly equivalent to LASSO-based computations which 
 
 ___
 
- `puffer_LASSO`          Puffer-transformed Lasso   $\beta = \lambda$      `beta_OSE`     $\beta = \lambda$ 
- `puffer_N_LASSO`        N-Puffer-transformed Lasso   $\beta = \lambda$    `pval_OSE`     $p = 2(1 - \Phi (\lambda\sqrt(n) / \sigma ))$ 
+$\beta = \lambda$ $\beta = \lambda$ 
+$\beta = \lambda$ $p = 2(1 - \Phi (\lambda\sqrt(n) / \sigma ))$ 
 
 
 
