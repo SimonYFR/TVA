@@ -26,6 +26,12 @@ Where $T$ is a dummy matrix indicating the unique policy each observation is ass
 
 ## Quick guide to use TVA
 
+The main function of the TVA package is : 
+
+`result = do_TVA(data = data, arms = arms, y = y,  fes = fes, w = w, estim_func = estim_func, compare_to_zero = compare_to_zero, clusters = clusters)`
+
+Let's see what are the different parameters.
+
 ### Your data
 
 Your data must be structured in a specific (but simple) way. Specifically, most TVA functions will have the following arguments :
@@ -42,16 +48,18 @@ For example in a setting where one wants to test the effectiveness of 3 drugs to
 
 Other arguments can be asked for some functions of the package:
 - `compare_to_zero` : a boolean (`FALSE` by default). If `TRUE`, it means you allow pooling two policies that might have a different set of activated arms. If `FALSE`, it means you never want to pool two policies that have a different set of activated arms. For example, the policy `(1,1)` can be pooled with `(0,1)` if `compare_to_zero` is set to `TRUE`, but not if it is `FALSE`. 
-- `estimation_function_name` : a string, can be equal to `pval_MSE` (Multiple Step Eliminiation) or `pval_OSE` (One Step Elimination ; default). This argument allows you to choose the function that will estimate the support of the marginal effects. In short, `pval_OSE` will be fast and `pval_MSE` will take longer, but will provide more coherent results in some edge cases in finite sample. 
-- `cutoff` : a number between `0` and `1` or `NULL`. At first, we suggest choosing  `pval_OSE` and `cutoff=0.05`.  All the estimation functions need a cutoff value that governs the severity with which a marginal effect is included in the support or not. If you choose `pval_OSE`, the support is estimated by performing an OLS in the marginal space and by taking marginals that have a p-value below `cutoff`. If you choose `pval_MSE`, the support is estimated by repeating OLS in the marginal space, and removing the marginal with the largest p-value at each step, until the largest p-value is smaller than `cutoff`. If `NULL` the program will suggest a cutoff itself. It does so by solving for the elbow of the R-squared vs support size curve.
+- `estimation_function_name` : a string, can be equal to `"pval_MSE"` (Multiple Step Eliminiation on p-values), `"pval_OSE"` (One Step Elimination on p-values), or `"beta_OSE"` (One Step Elimination on betas). This argument allows you to choose the function that will estimate the support of the marginal effects. We suggest using `pval_OSE` at first since the computation is faster. However, once you are confortable with the package, we suggest using `pval_MSE` which will provide better results for some edge cases in finite sample. 
+- `cutoff` : a number between `0` and `1` or `NULL`. All the estimation functions need a cutoff value that governs the severity with which a marginal effect is included in the support or not. To start with, we suggest leaving this parameter to `NULL`. There will be a first estimation which will provide a cutoff suggestion. Once you are confortable with the package, you can start choosing your own cutoff and trying different values. If you choose `pval_OSE`, the support is estimated by performing an OLS in the marginal space and by taking marginals that have a p-value below `cutoff`. If you choose `pval_MSE`, the support is estimated by repeating OLS in the marginal space, and removing the marginal with the largest p-value at each step, until the largest p-value is smaller than `cutoff`. If `NULL` the program will suggest a cutoff itself. It does so by solving for the elbow of the R-squared vs support size curve.
 
 ### How to use TVA
 
-Once the data is structured in the way TVA diggests it, an important choice remains: the cutoff. To get an idea of what the appropriate cutoff is, the user can either specify `cutoff = NULL' to let `do_TVA' suggest one automatically. Alternatively we suggest running the following lines: 
+Once the data is structured in the way TVA diggests it, an important choice remains: the cutoff. To get an idea of what the appropriate cutoff is, the user can choose `cutoff = NULL` to let `do_TVA` suggest one automatically and run :  `result = do_TVA(data, arms, fes, y, cutoff=NULL, w, estimation_function_name)` for example.
 
-Run `grid_pval_OSE(data ,arms, fes, y, w, compare_to_zero)` or `plot_pval_OSE(data, arms, fes, y, w, compare_to_zero)` to get an idea of the support size you will obtain for different cutoff values with the p-value one-step elimination method.
+Alternatively, if you want to choose your own cutoff, we suggest running the following lines: 
 
-Then, run `result = do_TVA(data, arms, fes, y, cutoff, w, estimation_function_name = 'pval_OSE')` to execute the TVA algorithm.
+Run `grid_cutoff(data, arms, y, fes, w, estim_func, compare_to_zero, clusters)` to get an idea of the support size and the number of pools you will obtain for different cutoff values with the p-value one-step elimination method. 
+
+Select one cutoff which produces consistent results with your context and then, run `result = do_TVA(data, arms, fes, y, cutoff, w, estimation_function_name = 'pval_OSE')` to execute the TVA algorithm.
 
 Type :
 - `result$marginal_support` to see the marginal support you obtained
@@ -62,7 +70,7 @@ Type :
 - `result$pooled_ols` to get the final OLS on the pooled data
 - `result$winners_effect` to get the estimate of the best pool effect and its 95% confidence interval
 
-## How the algorithm works?
+## What are the maths behind?
 
 TVA algorithm can be decomposed in several steps:
 1. Transform the data, from unique policies to marginal policies
@@ -103,6 +111,7 @@ We are not interested in the exact values of $\alpha$, but rather the zeros and 
 
 - The simplest is to compute the OLS regression, and to assume that $\alpha_i=0$ if the corresponding p-value $p_i$ is lower than a cutoff value $p_{cutoff}$. This gives us the list of marginals that have a non-zero effect by comparing the p-values of  the OLS to a chosen cutoff. We call this the *p-value one-step elimination* method (`pval_OSE` in the code).
 - A second method, longer but more accurate, is to perform a first OLS, remove the marginal with the highest p-value, perform a second OLS, remove the new marginal with the highest p-value, and repeat until the highest p-value is lower than a cutoff value $p_{cutoff}$. We call this  the *p-value multi-step elimination* method (`pval_MSE` in the code).
+- A third one, which we don't recommend unless you have reasons to use it, is to perform a single OLS regression, and then take all the marginals for which the $\beta$ coefficient is, in absolute, greater than a cutoff (`beta_OSE` in the code).
 
 At this stage, we now have a list of marginals that have non-zero effects, which we call the support $S_{\alpha}$.
 
@@ -137,6 +146,16 @@ The estimated $\hat\eta$ can be used as it is now and if we choose one pool rand
 Let $\hat\kappa^{\star}$ be such that $\hat\eta_{\hat\kappa^{\star}} = \textup{max}(\hat\eta)$ i.e. the estimated effect of the selected best pooled policy. Then $\hat\eta_{\hat\kappa^{\star}}$ is a biased estimate of $\eta_{\hat\kappa^{\star}}$, the true effect of the selected best pooled policy (see p.11 in the paper). In short, conditional on $\hat\kappa^{\star}$ being the estimated best pool, the probability is high that it happened by chance and that the real effect is below what we estimated (and this probability increases with the number of pools).
 
 For this reason, we implement the method exposed in [Andrew's paper] and apply it to our setting. Basically, we construct a new estimator of $\hat\eta_{\hat\kappa^{\star}}$. This gives us an unbiased estimator and confidence interval for $\eta_{\hat\kappa^{\star}}$ that one has to use if the goal of using TVA is to extract the best pool and implement it.
+
+
+### 6. Optional : cutoff suggestion
+
+Until now, we assume that the cutoff value was fixed. But our code allows an empty value, and then suggest one. This suggestion is done by :
+1. Run the TVA algorithm for a grid of possible cutoff values
+2. Check, for each cutoff, the size of the marginal support and the R-squared score of the final pooled OLS. For small support sizes, the R-squared is close to zero. When you increase the support size, the R-squared score starts to increase rapidly and then slower and slower.
+3. Choose the elbow point of the plot of marginal support sizes against R-squared score. The elbow point is such that if you keep increasing the marginal support size, the gain on the R-squared score does not compensate the increase in the size.
+4. Once you have this marginal support size, let's say equal to M, we look at all possible support sizes between M/2 and M*2. If some of them are such that, in the final pooled OLS, the best effect and the second best effect differ from zero (at the 95% significance), then we take the closest support size which verifies this condition, starting by the smallest ones (meaning we look at them in the following order : M, M-1, M-2, ..., M/2, M+1, M+2, ..., 2M). If there is no support size in the interval [M/2 ; 2M], then we just take M.
+5. We send back a cutoff which corresponds to the previously selected marginal support size.
 
 
 ## Concrete example
@@ -222,22 +241,23 @@ To check what this produced, one can look at :
 
 If not satisfied with the support size, it is of course possible to change the cutoff value (increase it to increase the support size and conversely). To get a rough idea of what one could obtain, it is useful to run the function:
 
-    grid_pval_OSE(data=df,arms=arms,fes=fes,y=y)
+    grid_cutoff(data=df, arms=arms, y=y, fes=fes, estim_func = 'pval_OSE')
 
 It will give you a grid of cutoffs with their corresponding support size.
 It might also be useful to see this visually, with
 
-    plot_pval_OSE(data=df,arms=arms,fes=fes,y=y,scale=FALSE,compare_to_zero=FALSE)
+    plot_cutoff_vs_support_size(data=df,arms=arms,y=y,fes=fes, estim_func="pval_OSE", compare_to_zero=FALSE)
+
     
 As explained previously, the fastest support estimation method is the p-value one-step elimination, but if time is not an issue, it is suggested to use the p-value multi-step elimination (there is no equivalence between the cutoffs that should be used in the p-value one-step elimination and in the multi-step, they have different orders of magnitude). The p-value multi-step elimination is usually ~10 times longer.
 
 First of all, let's check a few cutoff value and their corresponding support size:
 
-    plot_pval_MSE(data=df,arms=arms,fes=fes,y=y,scale=FALSE,compare_to_zero=FALSE)
+    plot_cutoff_vs_support_size(data=df,arms=arms,y=y,fes=fes, estim_func="pval_MSE", compare_to_zero=FALSE)
     
 In my simulation, I see that taking a cutoff of `1e-10` gives a support size of 4. Then, one can call `do_TVA` with those new options:
 
-    result = do_TVA(data = df, arms = arms, fes = fes, y = y, estimation_function_name = 'pval_MSE', cutoff = 1e-10 )
+    result = do_TVA(data = df, arms = arms, fes = fes, y = y, estim_func = 'pval_MSE', cutoff = 1e-10 )
 
 They should give a more accurate estimation of the support than running it with `pval_OSE`.
 
@@ -275,12 +295,3 @@ Some of these methods are strictly equivalent to LASSO-based computations which 
 | :---:                 | :----:                        | :---:             | :----:        | :----:                                        | 
 | `puffer_LASSO`        | Puffer-transformed Lasso      | $\lambda$ penalty | `beta_OSE`    | $\beta = \lambda$                             |
 | `puffer_N_LASSO`      | N-Puffer-transformed Lasso    | $\lambda$ penalty | `pval_OSE`    | $p = 2(1 - \Phi (\lambda\sqrt(n) / \sigma ))$ |
-
-
-
-
-
-test
-
-
-
